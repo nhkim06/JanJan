@@ -193,7 +193,7 @@ const parsedMessages = computed(() => {
 });
 
 const parseAnalysisResults = (chatItems: any[]) => {
-  if (chatItems.length >= 1) {
+  if (chatItems.length >= 1 && chatItems[0].answer) {
     const amountItem = chatItems[0].answer;
     const lines = amountItem.split('\n').filter((l: string) => l.trim());
     if (lines.length >= 2) {
@@ -208,17 +208,17 @@ const parseAnalysisResults = (chatItems: any[]) => {
     }
   }
 
-  if (chatItems.length >= 2) {
+  if (chatItems.length >= 2 && chatItems[1].answer) {
     try {
       const etiquetteData = JSON.parse(chatItems[1].answer);
-      aiReport.value.fullReport = etiquetteData.fullReport;
-      aiReport.value.villainPreventionSummary = etiquetteData.summary;
+      aiReport.value.fullReport = etiquetteData.fullReport || etiquetteData.answer || '';
+      aiReport.value.villainPreventionSummary = etiquetteData.summary || '';
     } catch (e) {
       aiReport.value.fullReport = chatItems[1].answer;
     }
   }
 
-  if (chatItems.length >= 3) {
+  if (chatItems.length >= 3 && chatItems[2].answer) {
     aiReport.value.messageGuide = chatItems[2].answer;
   }
 };

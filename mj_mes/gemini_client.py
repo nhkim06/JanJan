@@ -12,7 +12,7 @@ except ImportError:  # pragma: no cover - supports direct script execution
     from type_def import AIResponse
 
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-2.0-flash"
 
 
 def call_gemini(

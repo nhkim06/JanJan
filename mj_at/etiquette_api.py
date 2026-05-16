@@ -30,7 +30,7 @@ except ImportError:  # pragma: no cover - supports direct script execution
         validate_histories,
     )
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-2.0-flash"
 
 ETIQUETTE_QUESTIONS: dict[OccasionCategory, list[str]] = {
     "birth": [

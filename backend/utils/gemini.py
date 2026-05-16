@@ -195,19 +195,6 @@ def get_mj_message_answer(
     memory: str,
 ) -> "GeminiResult":
     return __wrapper_mj_message(language, histories, question, memory)
-        category=category,
-        target_name=target_name,
-        culture_base=culture_base,
-    )
-
-
-def get_mj_etiquette_answer(
-    language: str,
-    histories: list[dict[str, Any]],
-    question: str,
-    memory: str,
-) -> "GeminiResult":
-    return __wrapper_mj_etiquette(language, histories, question, memory)
 
 
 def _with_culture_base(history: dict[str, Any]) -> dict[str, Any]:
@@ -230,7 +217,7 @@ def _with_currency(history: dict[str, Any]) -> dict[str, Any]:
     return normalized
 
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-2.0-flash"
 API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
 LANGUAGE_LABELS = {
@@ -275,6 +262,29 @@ CULTURE_ALIASES = {
 }
 
 _DOTENV_LOADED = False
+
+
+def _load_dotenv_files() -> None:
+    global _DOTENV_LOADED
+    if _DOTENV_LOADED:
+        return
+
+    _DOTENV_LOADED = True
+    seen: set[Path] = set()
+    search_roots = (Path.cwd(), Path(__file__).resolve().parent)
+
+    for root in search_roots:
+        for directory in (root, *root.parents):
+            dotenv_path = directory / ".env"
+            if dotenv_path in seen:
+                continue
+
+            seen.add(dotenv_path)
+            if dotenv_path.is_file():
+                _load_dotenv_file(dotenv_path)
+
+
+_load_dotenv_files()
 
 
 class GeminiResult(TypedDict):
@@ -873,6 +883,11 @@ def _load_dotenv_file(path: Path) -> None:
         value = value.strip().strip('"').strip("'")
         if key:
             os.environ.setdefault(key, value)
+    
+    # Ensure GOOGLE_API_KEY is set for google-genai package
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if gemini_key and not os.getenv("GOOGLE_API_KEY"):
+        os.environ["GOOGLE_API_KEY"] = gemini_key
 
 
 def _pretty_json(value: Any) -> str:

@@ -13,7 +13,7 @@ except ImportError:  # pragma: no cover - supports direct script execution
     from type_def import AIResponse
 
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-2.0-flash"
 API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 _DOTENV_LOADED = False
 

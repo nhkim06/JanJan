@@ -17,16 +17,42 @@ const isSignUpModalOpen = ref(false);
 const isInputModalOpen = ref(false);
 const isSettingModalOpen = ref(false);
 
+const peopleData = ref([]);
+
 onMounted(() => {
   if (route.query.isNewUser === 'true') {
     isSignUpModalOpen.value = true;
     router.replace({ query: {} });
   }
   
+  fetchForms();
   if (authStore.isAuthenticated) {
     fetchUserProfile();
   }
 });
+
+const fetchForms = async () => {
+  try {
+    const response = await apiClient.get('/form/list');
+    if (response.data.success) {
+      // Group forms by targetName
+      const grouped = response.data.forms.reduce((acc, form) => {
+        if (!acc[form.targetName]) {
+          acc[form.targetName] = {
+            id: form.targetName, // Use targetName as ID for grouping
+            name: form.targetName,
+            chatRooms: []
+          };
+        }
+        acc[form.targetName].chatRooms.push(form);
+        return acc;
+      }, {});
+      peopleData.value = Object.values(grouped);
+    }
+  } catch (error) {
+    console.error('폼 목록 조회 에러:', error);
+  }
+};
 
 const fetchUserProfile = async () => {
   try {
@@ -41,7 +67,6 @@ const fetchUserProfile = async () => {
 
 const handleSignUpSubmit = async (data: any) => {
   try {
-    // data 에는 { id, name, language } 가 포함되어 있습니다.
     const response = await apiClient.post('/auth/register', data);
     
     if (response.data.success) {
@@ -59,23 +84,34 @@ const handleSignUpSubmit = async (data: any) => {
   }
 };
 
-// 3. 경조사 입력 완료 시 처리할 핸들러 함수
-const handleInputSubmit = (data) => {
-  console.log('경조사 입력 데이터 제출:', data);
-  // data 내부에는 경조사 종류, 날짜, 금액 등이 들어옵니다.
-  isInputModalOpen.value = false;
+const handleInputSubmit = async (data) => {
+  try {
+    const response = await apiClient.post('/history/new', data);
+    if (response.data.success) {
+      isInputModalOpen.value = false;
+      // Optionally refresh some data here
+    }
+  } catch (error) {
+    console.error('경조사 입력 에러:', error);
+  }
 };
 
-const handleSettingSave = (data) => {
-  console.log('설정 변경 데이터:', data);
-  // 실제 저장 로직(localStorage 등)이 필요하면 여기에 추가
-  isSettingModalOpen.value = false;
+const handleSettingSave = async (data) => {
+  try {
+    const response = await apiClient.post('/auth/profile', data);
+    if (response.data.success) {
+      fetchUserProfile();
+      isSettingModalOpen.value = false;
+    }
+  } catch (error) {
+    console.error('설정 저장 에러:', error);
+  }
 };
 
-const goToChatList = (personId) => {
+const goToChatList = (targetName) => {
   router.push({
     name: 'chat-list',
-    params: { personId },
+    params: { personId: targetName }, // Using targetName as personId for now
   });
 };
 </script>

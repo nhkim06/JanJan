@@ -30,9 +30,10 @@
             </label>
             <input
               v-model="formData.id"
+              :disabled="isSubmitting"
               type="text"
               :placeholder="i18n.idPlaceholder"
-              class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 text-base font-bold text-slate-800 placeholder-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all"
+              class="... disabled:opacity-60"
             />
           </div>
 
@@ -75,15 +76,15 @@
 
         <button
           @click="handleSubmit"
-          :disabled="!isFormValid"
+          :disabled="isButtonDisabled"
           :class="[
             'w-full mt-10 py-4 rounded-2xl font-bold text-lg shadow-lg transition-all active:scale-[0.98]',
-            isFormValid
+            !isButtonDisabled
               ? 'bg-indigo-600 text-white shadow-indigo-600/20'
               : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none',
           ]"
         >
-          {{ i18n.submitBtn }}
+          {{ isSubmitting ? '...' : i18n.submitBtn }}
         </button>
       </div>
     </div>
@@ -92,6 +93,12 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+
+const isSubmitting = ref(false);
+
+const isButtonDisabled = computed(() => {
+  return isSubmitting.value || !isFormValid.value;
+});
 
 const props = defineProps({
   isOpen: {
@@ -162,9 +169,18 @@ const isFormValid = computed(() => {
   );
 });
 
-const handleSubmit = () => {
-  if (isFormValid.value) {
-    emit('submit', { ...formData.value });
+const handleSubmit = async () => {
+  if (isButtonDisabled.value) return; // 안전장치 (더블 체크)
+
+  try {
+    isSubmitting.value = true; // 클릭 즉시 버튼 및 입력창 비활성화
+
+    // 부모 컴포넌트의 submit 처리가 완료될 때까지 대기
+    await emit('submit', { ...formData.value });
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isSubmitting.value = false; // 성공·실패 여부와 상관없이 완료 후 활성화
   }
 };
 </script>

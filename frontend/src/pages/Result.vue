@@ -1,5 +1,5 @@
 <template>
-  <!-- 하단 고정 버튼 때문에 생기는 가림 현상을 방지하기 위해 pb-24 추가 -->
+  <!-- 하단 고정 버튼 여백 확보를 위해 pb-24 유지 -->
   <div
     class="min-h-screen bg-slate-50 flex flex-col items-center p-6 pb-24 font-sans text-slate-800"
   >
@@ -116,7 +116,7 @@
         </div>
       </div>
 
-      <!-- 새로 추가된 AI 답변 표시 카드 -->
+      <!-- AI 답변 표시 카드 -->
       <div
         class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 space-y-4"
       >
@@ -130,7 +130,6 @@
           AI 맞춤 분석 보고서
         </div>
 
-        <!-- 대화/답변 내용이 쭉 표시되는 영역 -->
         <div
           class="space-y-4 text-sm md:text-base leading-relaxed text-slate-600"
         >
@@ -158,35 +157,79 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 하단 고정(Fixed) 액션 버튼 영역 -->
-    <div
-      class="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-50 via-slate-50/90 to-transparent flex justify-center z-50"
-    >
-      <div class="w-full max-w-md md:max-w-2xl lg:max-w-3xl">
-        <button
-          @click="handleChatWithAI"
-          class="w-full bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.99] transition py-4 px-6 rounded-2xl font-bold text-base md:text-lg flex items-center justify-center shadow-lg"
+      <!-- 실시간 AI 상담 카드 (스크롤 타겟) -->
+      <div
+        ref="chatSection"
+        class="bg-white rounded-3xl shadow-sm border border-slate-100 flex flex-col overflow-hidden h-[600px] scroll-mt-6"
+      >
+        <div
+          class="p-6 md:p-8 flex items-center text-slate-900 font-bold border-b border-slate-100 flex-shrink-0"
         >
           <font-awesome-icon
             icon="fa-solid fa-wand-magic-sparkles"
-            class="h-5 w-5 mr-2 text-indigo-300"
+            class="h-5 w-5 mr-2 text-indigo-500"
           />
-          AI와 더 자세히 대화하기
-        </button>
+          실시간 에티켓 상담
+        </div>
+        <div class="flex-1 overflow-hidden">
+          <ChatAI
+            is-component
+            :category="categoryName"
+            :target-name="targetName"
+            :culture-base="cultureBase"
+          />
+        </div>
       </div>
+    </div>
+
+    <!-- 우측 하단 고정 플로팅 영역 (버튼 및 안내 힌트) -->
+    <!-- 우측 하단 고정 플로팅 영역 (버튼 및 안내 힌트) -->
+    <div
+      class="fixed bottom-6 right-6 flex flex-col items-end space-y-3 z-50 group"
+    >
+      <!-- 위아래로 부드럽게 움직이는 말풍선 힌트 팝업 -->
+      <div
+        class="relative flex items-center space-x-1.5 bg-slate-900/95 backdrop-blur-sm text-white text-[11px] font-bold px-3.5 py-2 rounded-xl shadow-lg border border-slate-800 animate-bounce select-none after:content-[''] after:absolute after:top-full after:right-5 after:-mt-px after:border-4 after:border-transparent after:border-t-slate-950"
+      >
+        <span class="tracking-tight text-slate-100"
+          >AI 상담은 아래로 스크롤</span
+        >
+        <!-- FontAwesome 다운 화살표 -->
+        <font-awesome-icon
+          icon="fa-solid fa-chevron-down"
+          class="h-3 w-3 text-indigo-400"
+        />
+      </div>
+
+      <!-- 트렌디한 그라데이션 원형 플로팅 버튼 -->
+      <button
+        @click="scrollToChat"
+        class="w-14 h-14 bg-gradient-to-tr from-indigo-600 to-violet-500 text-white hover:from-indigo-500 hover:to-violet-400 active:scale-90 transition-all duration-200 rounded-full flex items-center justify-center shadow-xl shadow-indigo-600/30 border border-indigo-400/20 relative"
+        title="AI 상담으로 스크롤"
+      >
+        <font-awesome-icon
+          icon="fa-solid fa-comments"
+          class="h-6 w-6 transition-transform duration-300 group-hover:rotate-12"
+        />
+        <span
+          class="absolute inset-0 rounded-full bg-indigo-600/10 animate-ping pointer-events-none"
+        ></span>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import surveyData from '@/assets/surveyData.json';
+import ChatAI from './ChatAI.vue';
 
 const route = useRoute();
 const router = useRouter();
+
+const chatSection = ref(null);
 
 const category = computed(() => route.params.category || 'childbirth');
 const targetName = computed(() => route.query.targetName || '상대방');
@@ -199,14 +242,9 @@ const goHome = () => {
   router.push('/');
 };
 
-const handleChatWithAI = () => {
-  router.push({
-    name: 'chat',
-    query: {
-      category: category.value,
-      targetName: targetName.value,
-      cultureBase: cultureBase.value,
-    },
-  });
+const scrollToChat = () => {
+  if (chatSection.value) {
+    chatSection.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 };
 </script>

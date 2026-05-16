@@ -1,8 +1,12 @@
 <template>
   <div
-    class="min-h-screen bg-slate-50 flex flex-col items-center justify-between font-sans relative"
+    :class="[
+      'flex flex-col items-center font-sans relative w-full',
+      isComponent ? 'h-full' : 'min-h-screen bg-slate-50 justify-between'
+    ]"
   >
     <header
+      v-if="!isComponent"
       class="w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-white border-b border-slate-100 py-4 px-6 flex items-center justify-between sticky top-0 z-10 shadow-sm md:rounded-b-2xl"
     >
       <div class="flex items-center gap-3">
@@ -17,7 +21,11 @@
     </header>
 
     <div
-      class="flex-1 w-full max-w-md md:max-w-2xl lg:max-w-3xl overflow-y-auto px-6 py-6 space-y-6 flex flex-col"
+      ref="messageContainer"
+      :class="[
+        'flex-1 w-full max-w-md md:max-w-2xl lg:max-w-3xl overflow-y-auto px-6 py-6 space-y-6 flex flex-col',
+        isComponent ? '' : ''
+      ]"
     >
       <div v-for="(msg, index) in messages" :key="index" class="w-full">
         <div v-if="msg.sender === 'user'" class="flex flex-col items-end pl-12 md:pl-24">
@@ -79,7 +87,10 @@
     </div>
 
     <div
-      class="w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-transparent px-6 pb-8 pt-2 sticky bottom-0 z-10"
+      :class="[
+        'w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-transparent px-6 pt-2',
+        isComponent ? 'pb-4' : 'pb-8 sticky bottom-0 z-10'
+      ]"
     >
       <div
         class="relative flex items-center bg-white border border-slate-200 rounded-full shadow-lg px-5 py-2.5 md:py-4 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-50 transition-all"
@@ -109,11 +120,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { peopleData } from '../data/mockData';
 
+const props = defineProps({
+  isComponent: {
+    type: Boolean,
+    default: false
+  },
+  category: String,
+  targetName: String,
+  cultureBase: String,
+  roomId: [Number, String]
+});
+
 const route = useRoute();
+const messageContainer = ref(null);
 
 // 입력값 상태 관리
 const inputMessage = ref('');
@@ -121,14 +144,21 @@ const inputMessage = ref('');
 // 메시지 데이터
 const messages = ref([]);
 
+const scrollToBottom = async () => {
+  await nextTick();
+  if (messageContainer.value) {
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+  }
+};
+
 onMounted(() => {
-  const roomId = route.query.roomId ? parseInt(route.query.roomId) : null;
+  const roomId = props.roomId || (route.query.roomId ? parseInt(route.query.roomId) : null);
 
   if (roomId) {
     // 1. 기존 대화방 진입 시: 해당 roomId의 history 로드
     let foundHistory = null;
     peopleData.forEach(p => {
-      const room = p.chatRooms.find(r => r.roomId === roomId);
+      const room = p.chatRooms.find(r => r.roomId === parseInt(roomId));
       if (room) {
         foundHistory = room.history;
       }
@@ -136,14 +166,15 @@ onMounted(() => {
 
     if (foundHistory) {
       messages.value = [...foundHistory];
+      scrollToBottom();
       return;
     }
   }
 
   // 2. 결과 페이지에서 넘어왔을 때 (또는 새로운 대화 시작 시)
-  const category = route.query.category || '일반';
-  const targetName = route.query.targetName || '상대방';
-  const cultureBase = route.query.cultureBase || '한국';
+  const category = props.category || route.query.category || '일반';
+  const targetName = props.targetName || route.query.targetName || '상대방';
+  const cultureBase = props.cultureBase || route.query.cultureBase || '한국';
 
   const initialUserMessage = `지금 ${cultureBase}에서 ${category} 상황인 ${targetName}님과의 에티켓에 대해 더 자세히 알려줘.`;
   
@@ -158,6 +189,8 @@ onMounted(() => {
     text: '',
   });
 
+  scrollToBottom();
+
   setTimeout(() => {
     const aiMessageIndex = messages.value.findIndex(
       (m) => m.sender === 'ai' && m.isLoading,
@@ -166,6 +199,7 @@ onMounted(() => {
       messages.value[aiMessageIndex].isLoading = false;
       messages.value[aiMessageIndex].text = 
         `${targetName}님과의 ${category} 상황이시군요! ${cultureBase} 문화권을 기준으로 더 구체적인 조언을 드릴게요.\n\n어떤 점이 가장 궁금하신가요? (예: 구체적인 선물 추천, 복장, 건네면 좋은 말 등)`;
+      scrollToBottom();
     }
   }, 1000);
 });
@@ -181,6 +215,7 @@ const sendMessage = () => {
   });
 
   inputMessage.value = '';
+  scrollToBottom();
 
   // 2. AI 대기 상태 메시지 추가
   messages.value.push({
@@ -188,6 +223,8 @@ const sendMessage = () => {
     isLoading: true,
     text: '',
   });
+
+  scrollToBottom();
 
   // 3. 실제 API 연동을 흉내 낸 타이밍 처리 (2초 후 답변)
   setTimeout(() => {
@@ -198,9 +235,15 @@ const sendMessage = () => {
       messages.value[aiMessageIndex].isLoading = false;
       messages.value[aiMessageIndex].text =
         `구체적인 상황을 더 말씀해주시면 더욱 정확한 에티켓 가이드를 드릴 수 있습니다. (예시 답변: 지인 관계라면 5~10만원 정도의 축의금이 적당하며, 밝은 톤의 단정한 정장을 추천합니다.)`;
+      scrollToBottom();
     }
   }, 1500);
 };
+
+// watch messages to scroll bottom
+watch(messages, () => {
+  scrollToBottom();
+}, { deep: true });
 </script>
 
 <style scoped>
@@ -209,3 +252,4 @@ const sendMessage = () => {
   scroll-behavior: smooth;
 }
 </style>
+

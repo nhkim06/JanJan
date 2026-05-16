@@ -77,8 +77,8 @@ const router = useRouter();
 const handleGoogleLogin = () => {
   // 실제 로그인 로직은 백엔드 구현 시 연동
   console.log('Google 로그인 시도...');
-  // 데모를 위해 바로 홈으로 이동
-  router.push('/');
+  // 데모를 위해 바로 홈으로 이동 (처음 가입한 회원인 것으로 가정)
+  router.push({ path: '/', query: { isNewUser: 'true' } });
 };
 </script>
 

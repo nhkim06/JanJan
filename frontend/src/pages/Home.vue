@@ -1,5 +1,39 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { peopleData } from '../data/mockData';
+import SignUpModal from '../components/SignUpModal.vue';
+
+const router = useRouter();
+const route = useRoute();
+
+const isSignUpModalOpen = ref(false);
+
+onMounted(() => {
+  if (route.query.isNewUser === 'true') {
+    isSignUpModalOpen.value = true;
+    // URL에서 쿼리 파라미터 제거 (새로고침 시 다시 뜨지 않도록)
+    router.replace({ query: {} });
+  }
+});
+
+const handleSignUpSubmit = (data) => {
+  console.log('회원가입 데이터 제출:', data);
+  // 서버에 데이터 전송하는 로직이 들어갈 자리
+  isSignUpModalOpen.value = false;
+};
+
+const goToChatList = (personId) => {
+  router.push({
+    name: 'chat-list',
+    params: { personId },
+  });
+};
+</script>
+
 <template>
   <div class="flex justify-center bg-gray-50 min-h-screen">
+    <SignUpModal :isOpen="isSignUpModalOpen" @submit="handleSignUpSubmit" />
     <div
       class="w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50/30 via-white to-white flex flex-col px-6 pt-12 pb-6 min-h-screen relative select-none"
     >
@@ -133,16 +167,4 @@
   </div>
 </template>
 
-<script setup>
-import { useRouter } from 'vue-router';
-import { peopleData } from '../data/mockData';
 
-const router = useRouter();
-
-const goToChatList = (personId) => {
-  router.push({
-    name: 'chat-list',
-    params: { personId },
-  });
-};
-</script>

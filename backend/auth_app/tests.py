@@ -167,3 +167,77 @@ class AuthTests(TestCase):
         self.assertEqual(response.json()["user"]["email"], "tester@example.com")
         self.assertEqual(response.json()["user"]["name"], "테스터")
         self.assertEqual(response.json()["user"]["language"], "ko")
+
+    def test_profile_can_update_language_and_name(self):
+        user = get_user_model().objects.create_user(
+            username="tester",
+            email="tester@example.com",
+        )
+        profile = UserProfile.objects.create(
+            user=user,
+            google_sub="google-sub-123",
+            language="ko",
+            name="테스터",
+        )
+        self.client.force_login(user)
+
+        response = self.client.post(
+            reverse("profile"),
+            {"language": "en", "name": "전우치"},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"success": True})
+
+        profile.refresh_from_db()
+        self.assertEqual(profile.language, "en")
+        self.assertEqual(profile.name, "전우치")
+
+    def test_profile_update_requires_authentication(self):
+        response = self.client.post(
+            reverse("profile"),
+            {"language": "en", "name": "전우치"},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertFalse(response.json()["success"])
+
+    def test_profile_update_rejects_invalid_language(self):
+        user = get_user_model().objects.create_user(username="tester")
+        UserProfile.objects.create(
+            user=user,
+            google_sub="google-sub-123",
+            language="ko",
+            name="테스터",
+        )
+        self.client.force_login(user)
+
+        response = self.client.post(
+            reverse("profile"),
+            {"language": "fr", "name": "전우치"},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+
+    def test_profile_update_requires_name(self):
+        user = get_user_model().objects.create_user(username="tester")
+        UserProfile.objects.create(
+            user=user,
+            google_sub="google-sub-123",
+            language="ko",
+            name="테스터",
+        )
+        self.client.force_login(user)
+
+        response = self.client.post(
+            reverse("profile"),
+            {"language": "en"},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])

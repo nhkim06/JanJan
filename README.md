@@ -100,5 +100,17 @@ npm run dev
 
 ```bash
 cd backend
-# TBD
+python -m venv .venv
+
+# Windows
+cd .venv\Scripts
+.\activate
+# Linux
+source .venv/bin/activate
+
+pip install -r requirements.txt
+python manage.py migrate
+
+# backend.md 참고하여 .env 파일 작성 후
+python manage.py runserver
 ```

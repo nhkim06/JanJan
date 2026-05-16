@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from urllib import parse
 from rest_framework import status
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -14,6 +15,11 @@ from .services import GoogleAuthError, exchange_google_authorization_code
 
 
 PENDING_GOOGLE_AUTH_SESSION_KEY = "pending_google_auth"
+
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -100,7 +106,7 @@ class RegisterView(APIView):
 
         if language not in UserProfile.Language.values:
             return Response(
-                {"success": False, "detail": "language must be 'ko' or 'ja'."},
+                {"success": False, "detail": "language must be 'ko', 'ja', or 'en'."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -155,7 +161,11 @@ class LogoutView(APIView):
         return Response({"success": True})
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class ProfileView(APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication]
+    permission_classes = []
+
     def get(self, request):
         if not request.user.is_authenticated:
             return Response(
@@ -177,3 +187,37 @@ class ProfileView(APIView):
                 },
             }
         )
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return Response(
+                {"success": False, "detail": "Authentication is required."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        profile = getattr(request.user, "profile", None)
+        if not profile:
+            return Response(
+                {"success": False, "detail": "Profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        language = request.data.get("language")
+        name = request.data.get("name")
+
+        if language not in UserProfile.Language.values:
+            return Response(
+                {"success": False, "detail": "language must be 'ko', 'ja', or 'en'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not name:
+            return Response(
+                {"success": False, "detail": "name is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        profile.language = language
+        profile.name = name
+        profile.save(update_fields=["language", "name", "updated_at"])
+        return Response({"success": True})

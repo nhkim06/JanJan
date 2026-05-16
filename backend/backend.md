@@ -121,6 +121,23 @@ Google 로그인 링크로 redirect 시킵니다.
 }
 ```
 
+- `POST /auth/profile`
+
+현재 로그인된 계정의 언어와 이름을 수정합니다.
+
+```jsonb
+{
+  "language": "en",
+  "name": "전우치"
+}
+```
+
+```jsonb
+{
+  "success": true
+}
+```
+
 프론트는 Google 로그인 시작 시 redirect URI를 백엔드 콜백 주소로 지정합니다.
 
 ### Form API
@@ -221,7 +238,7 @@ Google 로그인 링크로 redirect 시킵니다.
   "targetName": "홍길동",
   "received": true,
   "value": 50000,
-  "cultureBase": "ko",
+  "currency": "ko",
   "category": "결혼",
   "date": "2026-05-16"
 }
@@ -247,7 +264,7 @@ Google 로그인 링크로 redirect 시킵니다.
       "targetName": "홍길동",
       "received": true,
       "value": 50000,
-      "cultureBase": "ko",
+      "currency": "ko",
       "category": "결혼",
       "date": "2026-05-16",
       "createdAt": "2026-05-17T00:40:00+09:00",
@@ -267,7 +284,7 @@ Google 로그인 링크로 redirect 시킵니다.
     "targetName": "홍길동",
     "received": true,
     "value": 50000,
-    "cultureBase": "ko",
+    "currency": "ko",
     "category": "결혼",
     "date": "2026-05-16",
     "createdAt": "2026-05-17T00:40:00+09:00",
@@ -285,7 +302,7 @@ Google 로그인 링크로 redirect 시킵니다.
   "targetName": "홍길동",
   "received": false,
   "value": 70000,
-  "cultureBase": "ko",
+  "currency": "ko",
   "category": "축의금",
   "date": "2026-05-17"
 }
@@ -299,7 +316,7 @@ Google 로그인 링크로 redirect 시킵니다.
     "targetName": "홍길동",
     "received": false,
     "value": 70000,
-    "cultureBase": "ko",
+    "currency": "ko",
     "category": "축의금",
     "date": "2026-05-17",
     "createdAt": "2026-05-17T00:40:00+09:00",

@@ -16,7 +16,7 @@ class HistoryApiTests(TestCase):
             "targetName": "Hong Gil Dong",
             "received": True,
             "value": 50000,
-            "cultureBase": "ko",
+            "currency": "ko",
             "category": "Money",
             "date": "2026-05-16",
         }
@@ -25,7 +25,7 @@ class HistoryApiTests(TestCase):
             target_name="Hong Gil Dong",
             received=True,
             value=10000,
-            culture_base="ko",
+            currency="ko",
             category="Old money",
             date=date(2026, 5, 16),
         )
@@ -34,7 +34,7 @@ class HistoryApiTests(TestCase):
             target_name="Kim Chul Soo",
             received=False,
             value=20000,
-            culture_base="ja",
+            currency="ja",
             category="Gift",
             date=date(2026, 5, 17),
         )
@@ -43,7 +43,7 @@ class HistoryApiTests(TestCase):
             target_name="Hong Gil Dong",
             received=True,
             value=30000,
-            culture_base="ko",
+            currency="ko",
             category="Other user's money",
             date=date(2026, 5, 15),
         )
@@ -67,7 +67,7 @@ class HistoryApiTests(TestCase):
         self.assertEqual(history.target_name, self.valid_payload["targetName"])
         self.assertEqual(history.received, self.valid_payload["received"])
         self.assertEqual(history.value, self.valid_payload["value"])
-        self.assertEqual(history.culture_base, self.valid_payload["cultureBase"])
+        self.assertEqual(history.currency, self.valid_payload["currency"])
         self.assertEqual(history.category, self.valid_payload["category"])
         self.assertEqual(history.date.isoformat(), self.valid_payload["date"])
 
@@ -123,7 +123,7 @@ class HistoryApiTests(TestCase):
         self.assertEqual(data["histories"][0]["historyId"], self.history.id)
         self.assertEqual(data["histories"][0]["targetName"], "Hong Gil Dong")
         self.assertEqual(data["histories"][0]["received"], True)
-        self.assertEqual(data["histories"][0]["cultureBase"], "ko")
+        self.assertEqual(data["histories"][0]["currency"], "ko")
         self.assertEqual(data["histories"][0]["category"], "Old money")
         self.assertEqual(data["histories"][0]["date"], "2026-05-16")
 
@@ -147,7 +147,7 @@ class HistoryApiTests(TestCase):
         self.assertEqual(data["history"]["targetName"], self.history.target_name)
         self.assertEqual(data["history"]["received"], self.history.received)
         self.assertEqual(data["history"]["value"], self.history.value)
-        self.assertEqual(data["history"]["cultureBase"], self.history.culture_base)
+        self.assertEqual(data["history"]["currency"], self.history.currency)
         self.assertEqual(data["history"]["category"], self.history.category)
         self.assertEqual(data["history"]["date"], self.history.date.isoformat())
 
@@ -167,7 +167,7 @@ class HistoryApiTests(TestCase):
             "targetName": "Hong Gil Dong",
             "received": False,
             "value": 70000,
-            "cultureBase": "ja",
+            "currency": "ja",
             "category": "Updated money",
             "date": "2026-05-18",
         }
@@ -183,14 +183,14 @@ class HistoryApiTests(TestCase):
         self.assertEqual(data["success"], True)
         self.assertEqual(data["history"]["received"], False)
         self.assertEqual(data["history"]["value"], 70000)
-        self.assertEqual(data["history"]["cultureBase"], "ja")
+        self.assertEqual(data["history"]["currency"], "ja")
         self.assertEqual(data["history"]["category"], "Updated money")
         self.assertEqual(data["history"]["date"], "2026-05-18")
 
         self.history.refresh_from_db()
         self.assertEqual(self.history.received, False)
         self.assertEqual(self.history.value, 70000)
-        self.assertEqual(self.history.culture_base, "ja")
+        self.assertEqual(self.history.currency, "ja")
         self.assertEqual(self.history.category, "Updated money")
         self.assertEqual(self.history.date.isoformat(), "2026-05-18")
 
@@ -200,7 +200,7 @@ class HistoryApiTests(TestCase):
             "targetName": "Hong Gil Dong",
             "received": True,
             "value": "not-number",
-            "cultureBase": "ko",
+            "currency": "ko",
             "category": "Updated money",
             "date": "2026-05-18",
         }

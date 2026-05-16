@@ -7,7 +7,7 @@ class HistoryWriteSerializer(serializers.Serializer):
     targetName = serializers.CharField(max_length=255)
     received = serializers.BooleanField()
     value = serializers.IntegerField()
-    cultureBase = serializers.CharField(max_length=20)
+    currency = serializers.CharField(max_length=20)
     category = serializers.CharField(allow_blank=False, trim_whitespace=True)
     date = serializers.DateField()
 
@@ -17,7 +17,7 @@ class HistoryWriteSerializer(serializers.Serializer):
             target_name=validated_data["targetName"],
             received=validated_data["received"],
             value=validated_data["value"],
-            culture_base=validated_data["cultureBase"],
+            currency=validated_data["currency"],
             category=validated_data["category"],
             date=validated_data["date"],
         )
@@ -26,7 +26,7 @@ class HistoryWriteSerializer(serializers.Serializer):
         instance.target_name = validated_data["targetName"]
         instance.received = validated_data["received"]
         instance.value = validated_data["value"]
-        instance.culture_base = validated_data["cultureBase"]
+        instance.currency = validated_data["currency"]
         instance.category = validated_data["category"]
         instance.date = validated_data["date"]
         instance.save(
@@ -34,7 +34,7 @@ class HistoryWriteSerializer(serializers.Serializer):
                 "target_name",
                 "received",
                 "value",
-                "culture_base",
+                "currency",
                 "category",
                 "date",
                 "updated_at",
@@ -46,7 +46,6 @@ class HistoryWriteSerializer(serializers.Serializer):
 class HistoryReadSerializer(serializers.ModelSerializer):
     historyId = serializers.IntegerField(source="id")
     targetName = serializers.CharField(source="target_name")
-    cultureBase = serializers.CharField(source="culture_base")
     createdAt = serializers.DateTimeField(source="created_at")
     updatedAt = serializers.DateTimeField(source="updated_at")
 
@@ -57,7 +56,7 @@ class HistoryReadSerializer(serializers.ModelSerializer):
             "targetName",
             "received",
             "value",
-            "cultureBase",
+            "currency",
             "category",
             "date",
             "createdAt",

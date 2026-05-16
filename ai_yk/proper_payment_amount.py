@@ -6,6 +6,7 @@ from typing import Any, Final
 
 try:
     from .gemini_client import call_gemini, pretty_json, pretty_question
+    from .language_rules import language_output_rule
     from .type_def import (
         AIResponse,
         CATEGORY_LABELS,
@@ -17,6 +18,7 @@ try:
     )
 except ImportError:  # pragma: no cover - supports direct script execution
     from gemini_client import call_gemini, pretty_json, pretty_question
+    from language_rules import language_output_rule
     from type_def import (
         AIResponse,
         CATEGORY_LABELS,
@@ -33,9 +35,9 @@ You are JanJan, a money and gift-cost advisor for Korean and Japanese life-event
 Give practical, culturally careful guidance only for cash gifts, gift value, group
 contributions, account transfers, and cases where spending money is inappropriate. Consider
 reciprocity from the payment history, but do not treat it as a rigid debt. Avoid stereotypes,
-explain uncertainty, and prefer options that reduce social burden. Always answer in English
-only, regardless of the requested language, input language, or survey/history language. Do
-not output Korean or Japanese script in the final answer except exact provided proper names.
+explain uncertainty, and prefer options that reduce social burden. Always answer in the
+requested output language. Do not let currency, culture marker, question text, survey text,
+or history choose the output language.
 
 The question data is not optional background. It is the user's current situation itself.
 Treat it as the authoritative boundary of the task. Only output money, gift, or payment
@@ -54,11 +56,11 @@ recommendation. The answer must read like advice written for an end user, not li
 internal report, schema, JSON, form field list, or developer output.
 
 The function output must contain exactly two user-facing items:
-1. Money recommendation: a natural prose recommendation about cash, gift, group contribution,
-   account transfer, or not spending money. This recommendation text must be 300 to 600
-   English characters, including spaces and punctuation.
-2. Recommended amount: exactly one integer for the event spending amount followed by one space
-   and the required currency unit, with no comma, range, or explanation.
+1. A natural prose recommendation about cash, gift, group contribution, account transfer, or
+   not spending money. This recommendation text must be 300 to 600 characters, including
+   spaces and punctuation.
+2. Exactly one integer for the event spending amount followed by one space and the required
+   currency unit, with no comma, range, label, or explanation.
 
 Never output internal labels, field names, snake_case names, JSON-like keys, or developer
 schema markers. If giving money is inappropriate because the other side refused money or the
@@ -320,6 +322,7 @@ def _build_prompt(
     amount_format_rule = _amount_format_rule(currency_unit)
     amount_line_rule = _amount_line_rule(currency_unit)
     currency_display = _format_raw_currency(raw_currency)
+    output_language_rule = language_output_rule(language)
     required_unit_display = currency_unit or "(infer from question.currency/country)"
     return f"""
 Task:
@@ -344,16 +347,18 @@ Current situation rule:
 - If the question data conflicts with payment history or general etiquette, follow the
   question data and explain the uncertainty briefly in the money recommendation.
 
+Output language:
+{output_language_rule}
+
 Output rules:
-- Answer in English only, regardless of language code: {language}
-- Do not output Korean or Japanese script, translated labels, or non-English wording in the
-  final answer except exact provided proper names.
 - Return plain text only.
-- Output exactly two user-facing items and nothing else:
-  Money recommendation: one natural prose paragraph about cash, gift, group contribution, account
-  transfer, or not spending money. This paragraph must be 300 to 600 English characters,
-  including spaces and punctuation.
-  {amount_format_rule}
+- Output exactly two lines and nothing else.
+- First line: one natural prose paragraph about cash, gift, group contribution, account
+  transfer, or not spending money. This paragraph must be 300 to 600 characters, including
+  spaces and punctuation.
+- Second line: {amount_format_rule}
+- Do not write headings, numbering, bullet markers, or labels such as Money recommendation or
+  Recommended amount.
 - The first item must discuss only money, gifts, group contributions, account transfers, or
   why spending money is inappropriate. Do not include visit manners, clothing, photo/SNS
   cautions, message examples, ad ideas, or other etiquette advice.
@@ -478,11 +483,11 @@ def _format_raw_currency(value: Any) -> str:
 def _amount_format_rule(currency_unit: str | None) -> str:
     if currency_unit:
         return (
-            "Recommended amount: exactly one integer followed by one space and "
+            "exactly one integer followed by one space and "
             f"{currency_unit}."
         )
     return (
-        "Recommended amount: exactly one integer followed by one space and the currency unit "
+        "exactly one integer followed by one space and the currency unit "
         "from the input currency/country."
     )
 
@@ -536,7 +541,7 @@ def _ensure_recommended_amount_currency(answer: str, currency_unit: str) -> str:
             lines[index] = _format_amount_with_currency(lines[index], currency_unit)
         return "\n".join(lines)
 
-    return f"Recommended amount: 0 {currency_unit}"
+    return f"0 {currency_unit}"
 
 
 def _format_amount_with_currency(value: str, currency_unit: str) -> str:

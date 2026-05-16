@@ -485,9 +485,14 @@ Interpretation rules:
 - Treat the selected category and pre-survey answers as the user's current situation.
 - Treat the histories as past congratulation/condolence records between the user and the
   current target person. They are reciprocity context, not a rigid debt ledger.
+- Treat conversation memory as the prior turns in the same chat. Use it to resolve
+  follow-up references, keep continuity, and avoid asking again for details already
+  provided.
 - If a history appears unrelated to the current target, category, culture, or timing, mention
   uncertainty briefly and do not force it into the recommendation.
 - Do not invent facts that are not present in the pre-survey, history, memory, or user question.
+- If memory conflicts with the latest user question or current pre-survey/history, prefer the
+  latest explicit user question and current structured context.
 - When information is missing, give the safest conservative recommendation and name the
   missing factor only if it changes the action.
 
@@ -528,11 +533,12 @@ def question(
     normalized_culture = _normalize_culture_base(culture_base)
     survey_data = survey_answers if survey_answers is not None else presurvey
 
+    conversation_memory = memory.strip()
     prompt = _build_prompt(
         language=language,
         histories=histories,
         user_question=question,
-        memory=memory,
+        memory=conversation_memory,
         category=normalized_category,
         raw_category=category,
         target_name=target_name,
@@ -540,34 +546,16 @@ def question(
         raw_culture_base=culture_base,
         survey_answers=survey_data,
     )
-    return call_gemini(
+    result = call_gemini(
         prompt,
         system_instruction=SYSTEM_INSTRUCTION,
         temperature=0.3,
         max_output_tokens=2400,
     )
-
-
-def get_category_questions(
-    category: str,
-    culture_base: str | None = None,
-) -> list[dict[str, Any]]:
-    """Return the prepared survey questions for a category and culture base."""
-
-    normalized_category = _normalize_category(category)
-    if normalized_category is None:
-        return []
-
-    normalized_culture = _normalize_culture_base(culture_base)
-    return [
-        {
-            "id": item["id"],
-            "question": item["text"],
-            "options": list(item["options"]),
-            "cultures": list(item["cultures"]),
-        }
-        for item in _questions_for_culture(normalized_category, normalized_culture)
-    ]
+    return {
+        "success": bool(result.get("success")),
+        "answer": str(result.get("answer", "")),
+    }
 
 
 def _build_prompt(
@@ -597,6 +585,9 @@ Output rules:
 - If the user asks narrowly, answer directly and add only the necessary caution.
 - Do not answer as a generic category guide. Use the pre-survey answers as the current
   context and the history as target-specific reciprocity context.
+- Continue from the conversation memory when the latest question depends on earlier turns.
+  Do not repeat already-settled context unless it is needed to answer accurately.
+- If the latest question updates or corrects earlier memory, follow the latest question.
 - Make clear when the safest answer is to not visit, not give money, not post publicly,
   or confirm permission first.
 
@@ -629,8 +620,8 @@ History schema note:
 - currency: ko, ja, both, unknown, or project-specific text if older data exists.
 - category/date: what the past event was and when it happened.
 
-Conversation memory:
-{memory.strip() or "(none)"}
+Conversation memory from previous turns:
+{memory or "(none)"}
 
 User's latest question:
 {user_question.strip()}

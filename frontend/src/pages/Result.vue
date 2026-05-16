@@ -1,240 +1,201 @@
 <template>
-  <!-- 하단 고정 버튼 여백 확보를 위해 pb-24 유지 -->
-  <div
-    class="min-h-screen bg-slate-50 flex flex-col items-center p-6 pb-24 font-sans text-slate-800"
-  >
-    <div class="w-full max-w-md md:max-w-2xl lg:max-w-3xl space-y-6">
-      <!-- 상단 네비게이션 -->
+  <div class="min-h-screen bg-slate-50 flex flex-col items-center p-6 pb-24 font-sans text-slate-800">
+    <div v-if="isLoading" class="flex-1 flex flex-col items-center justify-center">
+      <div class="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+      <p class="text-slate-500 font-medium text-lg">AI is preparing your guide...</p>
+    </div>
+
+    <div v-else-if="!formDetail" class="flex-1 flex flex-col items-center justify-center">
+      <p class="text-slate-400 font-medium">Data not found.</p>
+      <button @click="goHome" class="mt-4 text-indigo-600 font-bold hover:underline">Go Home</button>
+    </div>
+
+    <div v-else class="w-full max-w-md md:max-w-2xl lg:max-w-3xl space-y-6">
+      <!-- Top Navigation -->
       <div class="flex items-center justify-between w-full py-2">
         <button
           @click="goHome"
           class="w-10 h-10 flex items-center justify-center bg-white rounded-full border border-slate-200 shadow-sm text-slate-600 hover:bg-slate-50 active:scale-95 transition"
-          title="처음으로 이동"
         >
-          <font-awesome-icon icon="fa-solid fa-house" class="h-5 w-5" />
+          <font-awesome-icon icon="fa-solid fa-house" class="h-4 w-4" />
         </button>
-        <span class="text-sm md:text-base font-semibold text-slate-500"
-          >진단 결과</span
-        >
+        <span class="text-sm font-extrabold text-slate-400 tracking-widest uppercase">Analysis Result</span>
         <div class="w-10"></div>
       </div>
 
-      <!-- 요약 정보 -->
-      <div
-        class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100"
-      >
-        <div class="flex items-center justify-between mb-4">
-          <span
-            class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs md:text-sm font-bold"
-          >
-            {{ categoryName }}
-          </span>
-          <span class="text-xs md:text-sm font-bold text-slate-400">
-            기준: {{ cultureBase }}
-          </span>
+      <!-- 1. Intro Card -->
+      <div class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 overflow-hidden relative group">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></div>
+        <div class="flex items-center space-x-3 mb-4">
+           <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black tracking-wider uppercase">
+             {{ categoryName }}
+           </span>
+           <span class="text-[10px] font-bold text-slate-300">Base: {{ formDetail.cultureBase }}</span>
         </div>
-        <h1
-          class="text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 leading-tight"
-        >
-          <span class="text-indigo-600">{{ targetName }}</span
-          >님을 위한<br />
-          맞춤 가이드가 도착했습니다.
+        <h1 class="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
+          {{ aiReport.intro || `Custom guide for ${formDetail.targetName}.` }}
         </h1>
       </div>
 
-      <!-- 메인 콘텐츠 그리드 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-        <!-- 금액 추천 섹션 -->
-        <div
-          class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 flex flex-col justify-center text-center"
-        >
-          <h2 class="text-sm md:text-base font-medium text-slate-400 mb-2">
-            적정 추천 금액
-          </h2>
-          <div
-            class="text-5xl md:text-6xl font-black tracking-tight mb-2 text-slate-900"
-          >
-            50,000<span class="text-2xl font-bold text-indigo-600 ml-1"
-              >원</span
-            >
-          </div>
-          <p class="text-sm md:text-base font-semibold text-slate-400 mb-6">
-            최소 30,000원 이상
-          </p>
+      <!-- 2. Recommended Amount Card -->
+      <div class="bg-indigo-600 rounded-[32px] p-10 shadow-xl shadow-indigo-100 flex flex-col items-center justify-center text-center text-white relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,_rgba(255,255,255,0.1),_transparent)]"></div>
+        <h2 class="text-sm font-bold opacity-80 mb-2 uppercase tracking-widest">Recommended Amount</h2>
+        <div class="flex items-baseline space-x-2">
+          <span class="text-6xl md:text-7xl font-black tracking-tighter">
+            {{ (aiReport.amount || 0).toLocaleString() }}
+          </span>
+          <span class="text-2xl font-bold opacity-90">{{ aiReport.currency || 'KRW' }}</span>
+        </div>
+      </div>
 
-          <div
-            class="bg-emerald-50 rounded-2xl p-4 flex items-center justify-start border border-emerald-100"
-          >
-            <span class="text-emerald-500 mr-2 flex items-center">
-              <font-awesome-icon
-                icon="fa-solid fa-circle-check"
-                class="h-5 w-5"
-              />
-            </span>
-            <p class="text-sm md:text-base font-medium text-slate-600">
-              안 가고 3만원 or 가고 5만원
-            </p>
+      <!-- 3. Etiquette & 4. Message Guide -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- 3. Etiquette Villain Prevention -->
+        <div class="bg-rose-50/50 rounded-[32px] p-7 border border-rose-100 flex flex-col">
+          <div class="flex items-center text-rose-600 font-black text-sm mb-4 tracking-tight uppercase">
+            <font-awesome-icon icon="fa-solid fa-shield-halved" class="mr-2" />
+            Etiquette Pitfalls
+          </div>
+          <div class="space-y-3">
+             <div v-for="(tip, idx) in parsedVillainTips" :key="idx" class="flex items-start">
+               <span class="text-rose-400 mt-1 mr-2 flex-shrink-0">•</span>
+               <p class="text-sm md:text-base font-bold text-rose-900 leading-snug">{{ tip }}</p>
+             </div>
           </div>
         </div>
 
-        <!-- 상세 정보 섹션 (금기 & 추천) -->
-        <div class="flex flex-col gap-6">
-          <!-- 금기사항 -->
-          <div
-            class="flex-1 bg-rose-50/50 rounded-3xl p-6 border border-rose-100 flex flex-col"
-          >
-            <div class="flex items-center text-rose-600 font-bold mb-3">
-              <font-awesome-icon
-                icon="fa-solid fa-triangle-exclamation"
-                class="h-5 w-5 mr-2"
-              />
-              필수 금기사항
-            </div>
-            <hr class="border-rose-200 mb-4" />
-            <ul
-              class="list-disc pl-5 text-sm md:text-base font-medium text-rose-800 space-y-2 flex-1"
-            >
-              <li>안 친한데 가족 대동</li>
-            </ul>
+        <!-- 4. Message Guide -->
+        <div class="bg-emerald-50/50 rounded-[32px] p-7 border border-emerald-100 flex flex-col">
+          <div class="flex items-center text-emerald-700 font-black text-sm mb-4 tracking-tight uppercase">
+            <font-awesome-icon icon="fa-solid fa-pen-nib" class="mr-2" />
+            Message Template
           </div>
-
-          <!-- 추천 선물 -->
-          <div
-            class="flex-1 bg-emerald-50/50 rounded-3xl p-6 border border-emerald-100 flex flex-col"
-          >
-            <div class="flex items-center text-emerald-700 font-bold mb-3">
-              <font-awesome-icon icon="fa-solid fa-gift" class="h-5 w-5 mr-2" />
-              추천 선물 & 팁
-            </div>
-            <hr class="border-emerald-200 mb-4" />
-            <ul
-              class="list-disc pl-5 text-sm md:text-base font-medium text-emerald-800 space-y-2 flex-1"
-            >
-              <li>축의금</li>
-            </ul>
+          <div class="space-y-4">
+             <div v-for="(msg, idx) in parsedMessages" :key="idx" class="bg-white/80 rounded-2xl p-4 border border-emerald-100/50 shadow-sm relative group cursor-pointer hover:border-emerald-300 transition-all active:scale-95" @click="copyToClipboard(msg)">
+               <p class="text-xs md:text-sm font-bold text-emerald-900 italic leading-relaxed">"{{ msg }}"</p>
+               <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                 <font-awesome-icon icon="fa-solid fa-copy" class="text-emerald-400 text-[10px]" />
+               </div>
+             </div>
           </div>
         </div>
       </div>
 
-      <!-- AI 답변 표시 카드 -->
-      <div
-        class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 space-y-4"
-      >
-        <div
-          class="flex items-center text-slate-900 font-bold border-b border-slate-100 pb-3"
-        >
-          <font-awesome-icon
-            icon="fa-solid fa-robot"
-            class="h-5 w-5 mr-2 text-indigo-500"
-          />
-          AI 맞춤 분석 보고서
+      <!-- 5. Full Report -->
+      <div class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-50 pb-5">
+           <div class="flex items-center text-slate-900 font-black text-sm tracking-tight uppercase">
+             <font-awesome-icon icon="fa-solid fa-file-invoice" class="mr-2 text-indigo-500" />
+             AI Full Analysis Report
+           </div>
+           <button @click="isReportExpanded = !isReportExpanded" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors">
+              {{ isReportExpanded ? 'Close' : 'View More' }}
+           </button>
         </div>
 
-        <div
-          class="space-y-4 text-sm md:text-base leading-relaxed text-slate-600"
+        <div 
+          :class="[
+            'text-sm md:text-base leading-relaxed text-slate-600 font-medium whitespace-pre-wrap transition-all duration-500 overflow-hidden',
+            isReportExpanded ? 'max-h-[2000px]' : 'max-h-40 relative'
+          ]"
         >
-          <p>
-            안녕하세요! 입력해주신 정보를 바탕으로 분석한 결과, 상대방과의
-            관계는
-            <span class="font-semibold text-slate-900"
-              >"일정 수준의 친분이 있는 지인"</span
-            >으로 분류됩니다.
-          </p>
-          <p>
-            해당 문화권(기준: {{ cultureBase }})의 최근 트렌드를 고려했을 때,
-            직접 참석이 어려우시다면
-            <span class="font-semibold text-indigo-600">3만 원</span>이 가장
-            결례가 없는 선이며, 식사 자리에 참석하시는 경우 최소
-            <span class="font-semibold text-indigo-600">5만 원</span>을 추천해
-            드립니다.
-          </p>
-          <div
-            class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs md:text-sm text-slate-500"
-          >
-            💡 <span class="font-semibold text-slate-700">추가 팁:</span> 만약
-            상대방이 최근 나에게 먼저 경조사를 챙겨준 적이 있다면, 참석 여부와
-            관계없이 5만 원 이상으로 상향 조정하는 것이 관계 유지에 유리합니다.
-          </div>
+          {{ aiReport.fullReport }}
+          <div v-if="!isReportExpanded" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent"></div>
         </div>
       </div>
 
-      <!-- 실시간 AI 상담 카드 (스크롤 타겟) -->
+      <!-- AI Chat -->
       <div
         ref="chatSection"
-        class="bg-white rounded-3xl shadow-sm border border-slate-100 flex flex-col overflow-hidden h-[600px] scroll-mt-6"
+        class="bg-white rounded-[32px] shadow-sm border border-slate-100 flex flex-col overflow-hidden h-[600px] scroll-mt-6"
       >
-        <div
-          class="p-6 md:p-8 flex items-center text-slate-900 font-bold border-b border-slate-100 flex-shrink-0"
-        >
-          <font-awesome-icon
-            icon="fa-solid fa-wand-magic-sparkles"
-            class="h-5 w-5 mr-2 text-indigo-500"
-          />
-          실시간 에티켓 상담
+        <div class="p-6 md:p-8 flex items-center justify-between border-b border-slate-100 flex-shrink-0">
+          <div class="flex items-center text-slate-900 font-black text-sm tracking-tight uppercase">
+            <font-awesome-icon icon="fa-solid fa-wand-magic-sparkles" class="mr-2 text-indigo-500" />
+            AI Real-time Q&A
+          </div>
+          <span class="text-[10px] font-bold text-slate-300">Ask anything about this event</span>
         </div>
         <div class="flex-1 overflow-hidden">
           <ChatAI
             is-component
             :category="categoryName"
-            :target-name="targetName"
-            :culture-base="cultureBase"
+            :target-name="formDetail.targetName"
+            :culture-base="formDetail.cultureBase"
             :room-id="route.query.roomId"
           />
         </div>
       </div>
     </div>
 
-    <!-- 우측 하단 고정 플로팅 영역 (버튼 및 안내 힌트) -->
-    <div
-      class="fixed bottom-6 right-6 flex flex-col items-end space-y-3 z-50 group"
-    >
-      <div
-        class="relative flex items-center space-x-1.5 bg-slate-900/95 backdrop-blur-sm text-white text-[11px] font-bold px-3.5 py-2 rounded-xl shadow-lg border border-slate-800 animate-bounce select-none after:content-[''] after:absolute after:top-full after:right-5 after:-mt-px after:border-4 after:border-transparent after:border-t-slate-950"
-      >
-        <span class="tracking-tight text-slate-100"
-          >AI 상담은 아래로 스크롤</span
-        >
-        <font-awesome-icon
-          icon="fa-solid fa-chevron-down"
-          class="h-3 w-3 text-indigo-400"
-        />
-      </div>
-
-      <!-- 트렌디한 그라데이션 원형 플로팅 버튼 -->
+    <!-- Floating Button -->
+    <div class="fixed bottom-6 right-6 flex flex-col items-end space-y-3 z-50 group">
       <button
         @click="scrollToChat"
-        class="w-14 h-14 bg-gradient-to-tr from-indigo-600 to-violet-500 text-white hover:from-indigo-500 hover:to-violet-400 active:scale-90 transition-all duration-200 rounded-full flex items-center justify-center shadow-xl shadow-indigo-600/30 border border-indigo-400/20 relative"
-        title="AI 상담으로 스크롤"
+        class="w-14 h-14 bg-slate-900 text-white hover:bg-slate-800 active:scale-90 transition-all duration-200 rounded-full flex items-center justify-center shadow-xl relative"
       >
-        <font-awesome-icon
-          icon="fa-solid fa-comments"
-          class="h-6 w-6 transition-transform duration-300 group-hover:rotate-12 color-white"
-        />
-        <span
-          class="absolute inset-0 rounded-full bg-indigo-600/10 animate-ping pointer-events-none"
-        ></span>
+        <font-awesome-icon icon="fa-solid fa-comments" class="h-5 w-5" />
       </button>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import surveyData from '@/assets/surveyData.json';
 import ChatAI from './ChatAI.vue';
+import apiClient from '../utils/api';
 
 const route = useRoute();
 const router = useRouter();
 
-const chatSection = ref(null);
+const chatSection = ref<HTMLElement | null>(null);
+const isLoading = ref(true);
+const isReportExpanded = ref(false);
+const formDetail = ref<any>(null);
 
-const category = computed(() => route.params.category || 'childbirth');
-const targetName = computed(() => route.query.targetName || '상대방');
-const cultureBase = computed(() => route.query.cultureBase || '미지정');
-const categoryName = computed(
-  () => surveyData[category.value]?.title || '알 수 없음',
-);
+const categoryName = computed(() => {
+  const cat = route.params.category as string || formDetail.value?.category;
+  return (surveyData as any)[cat]?.title || 'Unknown';
+});
+
+const aiReport = computed(() => {
+  return formDetail.value?.aiResponse || {};
+});
+
+const parsedVillainTips = computed(() => {
+  const raw = aiReport.value.villainPreventionSummary;
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  return raw.split('\n').map((line: string) => line.replace(/^[•\-\*\d\.]+\s*/, '').trim()).filter(Boolean);
+});
+
+const parsedMessages = computed(() => {
+  const raw = aiReport.value.messageGuide;
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  return raw.split('\n').map((line: string) => line.replace(/^[•\-\*\d\.]+\s*|^["']|["']$/g, '').trim()).filter(Boolean);
+});
+
+onMounted(async () => {
+  const roomId = route.query.roomId;
+  if (roomId) {
+    try {
+      const response = await apiClient.get(`/form/${roomId}`);
+      if (response.data.success) {
+        formDetail.value = response.data.form;
+      }
+    } catch (error) {
+      console.error('Error loading result data:', error);
+    } finally {
+      isLoading.value = false;
+    }
+  } else {
+    isLoading.value = false;
+  }
+});
 
 const goHome = () => {
   router.push('/');
@@ -245,4 +206,16 @@ const scrollToChat = () => {
     chatSection.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 };
+
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Message copied to clipboard!');
+  });
+};
 </script>
+
+<style scoped>
+.max-h-40 {
+  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+}
+</style>

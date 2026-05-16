@@ -14,26 +14,24 @@
           />
         </button>
         <h1 class="text-xl md:text-2xl font-extrabold text-slate-950 text-ellipsis overflow-hidden whitespace-nowrap">
-          {{ personName }}님 기록
+          History for {{ personName }}
         </h1>
       </header>
 
-      <!-- 로딩 상태 -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center h-64">
         <div class="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3"></div>
-        <p class="text-sm font-medium text-slate-400">내역을 불러오는 중...</p>
+        <p class="text-sm font-medium text-slate-400">Loading history...</p>
       </div>
 
       <div
         v-else-if="combinedList.length === 0"
         class="flex flex-col items-center justify-center h-64 text-slate-400"
       >
-        <p class="text-sm md:text-base font-medium">진행 중인 대화나 기록이 없습니다.</p>
+        <p class="text-sm md:text-base font-medium">No conversations or records found.</p>
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
         <template v-for="(item, idx) in combinedList" :key="idx">
-          <!-- 1. AI 상담 카드 -->
           <button
             v-if="item.type === 'consultation'"
             @click="enterChatRoom(item.roomId)"
@@ -42,7 +40,7 @@
             <div class="flex-1 min-w-0 pr-4">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-600 uppercase">
-                  AI 상담
+                  AI Consultation
                 </span>
                 <span class="text-[11px] md:text-xs text-slate-400 font-medium">{{ item.lastTime }}</span>
               </div>
@@ -58,7 +56,6 @@
             </div>
           </button>
 
-          <!-- 2. 직접 기록 카드 (연하늘/연초록) -->
           <div
             v-else-if="item.type === 'history'"
             :class="[
@@ -70,7 +67,7 @@
           >
             <div class="flex justify-between items-center mb-3">
               <span class="text-[10px] font-bold uppercase tracking-wider opacity-60 px-2 py-0.5 rounded-md bg-white/50">
-                {{ item.received ? '내가 받음' : '내가 보냄' }}
+                {{ item.received ? 'Received' : 'Sent' }}
               </span>
               <span class="text-[10px] font-bold opacity-50">{{ item.date }}</span>
             </div>
@@ -83,7 +80,7 @@
                 <span class="text-xl font-black">
                   {{ item.value.toLocaleString() }}
                 </span>
-                <span class="text-xs font-bold ml-1">원</span>
+                <span class="text-xs font-bold ml-1">{{ item.currency === 'ko' ? 'KRW' : item.currency.toUpperCase() }}</span>
               </div>
             </div>
           </div>
@@ -126,16 +123,16 @@ const fetchChatRooms = async () => {
         .map((form: any) => ({
           roomId: form.formId,
           type: 'consultation',
-          title: `${form.targetName}님 상담 내역`,
-          lastMessage: 'AI 분석 결과 보기',
+          title: `Consultation for ${form.targetName}`,
+          lastMessage: 'View AI analysis results',
           lastTime: new Date(form.updatedAt).toLocaleDateString(),
-          category: '축하', // 기본값
+          category: form.category || 'Celebration',
           targetName: form.targetName,
           cultureBase: form.cultureBase
         }));
     }
   } catch (error) {
-    console.error('상담 목록 조회 에러:', error);
+    console.error('Error fetching consultation list:', error);
   }
 };
 
@@ -149,7 +146,7 @@ const fetchHistories = async () => {
       }));
     }
   } catch (error) {
-    console.error('기록 목록 조회 에러:', error);
+    console.error('Error fetching history list:', error);
   }
 };
 

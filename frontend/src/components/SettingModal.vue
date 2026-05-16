@@ -6,10 +6,7 @@
     <div
       class="bg-white rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl transform transition-all duration-300 scale-100 opacity-100"
     >
-      <!-- 헤더 영역 -->
-      <div
-        class="px-6 pt-6 pb-4 flex items-center justify-between border-b border-slate-50"
-      >
+      <div class="px-6 pt-6 pb-4 flex items-center justify-between border-b border-slate-50">
         <h2 class="text-xl font-bold text-slate-900 ml-2">
           {{ i18n.settingTitle }}
         </h2>
@@ -21,22 +18,19 @@
         </button>
       </div>
 
-      <!-- 본문 영역 -->
       <div class="px-8 py-6 flex flex-col space-y-6">
-        <!-- 1. 이름 변경 섹션 -->
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-400 ml-1">
-            {{ i18n.nameLabel }}
+            {{ i18n.usernameLabel }}
           </label>
           <input
-            v-model="localData.name"
+            v-model="localData.username"
             type="text"
-            :placeholder="i18n.namePlaceholder"
+            :placeholder="i18n.usernamePlaceholder"
             class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 text-base font-bold text-slate-800 placeholder-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all"
           />
         </div>
 
-        <!-- 2. 언어 설정 변경 섹션 -->
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-400 ml-1">
             {{ i18n.langLabel }}
@@ -59,7 +53,6 @@
         </div>
       </div>
 
-      <!-- 하단 버튼 영역 -->
       <div class="px-8 pb-8 pt-2 space-y-3">
         <button
           @click="handleSave"
@@ -77,7 +70,7 @@
           @click="handleLogout"
           class="w-full py-4 rounded-2xl font-bold text-lg text-rose-600 bg-rose-50 hover:bg-rose-100 transition-all active:scale-[0.98]"
         >
-          로그아웃
+          {{ i18n.logoutBtn }}
         </button>
       </div>
     </div>
@@ -94,20 +87,18 @@ const authStore = useAuthStore();
 const props = defineProps<{
   isOpen: boolean;
   currentSettings: {
-    name: string;
+    username: string;
     language: string;
   };
 }>();
 
 const emit = defineEmits(['close', 'save']);
 
-// 모달 내부에서 임시로 변경 사항을 들고 있을 반응형 데이터
 const localData = ref({
-  name: '',
-  language: 'ko',
+  username: '',
+  language: 'en',
 });
 
-// 모달이 열릴 때 부모의 데이터를 받아와 동기화
 watch(
   () => props.isOpen,
   (newVal) => {
@@ -119,44 +110,44 @@ watch(
 );
 
 const languages = [
-  { code: 'ko', label: '한국어' },
   { code: 'en', label: 'English' },
+  { code: 'ko', label: '한국어' },
   { code: 'ja', label: '日本語' },
 ];
 
-// 설정 창 내부에서 즉각 반영될 다국어 사전
 const contentText: Record<string, any> = {
-  ko: {
-    settingTitle: '환경 설정',
-    nameLabel: '이름 변경',
-    namePlaceholder: '이름을 입력해주세요',
-    langLabel: '언어 설정 변경',
-    saveBtn: '변경사항 저장',
-  },
   en: {
     settingTitle: 'Settings',
-    nameLabel: 'Change Name',
-    namePlaceholder: 'Enter your name',
+    usernameLabel: 'Change ID',
+    usernamePlaceholder: 'Enter your ID',
     langLabel: 'Change Language',
     saveBtn: 'Save Changes',
+    logoutBtn: 'Log Out',
+  },
+  ko: {
+    settingTitle: '환경 설정',
+    usernameLabel: '아이디 변경',
+    usernamePlaceholder: '아이디를 입력해주세요',
+    langLabel: '언어 설정 변경',
+    saveBtn: '변경사항 저장',
+    logoutBtn: '로그아웃',
   },
   ja: {
     settingTitle: '環境設定',
-    nameLabel: '名前의 변경',
-    namePlaceholder: '名前を入力してください',
+    usernameLabel: 'IDの変更',
+    usernamePlaceholder: 'IDを入力してください',
     langLabel: '言語設定の変更',
     saveBtn: '変更を保存',
+    logoutBtn: 'ログアウト',
   },
 };
 
-// 현재 임시 선택된 언어에 맞춰 모달의 텍스트 실시간 반영
 const i18n = computed(() => {
-  return contentText[localData.value.language] || contentText.ko;
+  return contentText[localData.value.language] || contentText.en;
 });
 
-// 빈 이름 저장 방지 검증
 const isFormValid = computed(() => {
-  return localData.value.name.trim().length > 0 && !!localData.value.language;
+  return localData.value.username.trim().length > 0 && !!localData.value.language;
 });
 
 const handleClose = () => {
@@ -167,18 +158,18 @@ const handleSave = async () => {
   if (isFormValid.value) {
     try {
       const response = await apiClient.post('/auth/profile', {
-        name: localData.value.name,
+        username: localData.value.username,
         language: localData.value.language,
       });
       if (response.data.success) {
         emit('save', { ...localData.value });
         emit('close');
       } else {
-        alert(response.data.detail || '설정 저장에 실패했습니다.');
+        alert(response.data.detail || 'Failed to save settings.');
       }
     } catch (error: any) {
-      console.error('설정 저장 에러:', error);
-      alert(error.response?.data?.detail || '오류가 발생했습니다.');
+      console.error('Settings save error:', error);
+      alert(error.response?.data?.detail || 'An error occurred.');
     }
   }
 };
@@ -189,14 +180,9 @@ const handleLogout = async () => {
     authStore.logout();
     window.location.href = '/login';
   } catch (error) {
-    console.error('로그아웃 에러:', error);
-    // 에러가 나도 로컬에서는 로그아웃 처리
+    console.error('Logout error:', error);
     authStore.logout();
     window.location.href = '/login';
   }
 };
 </script>
-
-<style scoped>
-/* 필요한 스타일 커스텀이 있다면 이곳에 작성 */
-</style>

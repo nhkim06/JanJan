@@ -7,14 +7,10 @@
       class="bg-white rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl transform transition-all duration-300 scale-100 opacity-100"
     >
       <div class="px-8 pt-10 pb-8 flex flex-col items-center">
-        <!-- 아이콘 -->
-        <div
-          class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6"
-        >
+        <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6">
           <font-awesome-icon icon="fa-solid fa-face-smile" class="w-8 h-8" />
         </div>
 
-        <!-- 텍스트 다국어 적용 -->
         <h2 class="text-2xl font-bold text-slate-900 mb-2">
           {{ i18n.title }}
         </h2>
@@ -23,7 +19,6 @@
         </p>
 
         <div class="w-full space-y-6">
-          <!-- 아이디 입력 -->
           <div class="space-y-2">
             <label class="text-xs font-bold text-slate-400 ml-1">
               {{ i18n.idLabel }}
@@ -33,29 +28,14 @@
               :disabled="isSubmitting"
               type="text"
               :placeholder="i18n.idPlaceholder"
-              class="... disabled:opacity-60"
+              class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 text-base font-bold text-slate-800 placeholder-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all disabled:opacity-60"
             />
           </div>
 
-          <!-- 이름 입력 -->
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-slate-400 ml-1">
-              {{ i18n.nameLabel }}
-            </label>
-            <input
-              v-model="formData.name"
-              type="text"
-              :placeholder="i18n.placeholder"
-              class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 text-base font-bold text-slate-800 placeholder-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all"
-            />
-          </div>
-
-          <!-- 언어 선택 -->
           <div class="space-y-2">
             <label class="text-xs font-bold text-slate-400 ml-1">
               {{ i18n.langLabel }}
             </label>
-            <!-- 3개 국어가 한 줄에 균등하게 배치되도록 grid-cols-3으로 변경 -->
             <div class="grid grid-cols-3 gap-2">
               <button
                 v-for="lang in languages"
@@ -94,12 +74,6 @@
 <script setup>
 import { ref, computed } from 'vue';
 
-const isSubmitting = ref(false);
-
-const isButtonDisabled = computed(() => {
-  return isSubmitting.value || !isFormValid.value;
-});
-
 const props = defineProps({
   isOpen: {
     type: Boolean,
@@ -109,82 +83,67 @@ const props = defineProps({
 
 const emit = defineEmits(['submit']);
 
+const isSubmitting = ref(false);
+
 const formData = ref({
   id: '',
-  name: '',
-  language: 'ko',
+  language: 'en',
 });
 
-// 영어(English) 옵션 추가
 const languages = [
-  { code: 'ko', label: '한국어' },
   { code: 'en', label: 'English' },
+  { code: 'ko', label: '한국어' },
   { code: 'ja', label: '日本語' },
 ];
 
-// 다국어 텍스트 사전 정의 (영어 추가)
 const contentText = {
-  ko: {
-    title: '환영합니다!',
-    description: '서비스 이용을 위해 기본 정보를 입력해주세요.',
-    idLabel: '아이디',
-    idPlaceholder: '아이디를 입력해주세요',
-    nameLabel: '이름',
-    placeholder: '이름을 입력해주세요',
-    langLabel: '선호 언어',
-    submitBtn: '시작하기',
-  },
   en: {
     title: 'Welcome!',
-    description: 'Please enter your basic profile details to get started.',
-    idLabel: 'ID',
+    description: 'Please enter your ID to get started.',
+    idLabel: 'User ID',
     idPlaceholder: 'Enter your ID',
-    nameLabel: 'Name',
-    placeholder: 'Enter your name',
     langLabel: 'Preferred Language',
     submitBtn: 'Get Started',
   },
+  ko: {
+    title: '환영합니다!',
+    description: '서비스 이용을 위해 아이디를 입력해주세요.',
+    idLabel: '아이디',
+    idPlaceholder: '아이디를 입력해주세요',
+    langLabel: '선호 언어',
+    submitBtn: '시작하기',
+  },
   ja: {
     title: 'ようこそ！',
-    description: 'サービスをご利用いただくために、基本情報を 입력해주세요.',
+    description: 'サービスをご利用いただくために、IDを入力してください。',
     idLabel: 'ID',
     idPlaceholder: 'IDを入力してください',
-    nameLabel: '名前',
-    placeholder: '名前を入力してください',
     langLabel: '希望言語',
     submitBtn: '始める',
   },
 };
 
-// 현재 선택된 언어에 맞는 텍스트를 실시간 반환
 const i18n = computed(() => {
-  return contentText[formData.value.language] || contentText.ko;
+  return contentText[formData.value.language] || contentText.en;
 });
 
 const isFormValid = computed(() => {
-  return (
-    formData.value.id.trim().length > 0 &&
-    formData.value.name.trim().length > 0 &&
-    formData.value.language
-  );
+  return formData.value.id.trim().length > 0 && !!formData.value.language;
+});
+
+const isButtonDisabled = computed(() => {
+  return isSubmitting.value || !isFormValid.value;
 });
 
 const handleSubmit = async () => {
-  if (isButtonDisabled.value) return; // 안전장치 (더블 체크)
-
+  if (isButtonDisabled.value) return;
   try {
-    isSubmitting.value = true; // 클릭 즉시 버튼 및 입력창 비활성화
-
-    // 부모 컴포넌트의 submit 처리가 완료될 때까지 대기
+    isSubmitting.value = true;
     await emit('submit', { ...formData.value });
   } catch (error) {
     console.error(error);
   } finally {
-    isSubmitting.value = false; // 성공·실패 여부와 상관없이 완료 후 활성화
+    isSubmitting.value = false;
   }
 };
 </script>
-
-<style scoped>
-/* 추가 스타일이 필요한 경우 작성 */
-</style>

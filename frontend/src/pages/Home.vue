@@ -152,10 +152,9 @@ const goToChatList = (personId: string) => {
       @save="handleSettingSave"
     />
 
-    <!-- 로딩 상태 표시 -->
     <div v-if="isLoading" class="w-full max-w-md md:max-w-2xl lg:max-w-3xl flex flex-col items-center justify-center min-h-screen">
        <div class="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
-       <p class="text-slate-500 font-medium">데이터를 불러오는 중입니다...</p>
+       <p class="text-slate-500 font-medium">Loading data...</p>
     </div>
 
     <div
@@ -166,7 +165,7 @@ const goToChatList = (personId: string) => {
         <button
           @click="isSettingModalOpen = true"
           class="absolute top-6 right-6 w-10 h-10 mt-3 hover:bg-slate-50 text-slate-500 hover:text-slate-700 rounded-xl flex items-center justify-center border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)] active:scale-95 transition-all z-40 group"
-          aria-label="설정"
+          aria-label="Settings"
         >
           <font-awesome-icon
             icon="fa-solid fa-gear"
@@ -178,23 +177,23 @@ const goToChatList = (personId: string) => {
           <h1
             class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mb-2"
           >
-            어떤 상황인가요?
+            How can I help you?
           </h1>
           <p class="text-sm md:text-base font-medium text-slate-500/90">
-            적정 축의금/부의금을 확인해보세요.
+            Check the appropriate etiquette and gift amounts.
           </p>
         </header>
 
         <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
-            @click="router.push('/events/축하')"
+            @click="router.push('/events/Celebration')"
             class="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-[0_10px_30px_rgb(0,0,0,0.02)] border border-slate-50 hover:border-indigo-100 hover:shadow-[0_12px_35px_rgb(99,102,241,0.05)] active:scale-[0.99] transition-all text-left group"
           >
             <div>
               <h2 class="text-xl md:text-2xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1">
-                축하
+                Celebration
               </h2>
-              <p class="text-xs md:text-sm font-medium text-slate-400">결혼, 승진, 출산 등</p>
+              <p class="text-xs md:text-sm font-medium text-slate-400">Wedding, Promotion, Birth, etc.</p>
             </div>
             <div class="w-14 h-14 md:w-16 md:h-16 bg-indigo-50/70 rounded-2xl flex items-center justify-center text-indigo-500 transition-colors group-hover:bg-indigo-100">
               <font-awesome-icon icon="fa-solid fa-gift" class="w-6 h-6 md:w-8 md:h-8" />
@@ -202,14 +201,14 @@ const goToChatList = (personId: string) => {
           </button>
 
           <button
-            @click="router.push('/events/위로')"
+            @click="router.push('/events/Condolence')"
             class="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-[0_10px_30px_rgb(0,0,0,0.02)] border border-slate-50 hover:border-indigo-100 hover:shadow-[0_12px_35px_rgb(99,102,241,0.05)] active:scale-[0.99] transition-all text-left group"
           >
             <div>
               <h2 class="text-xl md:text-2xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1">
-                위로
+                Condolence
               </h2>
-              <p class="text-xs md:text-sm font-medium text-slate-400">병문안 등 위로 상황</p>
+              <p class="text-xs md:text-sm font-medium text-slate-400">Hospital visit, Funeral, etc.</p>
             </div>
             <div class="w-14 h-14 md:w-16 md:h-16 bg-indigo-50/70 rounded-2xl flex items-center justify-center text-indigo-500 transition-colors group-hover:bg-indigo-100">
               <font-awesome-icon icon="fa-solid fa-bandage" class="w-6 h-6 md:w-8 md:h-8" />
@@ -219,7 +218,7 @@ const goToChatList = (personId: string) => {
 
         <section class="pt-2">
           <div class="text-xs md:text-sm font-bold text-slate-400 mb-3 px-1">
-            최근 대화한 인물 목록
+            Recent Interactions
           </div>
           <div v-if="peopleData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <button
@@ -237,7 +236,7 @@ const goToChatList = (personId: string) => {
                     {{ person.name }}
                   </h3>
                   <p class="text-[11px] md:text-xs text-slate-400 mt-0.5">
-                    내역 {{ person.itemsCount }}개
+                    {{ person.itemsCount }} records
                   </p>
                 </div>
               </div>
@@ -247,7 +246,7 @@ const goToChatList = (personId: string) => {
             </button>
           </div>
           <div v-else class="text-center py-10 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-            <p class="text-sm text-slate-400 font-medium">아직 대화 내역이 없습니다.</p>
+            <p class="text-sm text-slate-400 font-medium">No history yet.</p>
           </div>
         </section>
       </div>
@@ -255,7 +254,7 @@ const goToChatList = (personId: string) => {
       <button
         @click="isInputModalOpen = true"
         class="absolute bottom-6 right-6 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-indigo-200 active:scale-95 transition-all z-40 group"
-        aria-label="경조사 직접 입력"
+        aria-label="Add record"
       >
         <font-awesome-icon icon="fa-solid fa-plus" class="w-6 h-6 transition-transform group-hover:rotate-90" />
       </button>

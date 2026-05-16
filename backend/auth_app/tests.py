@@ -134,6 +134,9 @@ class AuthTests(TestCase):
             login_response["Location"],
             "http://frontend.test/auth/callback?success=True&hasData=True",
         )
+        profile_response = self.client.get(reverse("profile"))
+        self.assertEqual(profile_response.status_code, 200)
+        self.assertEqual(profile_response.json()["user"]["username"], "tester")
 
     def test_logout_returns_success(self):
         logout_response = self.client.post(reverse("logout"))

@@ -45,9 +45,7 @@ const handleSignUpSubmit = async (data: any) => {
     const response = await apiClient.post('/auth/register', data);
     
     if (response.data.success) {
-      if (response.data.token) {
-        authStore.setToken(response.data.token);
-      }
+      authStore.setAuthenticated(true);
       authStore.setIsRegistering(false);
       isSignUpModalOpen.value = false;
       fetchUserProfile();

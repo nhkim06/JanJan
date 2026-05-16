@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
+# from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import UserProfile
 from .services import GoogleAuthError, exchange_google_authorization_code
@@ -23,12 +23,12 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
         return
 
 
-def get_tokens_for_user(user):
-    refresh = RefreshToken.for_user(user)
-    return {
-        "refresh": str(refresh),
-        "access": str(refresh.access_token),
-    }
+# def get_tokens_for_user(user):
+#     refresh = RefreshToken.for_user(user)
+#     return {
+#         "refresh": str(refresh),
+#         "access": str(refresh.access_token),
+#     }
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -82,15 +82,11 @@ class CallbackView(APIView):
                     detail="User is inactive.",
                 )
 
-            # JWT 토큰 생성
-            tokens = get_tokens_for_user(profile.user)
             login(request, profile.user)
             request.session.pop(PENDING_GOOGLE_AUTH_SESSION_KEY, None)
             return self._redirect_to_frontend(
                 success=True, 
                 hasData=True, 
-                token=tokens["access"],
-                refresh=tokens["refresh"]
             )
 
         request.session[PENDING_GOOGLE_AUTH_SESSION_KEY] = google_user
@@ -120,15 +116,15 @@ class RegisterView(APIView):
         username = request.data.get("id")
         name = request.data.get("name")
 
-        if language not in UserProfile.Language.values:
+        if not username:
             return Response(
-                {"success": False, "detail": "language must be 'ko', 'ja', or 'en'."},
+                {"success": False, "detail": "id is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if not username or not name:
+        if language not in UserProfile.Language.values:
             return Response(
-                {"success": False, "detail": "id and name are required."},
+                {"success": False, "detail": "language must be 'ko', 'ja', or 'en'."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -136,6 +132,12 @@ class RegisterView(APIView):
         if User.objects.filter(username=username).exists():
             return Response(
                 {"success": False, "detail": "id is already taken."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        if UserProfile.objects.filter(name=name).exists():
+            return Response(
+                {"success": False, "detail": "name is already taken."},
                 status=status.HTTP_409_CONFLICT,
             )
 
@@ -161,13 +163,13 @@ class RegisterView(APIView):
             name=name,
         )
 
-        tokens = get_tokens_for_user(user)
+        # tokens = get_tokens_for_user(user)
         login(request, user)
         request.session.pop(PENDING_GOOGLE_AUTH_SESSION_KEY, None)
         return Response({
             "success": True,
-            "token": tokens["access"],
-            "refresh": tokens["refresh"]
+            # "token": tokens["access"],
+            # "refresh": tokens["refresh"]
         })
 
 
@@ -199,7 +201,7 @@ class ProfileView(APIView):
             {
                 "success": True,
                 "user": {
-                    "id": request.user.id,
+                    # "id": request.user.id,
                     "username": request.user.get_username(),
                     "email": request.user.email,
                     "name": profile.name if profile else "",

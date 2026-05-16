@@ -44,7 +44,7 @@
         <button
           v-for="(option, idx) in currentQuestion.options"
           :key="idx"
-          @click="selectAnswer(option)"
+          @click="selectAnswerAndNext(option)"
           :class="[
             'w-full bg-white rounded-2xl py-4 px-6 text-left font-bold border text-base transition-all duration-150',
             answers[currentStep] === option
@@ -57,27 +57,38 @@
       </div>
     </div>
 
-    <div class="w-full max-w-md flex gap-3 mt-8">
+    <div class="w-full max-w-md flex flex-col gap-3 mt-8">
       <button
-        v-if="currentStep > 0"
-        @click="prevStep"
-        class="flex-1 bg-slate-200 text-slate-700 font-bold py-4 rounded-3xl active:scale-[0.98] transition-transform"
+        @click="skipStep"
+        class="w-full bg-white border border-slate-200 text-slate-500 font-bold py-3.5 rounded-2xl active:scale-[0.98] transition-all text-sm hover:bg-slate-50"
       >
-        이전
+        이 질문 건너뛰기
       </button>
 
-      <button
-        @click="nextStep"
-        :disabled="!answers[currentStep]"
-        :class="[
-          'flex-[2] font-bold py-4 rounded-3xl text-white shadow-lg shadow-indigo-600/20 active:scale-[0.98] transition-all',
-          answers[currentStep]
-            ? 'bg-indigo-600'
-            : 'bg-slate-300 cursor-not-allowed shadow-none',
-        ]"
-      >
-        {{ currentStep === totalSteps - 1 ? '결과 확인하기' : '다음 문항' }}
-      </button>
+      <div class="flex gap-3 w-full">
+        <button
+          v-if="currentStep > 0"
+          @click="prevStep"
+          class="flex-1 bg-indigo-600 text-white font-bold py-4 rounded-3xl active:scale-[0.98] transition-transform text-base"
+        >
+          이전
+        </button>
+
+        <div v-else class="flex-1"></div>
+
+        <button
+          @click="nextStep"
+          :disabled="!answers[currentStep]"
+          :class="[
+            'flex-1 font-bold py-4 rounded-3xl text-white shadow-lg active:scale-[0.98] transition-all text-base',
+            answers[currentStep]
+              ? 'bg-indigo-600 shadow-indigo-600/20'
+              : 'bg-slate-300 cursor-not-allowed shadow-none',
+          ]"
+        >
+          {{ currentStep === totalSteps - 1 ? '결과 확인하기' : '다음' }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -90,24 +101,33 @@ import surveyData from '@/assets/surveyData.json';
 const route = useRoute();
 const router = useRouter();
 
-// 현재 URL 파라미터에서 카테고리 추출 (예: childbirth, wedding, career)
 const category = ref(route.params.category || 'childbirth');
 
-// 선택된 카테고리의 전체 데이터 (질문 목록 포함)
-const categoryData = computed(() => surveyData[category.value] || { questions: [] });
+const categoryData = computed(
+  () => surveyData[category.value] || { questions: [] },
+);
 const questions = computed(() => categoryData.value.questions);
 const totalSteps = computed(() => questions.value.length);
 
-// 현재 사용자가 위치한 질문 인덱스 (0부터 시작)
 const currentStep = ref(0);
 const currentQuestion = computed(() => questions.value[currentStep.value]);
 
-// 사용자가 선택한 답변을 저장할 배열
 const answers = ref([]);
 
-// 답변 선택 핸들러
-const selectAnswer = (option) => {
+// 선택 목록 클릭 시 작동
+const selectAnswerAndNext = (option) => {
   answers.value[currentStep.value] = option;
+
+  // 시각적 피드백용 미세 딜레이
+  setTimeout(() => {
+    nextStep();
+  }, 150);
+};
+
+// 1. [요구사항] 건너뛰기 시 기존 선택 해제 후 다음 단계로
+const skipStep = () => {
+  answers.value[currentStep.value] = null; // 선택했던 항목을 null로 밀어버려 해제함
+  nextStep();
 };
 
 // 이전 버튼
@@ -115,14 +135,11 @@ const prevStep = () => {
   if (currentStep.value > 0) currentStep.value--;
 };
 
-// 다음 버튼 / 결과 확인
+// 다음 버튼 / 결과 확인 처리 공통 로직
 const nextStep = () => {
-  if (!answers.value[currentStep.value]) return; // 미선택 시 작동 방지
-
   if (currentStep.value < totalSteps.value - 1) {
-    currentStep.value++; // 다음 질문으로 이동
+    currentStep.value++;
   } else {
-    // ⚠️ 모든 질문 완료 -> 결과 페이지로 이동 (State나 쿼리로 데이터 전달 가능)
     router.push({
       name: 'Result',
       params: { category: category.value },

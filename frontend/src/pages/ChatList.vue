@@ -18,8 +18,14 @@
         </h1>
       </header>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoading" class="flex flex-col items-center justify-center h-64">
+        <div class="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3"></div>
+        <p class="text-sm font-medium text-slate-400">대화 목록을 불러오는 중...</p>
+      </div>
+
       <div
-        v-if="chatRooms.length === 0"
+        v-else-if="chatRooms.length === 0"
         class="flex flex-col items-center justify-center h-64 text-slate-400"
       >
         <p class="text-sm md:text-base font-medium">진행 중인 대화방이 없습니다.</p>
@@ -63,18 +69,44 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { peopleData } from '../data/mockData';
+import apiClient from '../utils/api';
 
 const route = useRoute();
 const router = useRouter();
 
-const personId = computed(() => parseInt(route.params.personId));
-const person = computed(() => peopleData.find(p => p.id === personId.value));
+const personName = computed(() => route.params.personId); // Using personId as targetName
+const chatRooms = ref([]);
+const isLoading = ref(true);
 
-const personName = computed(() => person.value ? person.value.name : '알 수 없음');
-const chatRooms = computed(() => person.value ? person.value.chatRooms : []);
+onMounted(async () => {
+  await fetchChatRooms();
+  isLoading.value = false;
+});
+
+const fetchChatRooms = async () => {
+  try {
+    const response = await apiClient.get('/form/list');
+    if (response.data.success) {
+      // Filter forms by targetName
+      chatRooms.value = response.data.forms
+        .filter(form => form.targetName === personName.value)
+        .map(form => ({
+          roomId: form.formId,
+          type: form.cultureBase, // Or some other type if available
+          title: `${form.targetName}님 관련 대화`,
+          lastMessage: '대화 내용을 확인하세요',
+          lastTime: new Date(form.updatedAt).toLocaleDateString(),
+          category: '축하', // Default for now, should ideally come from form
+          targetName: form.targetName,
+          cultureBase: form.cultureBase
+        }));
+    }
+  } catch (error) {
+    console.error('채팅방 목록 조회 에러:', error);
+  }
+};
 
 const enterChatRoom = (roomId) => {
   const room = chatRooms.value.find(r => r.roomId === roomId);

@@ -3,27 +3,13 @@
     class="min-h-screen bg-slate-50 flex flex-col items-center justify-between pt-12 pb-8 px-6 font-sans relative"
   >
     <div class="w-full max-w-md">
-      <!-- 상단 헤더: 라우터 뒤로가기(Exit) & 프로그레스 바 -->
+      <!-- 상단 헤더: 뒤로가기 & 프로그레스 바 -->
       <div class="flex items-center mb-6">
         <button
-          @click="handleExit"
+          @click="handlePrev"
           class="mr-4 text-slate-600 hover:text-slate-900 active:scale-95 transition bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-100"
-          title="설문 종료"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="2.5"
-            stroke="currentColor"
-            class="w-5 h-5"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15.75 19.5 8.25 12l7.5-7.5"
-            />
-          </svg>
+          <font-awesome-icon icon="fa-solid fa-chevron-left" />
         </button>
         <div class="flex-1 bg-slate-200 h-1.5 rounded-full overflow-hidden">
           <div

@@ -7,20 +7,7 @@
         @click="router.back()"
         class="mr-4 text-slate-600 hover:text-slate-900 active:scale-95 transition bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-100"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="2.5"
-          stroke="currentColor"
-          class="w-5 h-5"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15.75 19.5 8.25 12l7.5-7.5"
-          />
-        </svg>
+        <font-awesome-icon icon="fa-solid fa-chevron-left" />
       </button>
       <h1 class="text-2xl font-bold text-slate-900 truncate">{{ pageTitle }}</h1>
     </div>
@@ -39,7 +26,7 @@
         <div
           class="w-16 h-16 rounded-2xl bg-indigo-50/70 flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors duration-200"
         >
-          <i :class="[item.icon, 'text-xl text-indigo-600']"></i>
+          <font-awesome-icon :icon="item.icon" class="text-xl text-indigo-600" />
         </div>
 
         <span class="text-base font-bold text-slate-800 text-center">{{ item.title }}</span>

@@ -22,20 +22,7 @@
             <div
               class="w-9 h-9 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-full flex items-center justify-center text-white shadow-md shadow-indigo-200"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2.5"
-                stroke="currentColor"
-                class="w-4 h-4"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M9.813 15.904 9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.187.904ZM18 10.5l-.5 3.5-3.5.5 3.5.5.5 3.5 5-5-5-3.5ZM18 1a.5.5 0 0 1 .5.5V3h1.5a.5.5 0 0 1 0 1H18.5v1.5a.5.5 0 0 1-1 0V4H16a.5.5 0 0 1 0-1h1.5V1.5A.5.5 0 0 1 18 1Z"
-                />
-              </svg>
+              <font-awesome-icon icon="fa-solid fa-wand-magic-sparkles" class="w-4 h-4" />
             </div>
             <input
               type="text"
@@ -45,20 +32,7 @@
             <button
               class="text-indigo-500 hover:text-indigo-600 active:scale-90 transition-transform p-1"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                class="w-5 h-5 rotate-45"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
-                />
-              </svg>
+              <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-5 h-5 rotate-45" />
             </button>
           </div>
         </section>
@@ -81,20 +55,7 @@
             <div
               class="w-14 h-14 bg-indigo-50/70 rounded-2xl flex items-center justify-center text-indigo-500 transition-colors group-hover:bg-indigo-100"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                class="w-6 h-6"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-                />
-              </svg>
+              <font-awesome-icon icon="fa-solid fa-heart" class="w-6 h-6" />
             </div>
           </button>
 
@@ -115,20 +76,7 @@
             <div
               class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 transition-colors group-hover:bg-slate-100 group-hover:text-slate-600"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                class="w-6 h-6"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M12 4.5v15m7.5-7.5h-15"
-                />
-              </svg>
+              <font-awesome-icon icon="fa-solid fa-plus" class="w-6 h-6" />
             </div>
           </button>
         </section>
@@ -164,20 +112,7 @@
               <div
                 class="text-slate-300 group-hover:text-indigo-500 transition-colors"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2.5"
-                  stroke="currentColor"
-                  class="w-4 h-4"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                  />
-                </svg>
+                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-4 h-4" />
               </div>
             </button>
           </div>
@@ -190,20 +125,7 @@
             @click="selectedPerson = null"
             class="mr-3 text-slate-600 hover:text-slate-900 active:scale-95 transition bg-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm border border-slate-100"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="2.5"
-              stroke="currentColor"
-              class="w-4 h-4"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15.75 19.5 8.25 12l7.5-7.5"
-              />
-            </svg>
+            <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-4 h-4" />
           </button>
           <h1 class="text-xl font-extrabold text-slate-950">
             {{ selectedPerson.name }}님 관련 대화방
@@ -243,20 +165,7 @@
               </p>
             </div>
             <div class="text-slate-300">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                class="w-5 h-5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
-                />
-              </svg>
+              <font-awesome-icon icon="fa-solid fa-comment-dots" class="w-5 h-5" />
             </div>
           </button>
         </div>

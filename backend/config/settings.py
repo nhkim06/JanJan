@@ -65,7 +65,7 @@ DEBUG = env_bool("DJANGO_DEBUG", True)
 
 ALLOWED_HOSTS = env_list(
     "DJANGO_ALLOWED_HOSTS",
-    ["localhost", "127.0.0.1", ".vercel.app"],
+    ["localhost", "127.0.0.1", ".vercel.app", ".hurdoo.kr"],
 )
 
 
@@ -107,6 +107,7 @@ CORS_ALLOWED_ORIGINS = env_list(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "https://jan-jan.vercel.app",
+        "https://janjan.hurdoo.kr"
     ],
 )
 CORS_ALLOWED_ORIGIN_REGEXES = env_list(
@@ -119,6 +120,7 @@ CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_DOMAIN = ".hurdoo.kr"
 CSRF_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = env_list(

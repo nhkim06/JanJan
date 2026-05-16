@@ -2,9 +2,9 @@
   <div
     class="min-h-screen bg-slate-50 flex flex-col items-center justify-between pt-12 pb-8 px-6 font-sans relative"
   >
-    <div class="w-full max-w-md">
+    <div class="w-full max-w-md md:max-w-2xl">
       <!-- 상단 헤더: 뒤로가기 & 프로그레스 바 -->
-      <div class="flex items-center mb-6">
+      <div class="flex items-center mb-10">
         <button
           @click="handleExit"
           class="mr-4 text-slate-600 hover:text-slate-900 active:scale-95 transition bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-100"
@@ -20,40 +20,42 @@
       </div>
 
       <!-- [사전 단계 1] 상대방 이름 입력 -->
-      <div v-if="currentStep === 0" class="mb-8 text-left">
-        <span class="text-xs font-bold text-indigo-600 block mb-1"
+      <div v-if="currentStep === 0" class="mb-8 text-left md:text-center">
+        <span class="text-xs md:text-sm font-bold text-indigo-600 block mb-1"
           >기본 정보 입력</span
         >
-        <h1 class="text-2xl font-bold text-slate-900 leading-snug mb-6">
-          상대방의<br />이름을 입력해주세요
+        <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 leading-snug mb-8">
+          상대방의<br class="md:hidden" /> 이름을 입력해주세요
         </h1>
-        <input
-          v-model="preSurveyData.targetName"
-          type="text"
-          placeholder="예: 홍길동, 김대리님"
-          class="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 text-base font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-          @keyup.enter="!isNextDisabled && handleNext()"
-        />
+        <div class="max-w-xl mx-auto">
+          <input
+            v-model="preSurveyData.targetName"
+            type="text"
+            placeholder="예: 홍길동, 김대리님"
+            class="w-full bg-white border border-slate-200 rounded-2xl py-4 md:py-5 px-5 md:px-8 text-base md:text-lg font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 shadow-sm"
+            @keyup.enter="!isNextDisabled && handleNext()"
+          />
+        </div>
       </div>
 
       <!-- [사전 단계 2] 문화권 선택 -->
-      <div v-else-if="currentStep === 1" class="mb-8 text-left">
-        <span class="text-xs font-bold text-indigo-600 block mb-1"
+      <div v-else-if="currentStep === 1" class="mb-8 text-left md:text-center">
+        <span class="text-xs md:text-sm font-bold text-indigo-600 block mb-1"
           >기준 설정</span
         >
-        <h1 class="text-2xl font-bold text-slate-900 leading-snug mb-6">
-          어느 문화권 기준으로<br />판단할까요?
+        <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 leading-snug mb-8">
+          어느 문화권 기준으로<br class="md:hidden" /> 판단할까요?
         </h1>
 
-        <div class="grid grid-cols-1 gap-3 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-xl mx-auto">
           <button
             v-for="culture in ['한국', '일본', '둘 다', '아직 모르겠음']"
             :key="culture"
             @click="selectCulture(culture)"
             :class="[
-              'w-full bg-white rounded-2xl py-4 px-6 text-left font-bold border text-base transition-all duration-150',
+              'w-full bg-white rounded-2xl py-4 md:py-5 px-6 text-left md:text-center font-bold border text-base md:text-lg transition-all duration-150 shadow-sm',
               preSurveyData.cultureBase === culture
-                ? 'border-indigo-600 text-indigo-600 shadow-sm bg-indigo-50/10'
+                ? 'border-indigo-600 text-indigo-600 bg-indigo-50/10'
                 : 'border-slate-100 text-slate-700 hover:border-slate-200',
             ]"
           >
@@ -63,12 +65,12 @@
       </div>
 
       <!-- [메인 단계] 설문 문항 루프 (currentStep >= 2) -->
-      <div v-else-if="currentQuestion" class="w-full">
-        <div class="mb-8 text-left">
-          <span class="text-xs font-bold text-indigo-600 block mb-1">
+      <div v-else-if="currentQuestion" class="w-full max-w-xl mx-auto">
+        <div class="mb-8 text-left md:text-center">
+          <span class="text-xs md:text-sm font-bold text-indigo-600 block mb-1">
             Q{{ currentStep - 1 }}.
           </span>
-          <h1 class="text-2xl font-bold text-slate-900 leading-snug">
+          <h1 class="text-2xl md:text-3xl font-bold text-slate-900 leading-snug">
             {{ currentQuestion.question }}
           </h1>
         </div>
@@ -79,9 +81,9 @@
             :key="idx"
             @click="selectAnswer(option)"
             :class="[
-              'w-full bg-white rounded-2xl py-4 px-6 text-left font-bold border text-base transition-all duration-150',
+              'w-full bg-white rounded-2xl py-4 md:py-5 px-6 text-left md:text-center font-bold border text-base md:text-lg transition-all duration-150 shadow-sm',
               answers[surveyQuestionIdx] === option
-                ? 'border-indigo-600 text-indigo-600 shadow-sm bg-indigo-50/10'
+                ? 'border-indigo-600 text-indigo-600 bg-indigo-50/10'
                 : 'border-slate-100 text-slate-700 hover:border-slate-200',
             ]"
           >
@@ -91,9 +93,9 @@
           <button
             @click="selectAnswer('모르겠음')"
             :class="[
-              'w-full bg-white rounded-2xl py-4 px-6 text-left font-bold border text-base transition-all duration-150',
+              'w-full bg-white rounded-2xl py-4 md:py-5 px-6 text-left md:text-center font-bold border text-base md:text-lg transition-all duration-150 shadow-sm',
               answers[surveyQuestionIdx] === '모르겠음'
-                ? 'border-indigo-600 text-indigo-600 shadow-sm bg-indigo-50/10'
+                ? 'border-indigo-600 text-indigo-600 bg-indigo-50/10'
                 : 'border-slate-100 text-slate-700 hover:border-slate-200',
             ]"
           >
@@ -104,13 +106,13 @@
     </div>
 
     <!-- 하단 제어 버튼 컴포넌트 -->
-    <div class="w-full max-w-md flex flex-col gap-3 mt-8">
+    <div class="w-full max-w-md md:max-w-xl flex flex-col gap-3 mt-8">
       <div class="flex gap-3 w-full">
         <button
           @click="handlePrev"
           :disabled="currentStep === 0"
           :class="[
-            'flex-1 font-bold py-4 rounded-3xl transition-all text-base border bg-white text-slate-700 border-slate-200 hover:bg-slate-50 active:scale-[0.98]',
+            'flex-1 font-bold py-4 md:py-5 rounded-3xl transition-all text-base md:text-lg border bg-white text-slate-700 border-slate-200 hover:bg-slate-50 active:scale-[0.98]',
             currentStep === 0 ? 'opacity-50 cursor-not-allowed' : '',
           ]"
         >
@@ -121,7 +123,7 @@
           @click="handleNext"
           :disabled="isNextDisabled"
           :class="[
-            'flex-1 font-bold py-4 rounded-3xl text-white shadow-lg active:scale-[0.98] transition-all text-base',
+            'flex-1 font-bold py-4 md:py-5 rounded-3xl text-white shadow-lg active:scale-[0.98] transition-all text-base md:text-lg',
             !isNextDisabled
               ? 'bg-indigo-600 shadow-indigo-600/20'
               : 'bg-slate-300 text-slate-400 cursor-not-allowed shadow-none',

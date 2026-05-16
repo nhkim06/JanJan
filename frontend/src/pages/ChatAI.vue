@@ -3,24 +3,24 @@
     class="min-h-screen bg-slate-50 flex flex-col items-center justify-between font-sans relative"
   >
     <header
-      class="w-full max-w-md bg-white border-b border-slate-100 py-4 px-6 flex items-center justify-between sticky top-0 z-10 shadow-sm"
+      class="w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-white border-b border-slate-100 py-4 px-6 flex items-center justify-between sticky top-0 z-10 shadow-sm md:rounded-b-2xl"
     >
       <div class="flex items-center gap-3">
         <button
           @click="$router.back()"
-          class="text-slate-600 hover:text-slate-900 transition"
+          class="text-slate-600 hover:text-slate-900 transition bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"
         >
-          <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-5 h-5" />
+          <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-4 h-4" />
         </button>
-        <span class="font-bold text-slate-800 text-lg">에티켓 AI 상담실</span>
+        <span class="font-bold text-slate-800 text-lg md:text-xl">에티켓 AI 상담실</span>
       </div>
     </header>
 
     <div
-      class="flex-1 w-full max-w-md overflow-y-auto px-6 py-6 space-y-6 flex flex-col"
+      class="flex-1 w-full max-w-md md:max-w-2xl lg:max-w-3xl overflow-y-auto px-6 py-6 space-y-6 flex flex-col"
     >
       <div v-for="(msg, index) in messages" :key="index" class="w-full">
-        <div v-if="msg.sender === 'user'" class="flex flex-col items-end pl-12">
+        <div v-if="msg.sender === 'user'" class="flex flex-col items-end pl-12 md:pl-24">
           <div
             class="flex items-center gap-1 mb-1 text-xs text-slate-400 font-medium"
           >
@@ -28,13 +28,13 @@
             <font-awesome-icon icon="fa-solid fa-user" class="w-3 h-3" />
           </div>
           <div
-            class="bg-gradient-to-br from-indigo-600 to-indigo-500 text-white rounded-3xl rounded-tr-sm py-3 px-5 text-[15px] font-medium leading-relaxed shadow-sm shadow-indigo-600/10 whitespace-pre-wrap break-all"
+            class="bg-gradient-to-br from-indigo-600 to-indigo-500 text-white rounded-3xl rounded-tr-sm py-3 px-5 text-[15px] md:text-base font-medium leading-relaxed shadow-sm shadow-indigo-600/10 whitespace-pre-wrap break-all"
           >
             {{ msg.text }}
           </div>
         </div>
 
-        <div v-else class="flex flex-col items-start pr-12">
+        <div v-else class="flex flex-col items-start pr-12 md:pr-24">
           <div
             class="flex items-center gap-1.5 mb-1.5 text-xs text-indigo-600 font-bold"
           >
@@ -44,7 +44,7 @@
 
           <div class="flex items-start gap-2.5 w-full">
             <div
-              class="w-9 h-9 rounded-full bg-white border border-slate-100 shadow-sm flex-shrink-0 flex items-center justify-center text-indigo-400"
+              class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-slate-100 shadow-sm flex-shrink-0 flex items-center justify-center text-indigo-400"
             >
               <font-awesome-icon icon="fa-solid fa-wand-magic-sparkles" />
             </div>
@@ -68,7 +68,7 @@
               </div>
               <div
                 v-else
-                class="bg-white border border-slate-100 text-slate-800 rounded-3xl rounded-tl-sm py-3 px-5 text-[15px] font-medium leading-relaxed shadow-sm whitespace-pre-wrap break-all"
+                class="bg-white border border-slate-100 text-slate-800 rounded-3xl rounded-tl-sm py-3 px-5 text-[15px] md:text-base font-medium leading-relaxed shadow-sm whitespace-pre-wrap break-all"
               >
                 {{ msg.text }}
               </div>
@@ -79,29 +79,29 @@
     </div>
 
     <div
-      class="w-full max-w-md bg-transparent px-6 pb-8 pt-2 sticky bottom-0 z-10"
+      class="w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-transparent px-6 pb-8 pt-2 sticky bottom-0 z-10"
     >
       <div
-        class="relative flex items-center bg-white border border-slate-200 rounded-full shadow-lg px-5 py-2.5 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-50 transition-all"
+        class="relative flex items-center bg-white border border-slate-200 rounded-full shadow-lg px-5 py-2.5 md:py-4 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-50 transition-all"
       >
         <input
           v-model="inputMessage"
           type="text"
           placeholder="추가 질문을 입력하세요..."
-          class="flex-1 bg-transparent text-base font-medium text-slate-800 placeholder-slate-400 focus:outline-none pr-12"
+          class="flex-1 bg-transparent text-base md:text-lg font-medium text-slate-800 placeholder-slate-400 focus:outline-none pr-12"
           @keyup.enter="sendMessage"
         />
         <button
           @click="sendMessage"
           :disabled="!inputMessage.trim()"
           :class="[
-            'absolute right-2.5 w-10 h-10 rounded-full flex items-center justify-center transition-all',
+            'absolute right-2.5 md:right-4 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all',
             inputMessage.trim()
               ? 'bg-indigo-600 text-white shadow-md active:scale-95 cursor-pointer'
               : 'bg-slate-100 text-slate-400 cursor-not-allowed',
           ]"
         >
-          <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-5 h-5 transform rotate-45 -translate-x-[1px] translate-y-[1px]" />
+          <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-5 h-5 md:w-6 md:h-6 transform rotate-45 -translate-x-[1px] translate-y-[1px]" />
         </button>
       </div>
     </div>

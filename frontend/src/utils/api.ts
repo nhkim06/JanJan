@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 
 const apiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL || 'https://janjan-backend.vercel.app';
+  import.meta.env.VITE_API_BASE_URL || 'https://janjan-backend.hurdoo.kr';
 
 const apiClient = axios.create({
   baseURL: apiBaseUrl,

@@ -28,11 +28,12 @@
         <div class="flex flex-col items-center w-full">
           <!-- 로고 및 서비스 이름 -->
           <div
-            class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-indigo-200 mb-8 animate-bounce-subtle"
+            class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-3xl flex items-center justify-center shadow-xl shadow-indigo-200 mb-8 animate-bounce-subtle overflow-hidden p-4 md:p-5"
           >
-            <font-awesome-icon
-              icon="fa-solid fa-wand-magic-sparkles"
-              class="w-10 h-10 md:w-12 md:h-12"
+            <img
+              src="/app-logo.png"
+              alt="JanJan Logo"
+              class="w-full h-full object-contain"
             />
           </div>
 
@@ -113,7 +114,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const apiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL || 'https://janjan-backend.vercel.app';
+  import.meta.env.VITE_API_BASE_URL || 'https://janjan-backend.hurdoo.kr';
 
 // 현재 선택된 언어 상태 ('ko' | 'en' | 'ja')
 const currentLang = ref('ko');

@@ -21,3 +21,5 @@ backend/.env
 # Vercel
 vercel.json
 build_files.sh
+.vercel
+.vercelignore

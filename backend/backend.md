@@ -58,6 +58,13 @@ SUPABASE_DB_PORT=6543
 
 Supabase 환경 변수가 없으면 로컬 개발 편의를 위해 SQLite를 사용합니다.
 
+Vercel 배포에서는 `.env` 파일이 아니라 Project Settings의 Environment Variables에 같은 키들을 등록합니다.
+`DJANGO_ALLOWED_HOSTS`는 배포 도메인을 포함해야 합니다.
+
+```env
+DJANGO_ALLOWED_HOSTS=.vercel.app
+```
+
 ### 인증 API
 
 - `GET /auth/login`

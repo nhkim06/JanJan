@@ -1,0 +1,23 @@
+{
+  "경사": {
+    "title": "경사 상황 선택",
+    "description": "축하할 상황을 선택해주세요",
+    "options": [
+      { "title": "출산", "icon": "fa-solid fa-baby" },
+      { "title": "결혼식", "icon": "fa-solid fa-ring" },
+      { "title": "취업", "icon": "fa-solid fa-briefcase" },
+      { "title": "입학", "icon": "fa-solid fa-graduation-cap" },
+      { "title": "개업/창업", "icon": "fa-solid fa-store" },
+      { "title": "돌잔치", "icon": "fa-solid fa-cake-candles" }
+    ]
+  },
+
+  "위로": {
+    "title": "위로 상황 선택",
+    "description": "위로가 필요한 상황을 선택해주세요",
+    "options": [
+      { "title": "장례식", "icon": "fa-solid fa-ribbon" },
+      { "title": "병문안", "icon": "fa-solid fa-briefcase-medical" }
+    ]
+  }
+}

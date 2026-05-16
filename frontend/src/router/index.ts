@@ -1,8 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../pages/Home.vue'
-import Login from '../pages/Login.vue'
-import Chats from '../pages/Chats.vue'
-import Forms from '../pages/Forms.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import Home from '../pages/Home.vue';
+import Login from '../pages/Login.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,14 +18,19 @@ const router = createRouter({
     {
       path: '/chats',
       name: 'chats',
-      component: Chats,
+      component: import('../pages/Chats.vue'),
     },
     {
-      path: '/forms',
+      path: '/forms/:category',
       name: 'forms',
-      component: Forms,
+      component: () => import('../pages/Forms.vue'),
+    },
+    {
+      path: '/events/:category',
+      name: 'events',
+      component: () => import('../pages/EventList.vue'),
     },
   ],
-})
+});
 
-export default router
+export default router;

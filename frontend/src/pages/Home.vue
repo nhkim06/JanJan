@@ -65,13 +65,14 @@
 
         <section class="space-y-4">
           <button
+            @click="router.push('/events/경사')"
             class="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-[0_10px_30px_rgb(0,0,0,0.02)] border border-slate-50 hover:border-indigo-100 hover:shadow-[0_12px_35px_rgb(99,102,241,0.05)] active:scale-[0.99] transition-all text-left group"
           >
             <div>
               <h2
                 class="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1"
               >
-                축하
+                경사
               </h2>
               <p class="text-xs font-medium text-slate-400">
                 결혼, 승진, 출산 등
@@ -98,6 +99,7 @@
           </button>
 
           <button
+            @click="router.push('/events/위로')"
             class="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-[0_10px_30px_rgb(0,0,0,0.02)] border border-slate-50 hover:border-slate-300 hover:shadow-[0_12px_35px_rgb(148,163,184,0.05)] active:scale-[0.99] transition-all text-left group"
           >
             <div>
@@ -107,7 +109,7 @@
                 위로
               </h2>
               <p class="text-xs font-medium text-slate-400">
-                장례 등 조문 상황
+                병문안 등 위로 상황
               </p>
             </div>
             <div
@@ -124,7 +126,7 @@
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+                  d="M12 4.5v15m7.5-7.5h-15"
                 />
               </svg>
             </div>
@@ -265,6 +267,9 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 // 현재 홈에서 선택된 인물의 상태값 관리 (null이면 홈메인, 선택 시 대화방 리스트)
 const selectedPerson = ref(null);

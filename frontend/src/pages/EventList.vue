@@ -1,10 +1,32 @@
 <template>
   <div
-    class="min-h-screen bg-slate-50 flex flex-col items-center justify-start pt-16 px-6 font-sans"
+    class="min-h-screen bg-slate-50 flex flex-col items-center justify-start pt-12 px-6 font-sans relative"
   >
+    <div class="w-full max-w-md flex items-center mb-6">
+      <button
+        @click="router.back()"
+        class="mr-4 text-slate-600 hover:text-slate-900 active:scale-95 transition bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-100"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2.5"
+          stroke="currentColor"
+          class="w-5 h-5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.75 19.5 8.25 12l7.5-7.5"
+          />
+        </svg>
+      </button>
+      <h1 class="text-2xl font-bold text-slate-900 truncate">{{ pageTitle }}</h1>
+    </div>
+
     <div class="w-full max-w-md mb-8 text-left">
-      <h1 class="text-2xl font-bold text-slate-900 mb-2">상세 상황 선택</h1>
-      <p class="text-sm text-slate-400 font-medium">축하할 일을 선택해주세요</p>
+      <p class="text-sm text-slate-400 font-medium ml-1">{{ pageDescription }}</p>
     </div>
 
     <div class="grid grid-cols-2 gap-4 w-full max-w-md">
@@ -20,28 +42,53 @@
           <i :class="[item.icon, 'text-xl text-indigo-600']"></i>
         </div>
 
-        <span class="text-base font-bold text-slate-800">{{ item.title }}</span>
+        <span class="text-base font-bold text-slate-800 text-center">{{ item.title }}</span>
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import eventsData from '../assets/events.json';
 
-// 카드 데이터 배열
-const options = ref([
-  { title: '결혼식', icon: 'fa-regular fa-heart' },
-  { title: '승진/취업', icon: 'fa-solid fa-arrow-trend-up' },
-  { title: '출산', icon: 'fa-solid fa-baby' },
-  { title: '입학/졸업', icon: 'fa-solid fa-graduation-cap' },
-  { title: '퇴직/이직', icon: 'fa-solid fa-right-from-bracket' },
-]);
+const route = useRoute();
+const router = useRouter();
+const category = computed(() => route.params.category);
+
+const eventInfo = computed(() => {
+  return eventsData[category.value] || {
+    title: '상황 선택',
+    description: '상황을 선택해주세요',
+    options: []
+  };
+});
+
+const pageTitle = computed(() => eventInfo.value.title);
+const pageDescription = computed(() => eventInfo.value.description);
+const options = computed(() => eventInfo.value.options);
 
 // 클릭 이벤트 핸들러
 const selectOption = (title) => {
-  console.log(`${title} 선택됨`);
-  // 부모 컴포넌트로 emit 하거나 라우터 이동 로직을 여기에 작성하세요.
+  const mapping = {
+    "출산": "childbirth",
+    "결혼식": "wedding",
+    "승진/취업": "career",
+    "입학/졸업": "admission",
+    "퇴직/이직": "career", // 공유할 수도 있음
+    "장례식": "funeral",
+    "병문안": "hospital_visit",
+    "개업/창업": "business",
+    "돌잔치": "first_birthday"
+  };
+  
+  const categoryKey = mapping[title];
+  if (categoryKey) {
+    router.push(`/forms/${categoryKey}`);
+  } else {
+    console.log(`${title}에 대한 매핑 정보가 없습니다.`);
+  }
 };
 </script>
 

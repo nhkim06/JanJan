@@ -69,6 +69,15 @@ def build_chat_memory(chat_items):
     return "\n".join(memory)
 
 
+def build_current_context(form, category):
+    return {
+        "category": category,
+        "targetName": form.target_name,
+        "cultureBase": form.culture_base,
+        "answers": form.answers,
+    }
+
+
 class ChatCreateView(APIView):
     authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = []
@@ -112,12 +121,19 @@ class ChatCreateView(APIView):
             previous_chat_items = form.chat_items.filter(
                 status=ChatItem.Status.SUCCESS,
             ).exclude(id=chat_item.id).order_by("created_at", "id")
-            success, answer = get_gemini_answer(
+            category = serializer.validated_data.get("category") or form.category
+            gemini_result = get_gemini_answer(
                 get_user_language(request.user),
                 histories,
                 chat_item.question,
                 build_chat_memory(previous_chat_items),
+                current_context=build_current_context(form, category),
+                category=category,
+                target_name=form.target_name,
+                culture_base=form.culture_base,
             )
+            success = gemini_result["success"]
+            answer = gemini_result["answer"]
         except Exception:
             return Response(
                 {

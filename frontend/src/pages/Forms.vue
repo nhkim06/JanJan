@@ -145,7 +145,7 @@ const route = useRoute();
 const router = useRouter();
 
 // 카테고리 설정
-const category = ref(route.params.category || 'childbirth');
+const category = ref(route.params.category || 'birth');
 
 // JSON 데이터 파싱 및 인덱싱 처리
 const categoryData = computed(

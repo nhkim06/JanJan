@@ -8,6 +8,7 @@ class Form(models.Model):
         on_delete=models.CASCADE,
         related_name="forms",
     )
+    category = models.CharField(max_length=64, blank=True, default="")
     answers = models.JSONField()
     target_name = models.CharField(max_length=255)
     culture_base = models.CharField(max_length=255)

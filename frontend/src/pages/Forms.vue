@@ -172,9 +172,17 @@ const router = useRouter();
 
 const category = ref(route.params.category as string || 'birth');
 
-const categoryData = computed(
-  () => (surveyData as any)[category.value] || { questions: [] },
-);
+const categoryData = computed(() => {
+  // Search for the category in nested surveyData
+  for (const groupKey in surveyData) {
+    const group = (surveyData as any)[groupKey];
+    if (group[category.value]) {
+      return group[category.value];
+    }
+  }
+  return { title: 'Unknown', questions: [] };
+});
+
 const questions = computed(() => categoryData.value.questions);
 
 const totalSteps = computed(() => questions.value.length + 2);

@@ -158,7 +158,15 @@ const formDetail = ref<any>(null);
 
 const categoryName = computed(() => {
   const cat = route.params.category as string || formDetail.value?.category;
-  return (surveyData as any)[cat]?.title || 'Unknown';
+  if (!cat) return 'Unknown';
+  
+  for (const groupKey in surveyData) {
+    const group = (surveyData as any)[groupKey];
+    if (group[cat]) {
+      return group[cat].title;
+    }
+  }
+  return 'Unknown';
 });
 
 const aiReport = computed(() => {

@@ -1,599 +1,240 @@
 {
-  "birth": {
-    "title": "출산",
-    "questions": [
-      {
-        "id": "Q1",
-        "question": "상대와의 관계는 어느 정도인가요?",
-        "options": [
-          "가족/친척",
-          "매우 가까운 친구",
-          "친구/동료/선후배",
-          "가끔 연락하는 지인"
-        ]
-      },
-      {
-        "id": "Q2",
-        "question": "축하하려는 시점은 언제인가요?",
-        "options": ["출산 전", "출산 직후~1개월 이내", "출산 후 1개월 이후"]
-      },
-      {
-        "id": "Q3",
-        "question": "어떻게 축하할 예정인가요?",
-        "options": [
-          "방문해서 전달",
-          "비대면으로 선물/현금 전달",
-          "단체로 모아서 전달",
-          "메시지만 보냄"
-        ]
-      },
-      {
-        "id": "Q4",
-        "question": "방문해도 되는 상황인가요?",
-        "options": [
-          "방문 허락을 받음",
-          "아직 허락받지 않음",
-          "산모/아기가 쉬어야 할 것 같음",
-          "방문하지 않을 예정"
-        ]
-      },
-      {
-        "id": "Q5",
-        "question": "이번 아이는 몇 번째 아이인가요?",
-        "options": ["첫째", "둘째 이상"]
-      },
-      {
-        "id": "Q6",
-        "question": "본인의 위치는 어디에 가까운가요?",
-        "options": ["학생", "사회초년생", "일반 직장인", "선배/상사/친척 어른"]
-      }
-    ]
+  "celebratory_occasions": {
+    "birth": {
+      "title": "Birth",
+      "questions": [
+        {
+          "id": "Q1",
+          "question": "How close are you to the parents?",
+          "options": [
+            "Family / Relative",
+            "Very Close Friend",
+            "Friend / Colleague / Senior-Junior",
+            "Acquaintance I Occasionally Contact"
+          ]
+        },
+        {
+          "id": "Q2",
+          "question": "When are you planning to congratulate them?",
+          "options": [
+            "Before Birth",
+            "Within 1 Month After Birth",
+            "More Than 1 Month After Birth"
+          ]
+        },
+        {
+          "id": "Q3",
+          "question": "How are you planning to celebrate?",
+          "options": [
+            "Visit in Person",
+            "Send a Gift / Money Remotely",
+            "Contribute as a Group",
+            "Send Only a Message"
+          ]
+        },
+        {
+          "id": "Q4",
+          "question": "Is visiting appropriate right now?",
+          "options": [
+            "I Have Permission to Visit",
+            "I Haven’t Asked Yet",
+            "The Mother/Baby Probably Needs Rest",
+            "I Don’t Plan to Visit"
+          ]
+        },
+        {
+          "id": "Q5",
+          "question": "Is this their first child?",
+          "options": ["First Child", "Second Child or More"]
+        },
+        {
+          "id": "Q6",
+          "question": "Which best describes your situation?",
+          "options": [
+            "Student",
+            "Early Career",
+            "Office Worker",
+            "Senior / Manager / Elder Relative"
+          ]
+        }
+      ]
+    },
+
+    "wedding": {
+      "title": "Wedding",
+      "questions": [
+        {
+          "id": "Q1",
+          "question": "How were you invited?",
+          "options": [
+            "Formally Invited",
+            "Invited via Message / Verbally",
+            "Only Heard the News",
+            "Not Invited"
+          ]
+        },
+        {
+          "id": "Q2",
+          "question": "Will you attend the wedding?",
+          "options": [
+            "Attend and Join the Meal",
+            "Attend Without the Meal",
+            "Not Attending",
+            "Not Sure Yet"
+          ]
+        },
+        {
+          "id": "Q3",
+          "question": "How close are you to the bride or groom?",
+          "options": [
+            "Family / Relative",
+            "Very Close Friend",
+            "Friend / Colleague / Senior-Junior",
+            "Boss / Employee / Business Partner",
+            "Acquaintance I Occasionally Contact"
+          ]
+        },
+        {
+          "id": "Q4",
+          "question": "Will you bring a guest?",
+          "options": [
+            "Going Alone",
+            "Going With an Invited Guest",
+            "Not Sure if Guests Are Allowed",
+            "Not Attending"
+          ]
+        },
+        {
+          "id": "Q5",
+          "question": "How will you give your wedding gift money?",
+          "options": [
+            "Give It at the Venue",
+            "Send by Bank Transfer",
+            "Ask Someone Else to Deliver It",
+            "Not Planning to Give"
+          ]
+        },
+        {
+          "id": "Q6",
+          "question": "Which best describes your situation?",
+          "options": [
+            "Student",
+            "Early Career",
+            "Office Worker",
+            "Senior / Manager / Elder Relative"
+          ]
+        },
+        {
+          "id": "Q7",
+          "question": "For Japan-based etiquette: Have you replied to the invitation?",
+          "options": [
+            "Accepted",
+            "Declined",
+            "Haven’t Replied Yet",
+            "Didn’t Receive an Invitation"
+          ]
+        }
+      ]
+    },
+
+    "employment": {
+      "title": "New Job",
+      "questions": [
+        {
+          "id": "Q1",
+          "question": "What kind of career change is it?",
+          "options": [
+            "First Job / Passed an Exam",
+            "Job Change",
+            "Internship / Contract Position",
+            "Promotion-like Change"
+          ]
+        }
+      ]
+    },
+
+    "school_admission": {
+      "title": "School Admission",
+      "questions": [
+        {
+          "id": "Q1",
+          "question": "What level of school admission is it?",
+          "options": [
+            "Kindergarten / Preschool",
+            "Elementary School",
+            "Middle / High School",
+            "University or Higher"
+          ]
+        }
+      ]
+    },
+
+    "business_opening": {
+      "title": "Business Opening",
+      "questions": [
+        {
+          "id": "Q1",
+          "question": "How close are you to the person opening the business?",
+          "options": [
+            "Family / Relative",
+            "Very Close Friend",
+            "Friend / Colleague",
+            "Boss / Senior / Business Partner",
+            "Acquaintance I Occasionally Contact"
+          ]
+        }
+      ]
+    },
+
+    "first_birthday": {
+      "title": "First Birthday",
+      "questions": [
+        {
+          "id": "Q1",
+          "question": "How close are you to the parents?",
+          "options": [
+            "Family / Relative",
+            "Very Close Friend",
+            "Friend / Colleague",
+            "Acquaintance I Occasionally Contact"
+          ]
+        }
+      ]
+    }
   },
-  "wedding": {
-    "title": "결혼",
-    "questions": [
-      {
-        "id": "Q1",
-        "question": "초대받은 상황인가요?",
-        "options": [
-          "정식으로 초대받음",
-          "모바일/구두로 초대받음",
-          "소식만 들음",
-          "초대받지 않음"
-        ]
-      },
-      {
-        "id": "Q2",
-        "question": "결혼식에 참석하나요?",
-        "options": [
-          "참석하고 식사도 함",
-          "참석하지만 식사는 안 함",
-          "불참함",
-          "아직 모름"
-        ]
-      },
-      {
-        "id": "Q3",
-        "question": "신랑/신부와의 관계는 어느 정도인가요?",
-        "options": [
-          "가족/친척",
-          "매우 가까운 친구",
-          "친구/동료/선후배",
-          "상사/부하직원/거래처",
-          "가끔 연락하는 지인"
-        ]
-      },
-      {
-        "id": "Q4",
-        "question": "동행인이 있나요?",
-        "options": [
-          "혼자 감",
-          "초대받은 동행인과 감",
-          "동행 가능 여부를 모름",
-          "불참 예정"
-        ]
-      },
-      {
-        "id": "Q5",
-        "question": "축의금은 어떻게 전달할 예정인가요?",
-        "options": [
-          "예식장에서 직접 전달",
-          "계좌이체로 전달",
-          "지인을 통해 전달",
-          "전달하지 않을 예정"
-        ]
-      },
-      {
-        "id": "Q6",
-        "question": "본인의 위치는 어디에 가까운가요?",
-        "options": ["학생", "사회초년생", "일반 직장인", "선배/상사/친척 어른"]
-      },
-      {
-        "id": "Q7",
-        "question": "일본 기준이라면, 초대장 회신은 했나요?",
-        "options": [
-          "참석으로 회신함",
-          "불참으로 회신함",
-          "아직 회신하지 않음",
-          "초대장을 받지 않음"
-        ]
-      }
-    ]
-  },
-  "employment": {
-    "title": "취업 / 이직",
-    "questions": [
-      {
-        "id": "Q1",
-        "question": "축하 대상은 어떤 상황인가요?",
-        "options": [
-          "첫 취업/합격",
-          "이직",
-          "인턴/계약직 시작",
-          "승진에 가까운 변화"
-        ]
-      },
-      {
-        "id": "Q2",
-        "question": "상대와의 관계는 어느 정도인가요?",
-        "options": [
-          "가족/친척",
-          "매우 가까운 친구",
-          "친구/동료/선후배",
-          "가끔 연락하는 지인"
-        ]
-      },
-      {
-        "id": "Q3",
-        "question": "어떻게 축하할 예정인가요?",
-        "options": [
-          "식사 대접",
-          "선물/상품권",
-          "현금/축하금",
-          "단체 선물",
-          "메시지만 보냄"
-        ]
-      },
-      {
-        "id": "Q4",
-        "question": "단체로 챙기는 분위기가 있나요?",
-        "options": [
-          "이미 단체로 준비 중",
-          "단체 축하는 없음",
-          "개인적으로 따로 챙기고 싶음"
-        ]
-      },
-      {
-        "id": "Q5",
-        "question": "나이 차이나 선후배 관계는 어떤가요?",
-        "options": [
-          "내가 손윗사람/선배임",
-          "상대가 손윗사람/선배임",
-          "비슷한 위치임",
-          "상대가 후배/동생임"
-        ]
-      },
-      {
-        "id": "Q6",
-        "question": "일본 기준이라면, 현금을 줘도 자연스러운 관계인가요?",
-        "options": [
-          "가족/친척이라 가능함",
-          "아주 가까운 사이라 가능할 것 같음",
-          "친구/동료라 부담스러울 수 있음",
-          "직장 관계라 피하는 게 좋을 것 같음"
-        ]
-      }
-    ]
-  },
-  "school_admission": {
-    "title": "입학",
-    "questions": [
-      {
-        "id": "Q1",
-        "question": "입학하는 학교 단계는 어디인가요?",
-        "options": ["어린이집/유치원", "초등학교", "중·고등학교", "대학교 이상"]
-      },
-      {
-        "id": "Q2",
-        "question": "입학하는 사람과의 관계는 어느 정도인가요?",
-        "options": [
-          "자녀/형제자매",
-          "조카/친척 아이",
-          "가까운 친구의 자녀",
-          "동료/지인의 자녀",
-          "본인 친구/동료"
-        ]
-      },
-      {
-        "id": "Q3",
-        "question": "누구에게 전달할 예정인가요?",
-        "options": [
-          "입학하는 사람에게 직접",
-          "부모를 통해 전달",
-          "부모와 함께 있을 때 전달",
-          "메시지만 보냄"
-        ]
-      },
-      {
-        "id": "Q4",
-        "question": "어떻게 축하할 예정인가요?",
-        "options": ["현금/축하금", "선물/상품권", "식사 대접", "메시지만 보냄"]
-      },
-      {
-        "id": "Q5",
-        "question": "단체로 챙기는 분위기가 있나요?",
-        "options": [
-          "가족/친척끼리 함께 준비 중",
-          "회사/모임에서 함께 준비 중",
-          "단체 축하는 없음"
-        ]
-      },
-      {
-        "id": "Q6",
-        "question": "일본 기준이고 초등학교 입학이라면, 란도셀은 이미 준비되었나요?",
-        "options": [
-          "이미 준비됨",
-          "아직 준비 안 됨",
-          "누가 사줄지 정해짐",
-          "초등학교 입학이 아님"
-        ]
-      }
-    ]
-  },
-  "business_opening": {
-    "title": "개업 / 창업",
-    "questions": [
-      {
-        "id": "Q1",
-        "question": "상대와의 관계는 어느 정도인가요?",
-        "options": [
-          "가족/친척",
-          "매우 가까운 친구",
-          "친구/동료",
-          "상사/선배/거래처",
-          "가끔 연락하는 지인"
-        ]
-      },
-      {
-        "id": "Q2",
-        "question": "개업 소식을 어떻게 알게 되었나요?",
-        "options": [
-          "직접 초대받음",
-          "개인적으로 연락받음",
-          "단체 공지로 알게 됨",
-          "SNS/지인을 통해 알게 됨"
-        ]
-      },
-      {
-        "id": "Q3",
-        "question": "방문하거나 참석할 예정인가요?",
-        "options": [
-          "방문/참석 예정",
-          "못 감",
-          "아직 고민 중",
-          "상대가 원할지 모르겠음"
-        ]
-      },
-      {
-        "id": "Q4",
-        "question": "개업 형태는 무엇인가요?",
-        "options": [
-          "실제 매장/공간이 있는 개업",
-          "사무실/병원/학원 등 공간 기반 개업",
-          "온라인 서비스/앱/쇼핑몰",
-          "법인/스타트업 창업"
-        ]
-      },
-      {
-        "id": "Q5",
-        "question": "지금 개업 시점은 언제인가요?",
-        "options": [
-          "개업 전",
-          "개업 당일/첫 주",
-          "개업 후 몇 주 지남",
-          "개업 후 몇 달 이상 지남"
-        ]
-      },
-      {
-        "id": "Q6",
-        "question": "공개적으로 축하해도 되는 분위기인가요?",
-        "options": [
-          "공개 축하해도 괜찮을 것 같음",
-          "조용히 축하하는 게 나을 것 같음",
-          "SNS 홍보를 좋아할 것 같음",
-          "공개 축하는 부담스러워할 것 같음"
-        ]
-      },
-      {
-        "id": "Q7",
-        "question": "방문하면 상대에게 부담이 될 수 있나요?",
-        "options": [
-          "부담 없을 것 같음",
-          "바쁜 시간이라 부담될 수 있음",
-          "응대 부담이 클 것 같음",
-          "방문하지 않는 게 나을 것 같음"
-        ]
-      },
-      {
-        "id": "Q8",
-        "question": "단체로 축하하는 분위기가 있나요?",
-        "options": [
-          "이미 단체로 돈/선물을 모으고 있음",
-          "단체 축하 예정은 없음",
-          "개인적으로 따로 챙기고 싶음"
-        ]
-      }
-    ]
-  },
-  "first_birthday": {
-    "title": "돌잔치 / 첫돌",
-    "questions": [
-      {
-        "id": "Q1",
-        "question": "부모와의 관계는 어느 정도인가요?",
-        "options": [
-          "가족/친척",
-          "매우 가까운 친구",
-          "친구/동료",
-          "가끔 연락하는 지인"
-        ]
-      },
-      {
-        "id": "Q2",
-        "question": "돌잔치에 초대받았나요?",
-        "options": [
-          "개인적으로 초대받음",
-          "단체로 초대받음",
-          "소식만 들음",
-          "초대받지 않음"
-        ]
-      },
-      {
-        "id": "Q3",
-        "question": "참석할 예정인가요?",
-        "options": ["참석함", "불참함", "아직 모름"]
-      },
-      {
-        "id": "Q4",
-        "question": "식사나 행사가 있는 자리인가요?",
-        "options": [
-          "식사 있는 돌잔치",
-          "가족 중심 작은 모임",
-          "돌상/사진만 진행"
-        ]
-      },
-      {
-        "id": "Q5",
-        "question": "어떤 선물이 자연스러운 분위기인가요?",
-        "options": [
-          "금/현금 선물이 자연스러움",
-          "실용 선물이 자연스러움",
-          "메시지만으로 충분할 것 같음"
-        ]
-      },
-      {
-        "id": "Q6",
-        "question": "동반 참석이 포함되어 있나요?",
-        "options": ["나만 초대받음", "동반자도 초대받음", "가족 단위 초대임"]
-      },
-      {
-        "id": "Q7",
-        "question": "아기 사진이나 행사 내용을 공개해도 되나요?",
-        "options": ["허락받음", "허락받지 않음", "공개하지 않을 예정"]
-      }
-    ]
-  },
-  "funeral": {
-    "title": "장례 / 부고 / 조문",
-    "questions": [
-      {
-        "id": "Q1",
-        "question": "누구와 가까운 관계인가요?",
-        "options": [
-          "고인과 가까움",
-          "유족/상주와 가까움",
-          "둘 다 가까움",
-          "업무/조직 관계임",
-          "둘 다 잘 모름"
-        ]
-      },
-      {
-        "id": "Q2",
-        "question": "부고를 어떻게 알게 되었나요?",
-        "options": [
-          "직접 연락받음",
-          "회사/학교/단체 공지로 받음",
-          "지인을 통해 들음",
-          "SNS/우연히 알게 됨"
-        ]
-      },
-      {
-        "id": "Q3",
-        "question": "공개 조문을 받는 장례인가요?",
-        "options": [
-          "빈소/장례식장 안내가 있음",
-          "가족장이라고 들음",
-          "조문 사양이라고 들음",
-          "부의금/향전 사양이라고 들음"
-        ]
-      },
-      {
-        "id": "Q4",
-        "question": "직접 조문할 수 있나요?",
-        "options": [
-          "조문 예정",
-          "못 감",
-          "아직 고민 중",
-          "조문해도 되는지 모르겠음"
-        ]
-      },
-      {
-        "id": "Q5",
-        "question": "지금 어느 시점인가요?",
-        "options": [
-          "빈소 조문 가능 기간",
-          "발인 전",
-          "발인 후",
-          "장례가 끝난 뒤",
-          "추모/기일/법요 시기"
-        ]
-      },
-      {
-        "id": "Q6",
-        "question": "부의금/향전을 해야 할 관계인가요?",
-        "options": [
-          "해야 할 것 같음",
-          "단체 부의금에 참여하면 될 것 같음",
-          "하지 않아도 될 것 같음",
-          "상대가 사양함"
-        ]
-      },
-      {
-        "id": "Q7",
-        "question": "단체로 조문하거나 부의금을 모으고 있나요?",
-        "options": ["이미 모으고 있음", "단체 조문 예정임", "없음"]
-      },
-      {
-        "id": "Q8",
-        "question": "종교나 장례 방식이 안내되었나요?",
-        "options": ["불교식", "기독교/천주교식", "무종교/일반식", "일본식 장례"]
-      },
-      {
-        "id": "Q9",
-        "question": "복장은 준비되었나요?",
-        "options": [
-          "검정 정장 가능",
-          "어두운 단정한 옷 가능",
-          "준비가 부족함",
-          "직접 방문하지 않을 예정"
-        ]
-      },
-      {
-        "id": "Q10",
-        "question": "장례 관련 정보를 공개해도 된다고 들었나요?",
-        "options": ["허락받음", "허락받지 않음", "공개하지 않을 예정"]
-      },
-      {
-        "id": "Q11",
-        "question": "장례 이후 추모 행사까지 챙겨야 할 관계인가요?",
-        "options": [
-          "가족/친척이라 챙겨야 함",
-          "아주 가까운 관계라 챙길 수 있음",
-          "일반 지인이라 장례까지만 챙기면 될 것 같음",
-          "초대받은 경우에만 갈 예정"
-        ]
-      }
-    ]
-  },
-  "hospital_visit": {
-    "title": "병문안",
-    "questions": [
-      {
-        "id": "Q1",
-        "question": "환자와의 관계는 어느 정도인가요?",
-        "options": [
-          "가족/친척",
-          "매우 가까운 친구",
-          "친구/동료",
-          "가끔 연락하는 지인"
-        ]
-      },
-      {
-        "id": "Q2",
-        "question": "입원/치료 소식을 어떻게 알게 되었나요?",
-        "options": [
-          "환자에게 직접 들음",
-          "보호자에게 들음",
-          "단체 공지로 알게 됨",
-          "다른 사람/SNS를 통해 알게 됨"
-        ]
-      },
-      {
-        "id": "Q3",
-        "question": "직접 병문안을 가도 되는 상황인가요?",
-        "options": [
-          "환자나 보호자가 허락함",
-          "아직 묻지 않음",
-          "방문을 원하지 않는다고 들음"
-        ]
-      },
-      {
-        "id": "Q4",
-        "question": "환자가 면회를 받을 수 있는 상태인가요?",
-        "options": [
-          "받을 수 있음",
-          "쉬어야 하는 상태임",
-          "수술/검사 직후라 어려움",
-          "감염 위험이 있음"
-        ]
-      },
-      {
-        "id": "Q5",
-        "question": "병원 면회 규칙을 확인했나요?",
-        "options": [
-          "확인했고 방문 가능함",
-          "면회 시간이 제한됨",
-          "보호자만 가능함",
-          "예약/출입증이 필요함",
-          "아직 확인하지 않음"
-        ]
-      },
-      {
-        "id": "Q6",
-        "question": "내가 감염 위험이 있나요?",
-        "options": [
-          "없음",
-          "감기/기침/발열이 있음",
-          "최근 감염병 접촉 가능성이 있음",
-          "컨디션이 좋지 않음"
-        ]
-      },
-      {
-        "id": "Q7",
-        "question": "방문 인원은 몇 명인가요?",
-        "options": [
-          "혼자 감",
-          "2명 정도 같이 감",
-          "여러 명이 같이 감",
-          "동반 가능 여부를 모름"
-        ]
-      },
-      {
-        "id": "Q8",
-        "question": "선물이나 음식을 가져가도 되나요?",
-        "options": [
-          "가능하다고 들음",
-          "음식은 제한됨",
-          "꽃/화분은 제한됨",
-          "아무것도 가져가지 않을 예정",
-          "아직 확인하지 않음"
-        ]
-      },
-      {
-        "id": "Q9",
-        "question": "현금이나 위로금을 줄 관계인가요?",
-        "options": [
-          "가족/아주 가까운 사이라 줄 수 있음",
-          "간단한 선물이 적절함",
-          "메시지만으로 충분함",
-          "상대가 부담스러워할 것 같음"
-        ]
-      },
-      {
-        "id": "Q10",
-        "question": "병명이나 상태를 자세히 물어봐도 되는 관계인가요?",
-        "options": [
-          "물어봐도 될 만큼 가까움",
-          "먼저 말해주면 듣는 정도가 좋음",
-          "묻지 않는 게 좋음",
-          "민감한 병일 수 있음"
-        ]
-      },
-      {
-        "id": "Q11",
-        "question": "병실 사진이나 입원 사실을 공개해도 되나요?",
-        "options": ["허락받음", "허락받지 않음", "공개하지 않을 예정"]
-      }
-    ]
+
+  "sympathy_occasions": {
+    "funeral": {
+      "title": "Funeral",
+      "questions": [
+        {
+          "id": "Q1",
+          "question": "Who are you closer to?",
+          "options": [
+            "The Deceased",
+            "The Bereaved Family",
+            "Both",
+            "Work / Organization Connection",
+            "Neither Very Well"
+          ]
+        }
+      ]
+    },
+
+    "hospital_visit": {
+      "title": "Hospital Visit",
+      "questions": [
+        {
+          "id": "Q1",
+          "question": "How close are you to the patient?",
+          "options": [
+            "Family / Relative",
+            "Very Close Friend",
+            "Friend / Colleague",
+            "Acquaintance I Occasionally Contact"
+          ]
+        }
+      ]
+    }
   }
 }

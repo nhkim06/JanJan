@@ -9,18 +9,18 @@
       >
         <font-awesome-icon icon="fa-solid fa-chevron-left" />
       </button>
-      <h1 class="text-2xl md:text-3xl font-bold text-slate-900 truncate">{{ pageTitle }}</h1>
+      <h1 class="text-2xl md:text-3xl font-black text-slate-900 truncate">{{ pageTitle }}</h1>
     </div>
 
     <div class="w-full max-w-md md:max-w-2xl lg:max-w-4xl mb-8 text-left">
-      <p class="text-sm md:text-base text-slate-400 font-medium ml-1">{{ pageDescription }}</p>
+      <p class="text-sm md:text-base text-slate-400 font-bold ml-1">{{ pageDescription }}</p>
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full max-w-md md:max-w-2xl lg:max-w-4xl">
       <button
         v-for="(item, index) in options"
         :key="index"
-        @click="selectOption(item.title)"
+        @click="selectOption(item.key)"
         class="bg-white border border-slate-100 rounded-3xl p-6 flex flex-col items-center justify-center aspect-square shadow-[0_8px_30px_rgb(0,0,0,0.012)] hover:shadow-md hover:border-indigo-100 transition-all duration-200 group active:scale-[0.98]"
       >
         <div
@@ -35,19 +35,19 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, computed } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import eventsData from '../assets/events.json';
 
 const route = useRoute();
 const router = useRouter();
-const category = computed(() => route.params.category);
+const category = computed(() => route.params.category as string);
 
 const eventInfo = computed(() => {
-  return eventsData[category.value] || {
-    title: '상황 선택',
-    description: '상황을 선택해주세요',
+  return (eventsData as any)[category.value] || {
+    title: 'Select Event',
+    description: 'Please select an event',
     options: []
   };
 });
@@ -56,28 +56,9 @@ const pageTitle = computed(() => eventInfo.value.title);
 const pageDescription = computed(() => eventInfo.value.description);
 const options = computed(() => eventInfo.value.options);
 
-// 클릭 이벤트 핸들러
-const selectOption = (title) => {
-  const mapping = {
-    "출산": "birth",
-    "결혼식": "wedding",
-    "취업": "employment",
-    "입학": "school_admission",
-    "장례식": "funeral",
-    "병문안": "hospital_visit",
-    "개업/창업": "business_opening",
-    "돌잔치": "first_birthday"
-  };
-  
-  const categoryKey = mapping[title];
-  if (categoryKey) {
-    router.push(`/forms/${categoryKey}`);
-  } else {
-    console.log(`${title}에 대한 매핑 정보가 없습니다.`);
+const selectOption = (key: string) => {
+  if (key) {
+    router.push(`/forms/${key}`);
   }
 };
 </script>
-
-<style scoped>
-/* 추가적인 커스텀 스타일이 필요하다면 여기에 작성 (Tailwind로 대부분 해결 가능) */
-</style>

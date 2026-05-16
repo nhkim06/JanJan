@@ -1,23 +1,23 @@
 {
-  "축하": {
-    "title": "축하 상황 선택",
-    "description": "축하할 상황을 선택해주세요",
+  "Celebration": {
+    "title": "Select Celebration",
+    "description": "Please select the occasion to celebrate.",
     "options": [
-      { "title": "출산", "icon": "fa-solid fa-baby" },
-      { "title": "결혼식", "icon": "fa-solid fa-ring" },
-      { "title": "취업", "icon": "fa-solid fa-briefcase" },
-      { "title": "입학", "icon": "fa-solid fa-graduation-cap" },
-      { "title": "개업/창업", "icon": "fa-solid fa-store" },
-      { "title": "돌잔치", "icon": "fa-solid fa-cake-candles" }
+      { "title": "Birth", "icon": "fa-solid fa-baby", "key": "birth" },
+      { "title": "Wedding", "icon": "fa-solid fa-ring", "key": "wedding" },
+      { "title": "New Job", "icon": "fa-solid fa-briefcase", "key": "employment" },
+      { "title": "Admission", "icon": "fa-solid fa-graduation-cap", "key": "school_admission" },
+      { "title": "Business", "icon": "fa-solid fa-store", "key": "business_opening" },
+      { "title": "1st Birthday", "icon": "fa-solid fa-cake-candles", "key": "first_birthday" }
     ]
   },
 
-  "위로": {
-    "title": "위로 상황 선택",
-    "description": "위로가 필요한 상황을 선택해주세요",
+  "Condolence": {
+    "title": "Select Condolence",
+    "description": "Please select the occasion for sympathy.",
     "options": [
-      { "title": "장례식", "icon": "fa-solid fa-ribbon" },
-      { "title": "병문안", "icon": "fa-solid fa-briefcase-medical" }
+      { "title": "Funeral", "icon": "fa-solid fa-ribbon", "key": "funeral" },
+      { "title": "Hospital Visit", "icon": "fa-solid fa-briefcase-medical", "key": "hospital_visit" }
     ]
   }
 }

@@ -77,9 +77,17 @@ const personName = computed(() => person.value ? person.value.name : '알 수 �
 const chatRooms = computed(() => person.value ? person.value.chatRooms : []);
 
 const enterChatRoom = (roomId) => {
-  router.push({
-    name: 'chat',
-    query: { roomId }
-  });
+  const room = chatRooms.value.find(r => r.roomId === roomId);
+  if (room) {
+    router.push({
+      name: 'result',
+      params: { category: room.category },
+      query: { 
+        targetName: room.targetName, 
+        cultureBase: room.cultureBase,
+        roomId: room.roomId
+      }
+    });
+  }
 };
 </script>

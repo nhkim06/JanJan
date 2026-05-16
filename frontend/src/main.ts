@@ -39,6 +39,10 @@ import {
   faChevronRight,
   faCommentDots,
   faBandage,
+  faComments,
+  faChevronDown,
+  faXmark,
+  faCheck,
 } from '@fortawesome/free-solid-svg-icons';
 
 /* add icons to the library */
@@ -73,6 +77,10 @@ library.add(
   faChevronRight,
   faCommentDots,
   faBandage,
+  faComments,
+  faChevronDown,
+  faXmark,
+  faCheck,
 );
 
 import App from './App.vue';

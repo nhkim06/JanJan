@@ -172,16 +172,42 @@ class ChatListView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        form = Form.objects.filter(
-            id=serializer.validated_data["formId"],
-            user=request.user,
-        ).first()
-        if not form:
+        chat_items = ChatItem.objects.filter(form__user=request.user)
+        form_id = serializer.validated_data.get("formId")
+        if form_id is not None:
+            form = Form.objects.filter(id=form_id, user=request.user).first()
+            if not form:
+                return Response(
+                    {"success": False, "detail": "Form not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            chat_items = chat_items.filter(form=form)
+
+        chat_items = chat_items.order_by("created_at", "id")
+        read_serializer = ChatItemReadSerializer(chat_items, many=True)
+        return Response({"success": True, "chatItems": read_serializer.data})
+
+
+class ChatDetailView(APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication]
+    permission_classes = []
+
+    def get(self, request, chat_item_id):
+        if not request.user.is_authenticated:
             return Response(
-                {"success": False, "detail": "Form not found."},
+                {"success": False, "detail": "Authentication is required."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        chat_item = ChatItem.objects.select_related("form").filter(
+            id=chat_item_id,
+            form__user=request.user,
+        ).first()
+        if not chat_item:
+            return Response(
+                {"success": False, "detail": "Chat item not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        chat_items = form.chat_items.order_by("created_at", "id")
-        read_serializer = ChatItemReadSerializer(chat_items, many=True)
-        return Response({"success": True, "chatItems": read_serializer.data})
+        serializer = ChatItemReadSerializer(chat_item)
+        return Response({"success": True, "chatItem": serializer.data})

@@ -7,6 +7,9 @@ export const peopleData = [
         roomId: 101,
         type: '축하',
         title: '철수형 결혼 축의금 의논방',
+        category: 'wedding',
+        targetName: '김철수',
+        cultureBase: '한국',
         lastMessage: '축의금 10만원 정도가 적당할까?',
         lastTime: '방금 전',
         history: [
@@ -20,6 +23,9 @@ export const peopleData = [
         roomId: 102,
         type: '축하',
         title: '김철수 과장 승진 축하 모임',
+        category: 'promotion',
+        targetName: '김철수',
+        cultureBase: '한국',
         lastMessage: '선물 어떤 거 준비하시나요?',
         lastTime: '어제',
         history: [
@@ -37,6 +43,9 @@ export const peopleData = [
         roomId: 201,
         type: '위로',
         title: '영희 부친상 조문방',
+        category: 'funeral',
+        targetName: '이영희',
+        cultureBase: '한국',
         lastMessage: '부의금 봉투 작성하는 법 물어볼게',
         lastTime: '3일 전',
         history: [

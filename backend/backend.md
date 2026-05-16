@@ -23,19 +23,7 @@ python manage.py runserver
 .\.venv\bin\python manage.py runserver
 ```
 
-### 기본 API
-
-- `GET /api/health/`: 백엔드 상태 확인
-
-### 앱 구조
-
-- `api`: 공통 API, 헬스체크
-- `auth_app`: Google 로그인, 회원가입, 로그아웃
-- `chat`: 챗봇 대화 저장 API
-- `form`: 폼 생성 API
-- `history`: 기록 CRUD API
-
-### 환경 변수
+### 환경 변수 (로컬 설치할때만 필요)
 
 필요하면 `.env.example`을 참고해서 `backend/.env` 파일을 만듭니다.
 
@@ -71,6 +59,17 @@ Vercel 배포에서는 `.env` 파일이 아니라 Project Settings의 Environmen
 DJANGO_ALLOWED_HOSTS=.vercel.app
 ```
 
+
+### 앱 구조
+
+- `auth_app`: Google 로그인, 회원가입, 로그아웃, 프로필
+- `form`: 폼 생성 API (사전질문 응답 데이터)
+- `chat`: 챗봇 대화 저장 API
+- `history`: 가계부 기록 CRUD API
+
+### 기본 API
+- `GET /api/health/`: 백엔드 상태 확인
+
 ### 인증 API
 
 - `GET /auth/login`
@@ -79,11 +78,13 @@ Google 로그인 링크로 redirect 시킵니다.
 
 로그인이 완료되고 나면 `미리정해진프론트링크?success=True&hasData=True`로 리다이렉트됩니다. 이때 기존 회원이면 `hasData=True`, 신규 회원이면 `hasData=False`입니다.
 
+`미리정해진프론트링크` 는 서버 .env에 하드코딩되어 있으므로 백엔드에서 바꿔줘야 합니다.
+
 - `POST /auth/register`
 - 
 ```jsonb
 {
-  "language": "ko",  # "ko" 또는 "ja"
+  "language": "ko",  # "ko" 또는 "ja" 혹은 "en"
   "id": "janjan1234",  # 아이디
   "name": "홍길동"  # 이름
 }
@@ -137,8 +138,6 @@ Google 로그인 링크로 redirect 시킵니다.
   "success": true
 }
 ```
-
-프론트는 Google 로그인 시작 시 redirect URI를 백엔드 콜백 주소로 지정합니다.
 
 ### Form API
 
@@ -220,10 +219,61 @@ Google 로그인 링크로 redirect 시킵니다.
 
 현재 로그인된 계정의 form에 챗봇 대화를 저장합니다. 지금은 실제 Gemini API 대신 테스트 응답을 저장합니다.
 
+- 
 ```jsonb
 {
   "formId": 1,
   "question": "다음에는 어떤 말을 하면 좋을까?"
+}
+```
+
+```jsonb
+{
+  "success": true,
+  "chatItemId": 1,
+  "status": "success",
+  "answer": "Test Success! This is gemini answer"
+}
+```
+
+- `GET /chat/list`
+- `GET /chat/list?formId=1`
+
+현재 로그인된 계정의 챗봇 대화 목록을 반환합니다. `formId`는 선택이며, 넣으면 해당 form의 대화만 반환합니다.
+
+```jsonb
+{
+  "success": true,
+  "chatItems": [
+    {
+      "chatItemId": 1,
+      "formId": 1,
+      "question": "다음에는 어떤 말을 하면 좋을까?",
+      "answer": "Test Success! This is gemini answer",
+      "status": "success",
+      "createdAt": "2026-05-17T00:40:00+09:00",
+      "updatedAt": "2026-05-17T00:40:00+09:00"
+    }
+  ]
+}
+```
+
+- `GET /chat/{id}`
+
+현재 로그인된 계정의 특정 챗봇 대화를 반환합니다.
+
+```jsonb
+{
+  "success": true,
+  "chatItem": {
+    "chatItemId": 1,
+    "formId": 1,
+    "question": "다음에는 어떤 말을 하면 좋을까?",
+    "answer": "Test Success! This is gemini answer",
+    "status": "success",
+    "createdAt": "2026-05-17T00:40:00+09:00",
+    "updatedAt": "2026-05-17T00:40:00+09:00"
+  }
 }
 ```
 
@@ -330,35 +380,5 @@ Google 로그인 링크로 redirect 시킵니다.
 ```jsonb
 {
   "success": true
-}
-```
-
-```jsonb
-{
-  "success": true,
-  "chatItemId": 1,
-  "status": "success",
-  "answer": "그만 말해도 괜찮을 것 같아!"
-}
-```
-
-- `GET /chat/list?formId=1`
-
-현재 로그인된 계정의 특정 form에 연결된 챗봇 대화 목록을 반환합니다.
-
-```jsonb
-{
-  "success": true,
-  "chatItems": [
-    {
-      "chatItemId": 1,
-      "formId": 1,
-      "question": "다음에는 어떤 말을 하면 좋을까?",
-      "answer": "Test Success! This is gemini answer",
-      "status": "success",
-      "createdAt": "2026-05-16T22:30:00+09:00",
-      "updatedAt": "2026-05-16T22:30:00+09:00"
-    }
-  ]
 }
 ```

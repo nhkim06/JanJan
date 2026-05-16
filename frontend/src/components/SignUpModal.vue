@@ -23,6 +23,19 @@
         </p>
 
         <div class="w-full space-y-6">
+          <!-- 아이디 입력 -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-slate-400 ml-1">
+              {{ i18n.idLabel }}
+            </label>
+            <input
+              v-model="formData.id"
+              type="text"
+              :placeholder="i18n.idPlaceholder"
+              class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 text-base font-bold text-slate-800 placeholder-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all"
+            />
+          </div>
+
           <!-- 이름 입력 -->
           <div class="space-y-2">
             <label class="text-xs font-bold text-slate-400 ml-1">
@@ -41,7 +54,8 @@
             <label class="text-xs font-bold text-slate-400 ml-1">
               {{ i18n.langLabel }}
             </label>
-            <div class="grid grid-cols-2 gap-3">
+            <!-- 3개 국어가 한 줄에 균등하게 배치되도록 grid-cols-3으로 변경 -->
+            <div class="grid grid-cols-3 gap-2">
               <button
                 v-for="lang in languages"
                 :key="lang.code"
@@ -89,28 +103,45 @@ const props = defineProps({
 const emit = defineEmits(['submit']);
 
 const formData = ref({
+  id: '',
   name: '',
   language: 'ko',
 });
 
+// 영어(English) 옵션 추가
 const languages = [
   { code: 'ko', label: '한국어' },
+  { code: 'en', label: 'English' },
   { code: 'ja', label: '日本語' },
 ];
 
-// 다국어 텍스트 사전 정의
+// 다국어 텍스트 사전 정의 (영어 추가)
 const contentText = {
   ko: {
     title: '환영합니다!',
     description: '서비스 이용을 위해 기본 정보를 입력해주세요.',
+    idLabel: '아이디',
+    idPlaceholder: '아이디를 입력해주세요',
     nameLabel: '이름',
     placeholder: '이름을 입력해주세요',
     langLabel: '선호 언어',
     submitBtn: '시작하기',
   },
+  en: {
+    title: 'Welcome!',
+    description: 'Please enter your basic profile details to get started.',
+    idLabel: 'ID',
+    idPlaceholder: 'Enter your ID',
+    nameLabel: 'Name',
+    placeholder: 'Enter your name',
+    langLabel: 'Preferred Language',
+    submitBtn: 'Get Started',
+  },
   ja: {
     title: 'ようこそ！',
-    description: 'サービスをご利用いただくために、基本情報を入力してください。',
+    description: 'サービスをご利用いただくために、基本情報を 입력해주세요.',
+    idLabel: 'ID',
+    idPlaceholder: 'IDを入力してください',
     nameLabel: '名前',
     placeholder: '名前を入力してください',
     langLabel: '希望言語',
@@ -124,7 +155,11 @@ const i18n = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return formData.value.name.trim().length > 0 && formData.value.language;
+  return (
+    formData.value.id.trim().length > 0 &&
+    formData.value.name.trim().length > 0 &&
+    formData.value.language
+  );
 });
 
 const handleSubmit = () => {

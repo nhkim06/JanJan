@@ -23,19 +23,7 @@ python manage.py runserver
 .\.venv\bin\python manage.py runserver
 ```
 
-### 기본 API
-
-- `GET /api/health/`: 백엔드 상태 확인
-
-### 앱 구조
-
-- `api`: 공통 API, 헬스체크
-- `auth_app`: Google 로그인, 회원가입, 로그아웃
-- `chat`: 챗봇 대화 저장 API
-- `form`: 폼 생성 API
-- `history`: 기록 CRUD API
-
-### 환경 변수
+### 환경 변수 (로컬 설치할때만 필요)
 
 필요하면 `.env.example`을 참고해서 `backend/.env` 파일을 만듭니다.
 
@@ -71,6 +59,17 @@ Vercel 배포에서는 `.env` 파일이 아니라 Project Settings의 Environmen
 DJANGO_ALLOWED_HOSTS=.vercel.app
 ```
 
+
+### 앱 구조
+
+- `auth_app`: Google 로그인, 회원가입, 로그아웃, 프로필
+- `form`: 폼 생성 API (사전질문 응답 데이터)
+- `chat`: 챗봇 대화 저장 API
+- `history`: 가계부 기록 CRUD API
+
+### 기본 API
+- `GET /api/health/`: 백엔드 상태 확인
+
 ### 인증 API
 
 - `GET /auth/login`
@@ -79,11 +78,13 @@ Google 로그인 링크로 redirect 시킵니다.
 
 로그인이 완료되고 나면 `미리정해진프론트링크?success=True&hasData=True`로 리다이렉트됩니다. 이때 기존 회원이면 `hasData=True`, 신규 회원이면 `hasData=False`입니다.
 
+`미리정해진프론트링크` 는 서버 .env에 하드코딩되어 있으므로 백엔드에서 바꿔줘야 합니다.
+
 - `POST /auth/register`
 - 
 ```jsonb
 {
-  "language": "ko",  # "ko" 또는 "ja"
+  "language": "ko",  # "ko" 또는 "ja" 혹은 "en"
   "id": "janjan1234",  # 아이디
   "name": "홍길동"  # 이름
 }

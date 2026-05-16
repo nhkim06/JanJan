@@ -93,6 +93,7 @@ cd janjan
 ```bash
 cd frontend
 npm install
+npm install -D @tailwindcss/postcss
 npm run dev
 ```
 

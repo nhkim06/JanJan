@@ -52,7 +52,8 @@ internal report, schema, JSON, form field list, or developer output.
 
 The function output must contain exactly two user-facing items:
 1. 돈 관련 추천사항: a natural prose recommendation about cash, gift, group contribution,
-   account transfer, or not spending money.
+   account transfer, or not spending money. This recommendation text must be 300 to 600
+   Korean characters or equivalent length in the requested language.
 2. 적정 금액: exactly one integer for the event spending amount, with no comma, currency
    symbol, unit, range, or explanation.
 
@@ -285,11 +286,14 @@ Output rules:
 - Return plain text only.
 - Output exactly two user-facing items and nothing else:
   돈 관련 추천사항: one natural prose paragraph about cash, gift, group contribution, account
-  transfer, or not spending money.
+  transfer, or not spending money. This paragraph must be 300 to 600 Korean characters or
+  equivalent length in the requested language.
   적정 금액: exactly one integer only.
 - The first item must discuss only money, gifts, group contributions, account transfers, or
   why spending money is inappropriate. Do not include visit manners, clothing, photo/SNS
   cautions, message examples, ad ideas, or other etiquette advice.
+- Before returning, verify internally that the first item is 300 to 600 characters total,
+  including spaces and punctuation.
 - The second item must contain one integer with no comma, currency symbol, unit, range, or
   explanation. Use 0 when money/gift spending is not appropriate.
 - Explain the concrete social context from the question data, relevant reciprocity from

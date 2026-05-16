@@ -161,7 +161,7 @@ const combinedList = computed(() => {
   });
 });
 
-const enterChatRoom = (roomId: number) => {
+const enterChatRoom = (roomId: any) => {
   const room = chatRooms.value.find(r => r.roomId === roomId);
   if (room) {
     router.push({

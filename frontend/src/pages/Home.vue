@@ -30,20 +30,22 @@ const fetchFormsAndHistories = async () => {
     // 1. 폼 데이터 가공
     if (formsRes.data.success) {
       formsRes.data.forms.forEach((form: any) => {
-        if (!grouped[form.targetName]) {
-          grouped[form.targetName] = { id: form.targetName, name: form.targetName, itemsCount: 0 };
+        const name = form.targetName;
+        if (!grouped[name]) {
+          grouped[name] = { id: name, name: name, itemsCount: 0, chatRooms: [] };
         }
-        grouped[form.targetName].itemsCount++;
+        grouped[name].itemsCount++;
       });
     }
 
     // 2. 히스토리 데이터 가공
     if (historiesRes.data.success) {
       historiesRes.data.histories.forEach((h: any) => {
-        if (!grouped[h.target_name]) {
-          grouped[h.target_name] = { id: h.target_name, name: h.target_name, itemsCount: 0 };
+        const name = h.targetName; // Serializer returns targetName
+        if (!grouped[name]) {
+          grouped[name] = { id: name, name: name, itemsCount: 0, chatRooms: [] };
         }
-        grouped[h.target_name].itemsCount++;
+        grouped[name].itemsCount++;
       });
     }
 
@@ -88,7 +90,7 @@ const handleSignUpSubmit = async (data: any) => {
       authStore.setIsRegistering(false);
       isSignUpModalOpen.value = false;
       await fetchUserProfile();
-      await fetchForms();
+      await fetchFormsAndHistories();
     } else {
       alert(response.data.detail || '회원가입에 실패했습니다.');
     }
@@ -103,7 +105,7 @@ const handleInputSubmit = async (data: any) => {
     const response = await apiClient.post('/history/new', data);
     if (response.data.success) {
       isInputModalOpen.value = false;
-      await fetchForms(); // 목록 새로고침
+      await fetchFormsAndHistories(); // 목록 새로고침
     }
   } catch (error) {
     console.error('경조사 입력 에러:', error);
@@ -112,10 +114,9 @@ const handleInputSubmit = async (data: any) => {
 
 const handleSettingSave = async (data: any) => {
   try {
-    // SettingModal 내부에서 API 호출을 하므로 여기선 상태 갱신만 확인
     if (authStore.isAuthenticated) {
       await fetchUserProfile();
-      await fetchForms();
+      await fetchFormsAndHistories();
     }
     isSettingModalOpen.value = false;
   } catch (error) {
@@ -229,14 +230,14 @@ const goToChatList = (personId: string) => {
             >
               <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 md:w-11 md:h-11 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-400 flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-sm">
-                  {{ person.name[0] }}
+                  {{ person.name ? person.name[0] : '?' }}
                 </div>
                 <div>
                   <h3 class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors text-sm md:text-base">
                     {{ person.name }}
                   </h3>
                   <p class="text-[11px] md:text-xs text-slate-400 mt-0.5">
-                    진단 결과 {{ person.chatRooms.length }}개
+                    내역 {{ person.itemsCount }}개
                   </p>
                 </div>
               </div>

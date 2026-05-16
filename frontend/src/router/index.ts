@@ -16,19 +16,20 @@ const router = createRouter({
       component: Login,
     },
     {
-      path: '/chats',
-      name: 'chats',
-      component: import('../pages/Chats.vue'),
-    },
-    {
       path: '/forms/:category',
       name: 'forms',
       component: () => import('../pages/Forms.vue'),
     },
+
     {
       path: '/events/:category',
       name: 'events',
       component: () => import('../pages/EventList.vue'),
+    },
+    {
+      path: '/result/:category',
+      name: 'result',
+      component: () => import('../pages/Result.vue'),
     },
   ],
 });

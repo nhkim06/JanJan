@@ -2,7 +2,32 @@
   <div
     class="min-h-screen bg-slate-50 flex flex-col items-center justify-start p-6 font-sans text-slate-800"
   >
-    <div class="w-full max-w-md space-y-6">
+    <div class="w-full max-w-md space-y-6 relative">
+      <div class="flex items-center justify-between w-full py-2">
+        <button
+          @click="goHome"
+          class="w-10 h-10 flex items-center justify-center bg-white rounded-full border border-slate-200/70 shadow-sm text-slate-600 hover:bg-slate-50 active:scale-95 transition"
+          title="처음으로 이동"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+            />
+          </svg>
+        </button>
+        <span class="text-sm font-semibold text-slate-500">진단 결과</span>
+        <div class="w-10"></div>
+      </div>
+
       <div
         class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 text-center relative overflow-hidden"
       >
@@ -89,7 +114,7 @@
         </ul>
       </div>
 
-      <div class="pt-4 space-y-3">
+      <div class="pt-2 space-y-3">
         <button
           @click="handleCreateMessage"
           class="w-full bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 active:scale-[0.99] transition py-4 px-6 rounded-2xl font-bold text-base flex items-center justify-center shadow-sm"
@@ -137,19 +162,20 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const goHome = () => {
+  console.log('홈 화면(첫 페이지)으로 이동합니다.');
+  router.push('/');
+};
+
 const handleCreateMessage = () => {
-  console.log('추천 멘트 만들기 페이지로 이동 또는 액션 실행');
+  console.log('추천 멘트 만들기 페이지로 이동');
 };
 
 const handleChatWithAI = () => {
-  console.log('AI 채팅 페이지로 이동 또는 챗봇 열기');
+  console.log('AI 채팅 페이지로 이동');
 };
 </script>
-
-<style scoped>
-/* 대다수의 스타일은 Tailwind로 처리했으며, 미세한 조정을 위한 폰트 스무딩 */
-div {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-</style>

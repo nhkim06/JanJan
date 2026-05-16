@@ -178,24 +178,22 @@
             :category="categoryName"
             :target-name="targetName"
             :culture-base="cultureBase"
+            :room-id="route.query.roomId"
           />
         </div>
       </div>
     </div>
 
     <!-- 우측 하단 고정 플로팅 영역 (버튼 및 안내 힌트) -->
-    <!-- 우측 하단 고정 플로팅 영역 (버튼 및 안내 힌트) -->
     <div
       class="fixed bottom-6 right-6 flex flex-col items-end space-y-3 z-50 group"
     >
-      <!-- 위아래로 부드럽게 움직이는 말풍선 힌트 팝업 -->
       <div
         class="relative flex items-center space-x-1.5 bg-slate-900/95 backdrop-blur-sm text-white text-[11px] font-bold px-3.5 py-2 rounded-xl shadow-lg border border-slate-800 animate-bounce select-none after:content-[''] after:absolute after:top-full after:right-5 after:-mt-px after:border-4 after:border-transparent after:border-t-slate-950"
       >
         <span class="tracking-tight text-slate-100"
           >AI 상담은 아래로 스크롤</span
         >
-        <!-- FontAwesome 다운 화살표 -->
         <font-awesome-icon
           icon="fa-solid fa-chevron-down"
           class="h-3 w-3 text-indigo-400"
@@ -210,7 +208,7 @@
       >
         <font-awesome-icon
           icon="fa-solid fa-comments"
-          class="h-6 w-6 transition-transform duration-300 group-hover:rotate-12"
+          class="h-6 w-6 transition-transform duration-300 group-hover:rotate-12 color-white"
         />
         <span
           class="absolute inset-0 rounded-full bg-indigo-600/10 animate-ping pointer-events-none"

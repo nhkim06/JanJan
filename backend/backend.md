@@ -139,8 +139,6 @@ Google 로그인 링크로 redirect 시킵니다.
 }
 ```
 
-프론트는 Google 로그인 시작 시 redirect URI를 백엔드 콜백 주소로 지정합니다.
-
 ### Form API
 
 - `POST /form/new`
@@ -221,10 +219,61 @@ Google 로그인 링크로 redirect 시킵니다.
 
 현재 로그인된 계정의 form에 챗봇 대화를 저장합니다. 지금은 실제 Gemini API 대신 테스트 응답을 저장합니다.
 
+- 
 ```jsonb
 {
   "formId": 1,
   "question": "다음에는 어떤 말을 하면 좋을까?"
+}
+```
+
+```jsonb
+{
+  "success": true,
+  "chatItemId": 1,
+  "status": "success",
+  "answer": "Test Success! This is gemini answer"
+}
+```
+
+- `GET /chat/list`
+- `GET /chat/list?formId=1`
+
+현재 로그인된 계정의 챗봇 대화 목록을 반환합니다. `formId`는 선택이며, 넣으면 해당 form의 대화만 반환합니다.
+
+```jsonb
+{
+  "success": true,
+  "chatItems": [
+    {
+      "chatItemId": 1,
+      "formId": 1,
+      "question": "다음에는 어떤 말을 하면 좋을까?",
+      "answer": "Test Success! This is gemini answer",
+      "status": "success",
+      "createdAt": "2026-05-17T00:40:00+09:00",
+      "updatedAt": "2026-05-17T00:40:00+09:00"
+    }
+  ]
+}
+```
+
+- `GET /chat/{id}`
+
+현재 로그인된 계정의 특정 챗봇 대화를 반환합니다.
+
+```jsonb
+{
+  "success": true,
+  "chatItem": {
+    "chatItemId": 1,
+    "formId": 1,
+    "question": "다음에는 어떤 말을 하면 좋을까?",
+    "answer": "Test Success! This is gemini answer",
+    "status": "success",
+    "createdAt": "2026-05-17T00:40:00+09:00",
+    "updatedAt": "2026-05-17T00:40:00+09:00"
+  }
 }
 ```
 
@@ -331,35 +380,5 @@ Google 로그인 링크로 redirect 시킵니다.
 ```jsonb
 {
   "success": true
-}
-```
-
-```jsonb
-{
-  "success": true,
-  "chatItemId": 1,
-  "status": "success",
-  "answer": "그만 말해도 괜찮을 것 같아!"
-}
-```
-
-- `GET /chat/list?formId=1`
-
-현재 로그인된 계정의 특정 form에 연결된 챗봇 대화 목록을 반환합니다.
-
-```jsonb
-{
-  "success": true,
-  "chatItems": [
-    {
-      "chatItemId": 1,
-      "formId": 1,
-      "question": "다음에는 어떤 말을 하면 좋을까?",
-      "answer": "Test Success! This is gemini answer",
-      "status": "success",
-      "createdAt": "2026-05-16T22:30:00+09:00",
-      "updatedAt": "2026-05-16T22:30:00+09:00"
-    }
-  ]
 }
 ```

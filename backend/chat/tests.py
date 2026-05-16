@@ -284,7 +284,7 @@ class ChatCreateTests(TestCase):
         self.assertEqual(chat_item.answer, "")
 
 
-class ChatListTests(TestCase):
+class ChatReadTests(TestCase):
     def setUp(self):
         User = get_user_model()
         self.user = User.objects.create_user(username="tester")
@@ -344,18 +344,57 @@ class ChatListTests(TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json()["success"], False)
 
-    def test_form_id_is_required_to_list_chat_items(self):
+    def test_authenticated_user_can_list_all_own_chat_items_without_form_id(self):
         self.client.force_login(self.user)
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["success"], False)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["success"], True)
+        self.assertEqual(len(data["chatItems"]), 2)
+        chat_item_ids = {chat_item["chatItemId"] for chat_item in data["chatItems"]}
+        self.assertEqual(chat_item_ids, {self.first_chat.id, self.second_chat.id})
 
     def test_user_cannot_list_chat_items_for_other_users_form(self):
         self.client.force_login(self.user)
 
         response = self.client.get(self.url, {"formId": self.other_form.id})
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["success"], False)
+
+    def test_authenticated_user_can_get_own_chat_item_detail(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            reverse("chat-detail", kwargs={"chat_item_id": self.first_chat.id})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["success"], True)
+        self.assertEqual(data["chatItem"]["chatItemId"], self.first_chat.id)
+        self.assertEqual(data["chatItem"]["formId"], self.form.id)
+        self.assertEqual(data["chatItem"]["question"], self.first_chat.question)
+        self.assertEqual(data["chatItem"]["answer"], self.first_chat.answer)
+        self.assertEqual(data["chatItem"]["status"], ChatItem.Status.SUCCESS)
+
+    def test_anonymous_user_cannot_get_chat_item_detail(self):
+        response = self.client.get(
+            reverse("chat-detail", kwargs={"chat_item_id": self.first_chat.id})
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["success"], False)
+
+    def test_user_cannot_get_other_users_chat_item_detail(self):
+        other_chat = ChatItem.objects.get(form=self.other_form)
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            reverse("chat-detail", kwargs={"chat_item_id": other_chat.id})
+        )
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["success"], False)

@@ -1,5 +1,5 @@
 {
-  "childbirth": {
+  "birth": {
     "title": "출산",
     "questions": [
       {
@@ -120,7 +120,7 @@
       }
     ]
   },
-  "career": {
+  "employment": {
     "title": "취업 / 이직",
     "questions": [
       {
@@ -185,7 +185,7 @@
       }
     ]
   },
-  "admission": {
+  "school_admission": {
     "title": "입학",
     "questions": [
       {
@@ -240,7 +240,7 @@
       }
     ]
   },
-  "business": {
+  "business_opening": {
     "title": "개업 / 창업",
     "questions": [
       {

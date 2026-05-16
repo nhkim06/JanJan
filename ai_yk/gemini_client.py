@@ -4,6 +4,7 @@ import json
 import os
 import urllib.error
 import urllib.request
+from pathlib import Path
 from typing import Any
 
 try:
@@ -14,6 +15,7 @@ except ImportError:  # pragma: no cover - supports direct script execution
 
 DEFAULT_MODEL = "gemini-2.5-flash"
 API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+_DOTENV_LOADED = False
 
 
 def call_gemini(
@@ -23,6 +25,8 @@ def call_gemini(
     temperature: float = 0.35,
     max_output_tokens: int = 2048,
 ) -> AIResponse:
+    _load_dotenv_files()
+
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     if not api_key:
         return {
@@ -72,6 +76,39 @@ def call_gemini(
         return {"success": False, "answer": "Gemini API returned an empty response."}
 
     return {"success": True, "answer": answer}
+
+
+def _load_dotenv_files() -> None:
+    global _DOTENV_LOADED
+    if _DOTENV_LOADED:
+        return
+
+    _DOTENV_LOADED = True
+    seen: set[Path] = set()
+    search_roots = (Path.cwd(), Path(__file__).resolve().parent)
+
+    for root in search_roots:
+        for directory in (root, *root.parents):
+            dotenv_path = directory / ".env"
+            if dotenv_path in seen:
+                continue
+
+            seen.add(dotenv_path)
+            if dotenv_path.is_file():
+                _load_dotenv_file(dotenv_path)
+
+
+def _load_dotenv_file(path: Path) -> None:
+    for raw_line in path.read_text(encoding="utf-8-sig").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key:
+            os.environ.setdefault(key, value)
 
 
 def pretty_json(value: Any) -> str:

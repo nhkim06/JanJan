@@ -4,6 +4,12 @@ from .models import Form
 
 
 class FormCreateSerializer(serializers.Serializer):
+    category = serializers.CharField(
+        allow_blank=True,
+        max_length=64,
+        required=False,
+        trim_whitespace=True,
+    )
     answers = serializers.JSONField()
     targetName = serializers.CharField(max_length=255)
     cultureBase = serializers.CharField(max_length=255)
@@ -20,9 +26,11 @@ class FormCreateSerializer(serializers.Serializer):
 
             question = item.get("question")
             answer = item.get("answer")
-            if not isinstance(question, str) or not isinstance(answer, str):
+            if not isinstance(question, str) or not (
+                isinstance(answer, str) or answer is None
+            ):
                 raise serializers.ValidationError(
-                    f"answers[{index}] must include string question and answer."
+                    f"answers[{index}] must include string question and string/null answer."
                 )
 
         return value
@@ -30,6 +38,7 @@ class FormCreateSerializer(serializers.Serializer):
     def create(self, validated_data):
         return Form.objects.create(
             user=self.context["user"],
+            category=validated_data.get("category", ""),
             answers=validated_data["answers"],
             target_name=validated_data["targetName"],
             culture_base=validated_data["cultureBase"],
@@ -47,6 +56,7 @@ class FormReadSerializer(serializers.ModelSerializer):
         model = Form
         fields = [
             "formId",
+            "category",
             "answers",
             "targetName",
             "cultureBase",

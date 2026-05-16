@@ -154,7 +154,8 @@ Google 로그인 링크로 redirect 시킵니다.
     }
   ],
   "targetName": "홍길동",
-  "cultureBase": "ko"
+  "cultureBase": "ko",
+  "category": "birth"
 }
 ```
 
@@ -238,8 +239,12 @@ Google 로그인 링크로 redirect 시킵니다.
 
 
 - answer 형식
-1. 첫번째는 찾아보는중
-2. etiquette ```
+1. payment amount : 두 줄로 출력됨 ```
+- First line: one natural prose paragraph about cash, gift, group contribution, account
+  transfer, or not spending money. This paragraph must be 300 to 600 characters, including spaces and punctuation.
+- Second line: INT (amount)
+```
+2. etiquette ```jsonb
 {
   "fullReport": "Detailed markdown report in English. Sections: Situation summary / What to do / What to avoid (villain points) / Visits, contact, SNS, wording / Culture-specific notes ({culture_label})",
   "summary": "English summary: 3–5 sentences or 3–5 bullet points"

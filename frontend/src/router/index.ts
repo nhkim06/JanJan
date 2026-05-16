@@ -36,6 +36,11 @@ const router = createRouter({
       name: 'chat',
       component: () => import('../pages/ChatAI.vue'),
     },
+    {
+      path: '/chat-list/:personId',
+      name: 'chat-list',
+      component: () => import('../pages/ChatList.vue'),
+    },
   ],
 });
 

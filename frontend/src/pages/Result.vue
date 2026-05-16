@@ -17,9 +17,13 @@
       </div>
 
       <!-- 요약 정보 -->
-      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-2">
+      <div
+        class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-2"
+      >
         <div class="flex items-center justify-between mb-4">
-          <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold">
+          <span
+            class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold"
+          >
             {{ categoryName }}
           </span>
           <span class="text-xs font-bold text-slate-400">
@@ -27,7 +31,8 @@
           </span>
         </div>
         <h1 class="text-xl font-bold text-slate-900 leading-tight">
-          <span class="text-indigo-600">{{ targetName }}</span>님을 위한<br />
+          <span class="text-indigo-600">{{ targetName }}</span
+          >님을 위한<br />
           맞춤 가이드가 도착했습니다.
         </h1>
       </div>
@@ -48,7 +53,10 @@
           class="bg-emerald-50/50 rounded-2xl p-4 flex items-center justify-start border border-emerald-100/50"
         >
           <span class="text-emerald-500 mr-2 flex items-center">
-            <font-awesome-icon icon="fa-solid fa-circle-check" class="h-5 w-5" />
+            <font-awesome-icon
+              icon="fa-solid fa-circle-check"
+              class="h-5 w-5"
+            />
           </span>
           <p class="text-sm font-medium text-slate-600">
             안 가고 3만원 or 가고 5만원
@@ -59,7 +67,10 @@
       <!-- 금기사항 -->
       <div class="bg-rose-50/40 rounded-3xl p-6 border border-rose-100/70">
         <div class="flex items-center text-rose-600 font-bold mb-4">
-          <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="h-5 w-5 mr-2" />
+          <font-awesome-icon
+            icon="fa-solid fa-triangle-exclamation"
+            class="h-5 w-5 mr-2"
+          />
           필수 금기사항
         </div>
         <hr class="border-rose-200/60 mb-4" />
@@ -86,19 +97,22 @@
 
       <!-- 하단 액션 버튼 -->
       <div class="pt-2 space-y-3">
-        <button
+        <!-- <button
           @click="handleCreateMessage"
           class="w-full bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50 active:scale-[0.99] transition py-4 px-6 rounded-2xl font-bold text-base flex items-center justify-center shadow-sm"
         >
           <font-awesome-icon icon="fa-solid fa-comment" class="h-5 w-5 mr-2" />
           상황별 추천 멘트 만들기
-        </button>
+        </button> -->
 
         <button
           @click="handleChatWithAI"
           class="w-full bg-[#0f1423] text-white hover:bg-slate-800 active:scale-[0.99] transition py-4 px-6 rounded-2xl font-bold text-base flex items-center justify-center shadow-md"
         >
-          <font-awesome-icon icon="fa-solid fa-wand-magic-sparkles" class="h-5 w-5 mr-2 text-indigo-300" />
+          <font-awesome-icon
+            icon="fa-solid fa-wand-magic-sparkles"
+            class="h-5 w-5 mr-2 text-indigo-300"
+          />
           AI와 더 자세히 대화하기
         </button>
       </div>
@@ -117,7 +131,9 @@ const router = useRouter();
 const category = computed(() => route.params.category || 'childbirth');
 const targetName = computed(() => route.query.targetName || '상대방');
 const cultureBase = computed(() => route.query.cultureBase || '미지정');
-const categoryName = computed(() => surveyData[category.value]?.title || '알 수 없음');
+const categoryName = computed(
+  () => surveyData[category.value]?.title || '알 수 없음',
+);
 
 const goHome = () => {
   router.push('/');
@@ -133,8 +149,8 @@ const handleChatWithAI = () => {
     query: {
       category: category.value,
       targetName: targetName.value,
-      cultureBase: cultureBase.value
-    }
+      cultureBase: cultureBase.value,
+    },
   });
 };
 </script>

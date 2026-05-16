@@ -2,6 +2,9 @@
 
 Django REST Framework 기반 백엔드입니다.
 
+### 백엔드 서버는 https://janjan-backend.vercel.app/ 에 있습니다!
+
+
 ### 로컬 실행
 
 ```powershell
@@ -30,6 +33,7 @@ python manage.py runserver
 - `auth_app`: Google 로그인, 회원가입, 로그아웃
 - `chat`: 챗봇 대화 저장 API
 - `form`: 폼 생성 API
+- `history`: 기록 CRUD API
 
 ### 환경 변수
 
@@ -203,6 +207,112 @@ Google 로그인 링크로 redirect 시킵니다.
 {
   "formId": 1,
   "question": "다음에는 어떤 말을 하면 좋을까?"
+}
+```
+
+### History API
+
+- `POST /history/new`
+
+현재 로그인된 계정으로 history를 저장합니다.
+
+```jsonb
+{
+  "targetName": "홍길동",
+  "received": true,
+  "value": 50000,
+  "cultureBase": "ko",
+  "category": "결혼",
+  "date": "2026-05-16"
+}
+```
+
+```jsonb
+{
+  "success": true,
+  "historyId": 1
+}
+```
+
+- `GET /history/list?targetName=홍길동`
+
+현재 로그인된 계정의 history 목록을 반환합니다. `targetName`은 선택입니다.
+
+```jsonb
+{
+  "success": true,
+  "histories": [
+    {
+      "historyId": 1,
+      "targetName": "홍길동",
+      "received": true,
+      "value": 50000,
+      "cultureBase": "ko",
+      "category": "결혼",
+      "date": "2026-05-16",
+      "createdAt": "2026-05-17T00:40:00+09:00",
+      "updatedAt": "2026-05-17T00:40:00+09:00"
+    }
+  ]
+}
+```
+
+- `GET /history/{id}`
+
+```jsonb
+{
+  "success": true,
+  "history": {
+    "historyId": 1,
+    "targetName": "홍길동",
+    "received": true,
+    "value": 50000,
+    "cultureBase": "ko",
+    "category": "결혼",
+    "date": "2026-05-16",
+    "createdAt": "2026-05-17T00:40:00+09:00",
+    "updatedAt": "2026-05-17T00:40:00+09:00"
+  }
+}
+```
+
+- `POST /history/{id}`
+
+해당 history를 수정합니다.
+
+```jsonb
+{
+  "targetName": "홍길동",
+  "received": false,
+  "value": 70000,
+  "cultureBase": "ko",
+  "category": "축의금",
+  "date": "2026-05-17"
+}
+```
+
+```jsonb
+{
+  "success": true,
+  "history": {
+    "historyId": 1,
+    "targetName": "홍길동",
+    "received": false,
+    "value": 70000,
+    "cultureBase": "ko",
+    "category": "축의금",
+    "date": "2026-05-17",
+    "createdAt": "2026-05-17T00:40:00+09:00",
+    "updatedAt": "2026-05-17T00:45:00+09:00"
+  }
+}
+```
+
+- `DELETE /history/{id}`
+
+```jsonb
+{
+  "success": true
 }
 ```
 

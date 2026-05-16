@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "auth_app",
     "chat",
     "form",
+    "history",
 ]
 
 MIDDLEWARE = [

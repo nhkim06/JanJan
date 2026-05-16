@@ -1,9 +1,13 @@
+from datetime import date
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from unittest.mock import patch
 
+from auth_app.models import UserProfile
 from form.models import Form
+from history.models import History
 
 from .models import ChatItem
 
@@ -13,6 +17,12 @@ class ChatCreateTests(TestCase):
         User = get_user_model()
         self.user = User.objects.create_user(username="tester")
         self.other_user = User.objects.create_user(username="other")
+        UserProfile.objects.create(
+            user=self.user,
+            google_sub="google-sub-tester",
+            language="ja",
+            name="Tester",
+        )
         self.form = Form.objects.create(
             user=self.user,
             answers=[
@@ -35,6 +45,33 @@ class ChatCreateTests(TestCase):
             "formId": self.form.id,
             "question": "What should I say next?",
         }
+        self.history = History.objects.create(
+            user=self.user,
+            target_name="Yuna",
+            received=True,
+            value=50000,
+            culture_base="ko",
+            category="Money",
+            date=date(2026, 5, 16),
+        )
+        History.objects.create(
+            user=self.user,
+            target_name="Different target",
+            received=False,
+            value=70000,
+            culture_base="ja",
+            category="Filtered out",
+            date=date(2026, 5, 17),
+        )
+        History.objects.create(
+            user=self.other_user,
+            target_name="Yuna",
+            received=True,
+            value=90000,
+            culture_base="ko",
+            category="Other user",
+            date=date(2026, 5, 18),
+        )
 
     def test_authenticated_user_can_create_chat_item(self):
         self.client.force_login(self.user)
@@ -56,6 +93,82 @@ class ChatCreateTests(TestCase):
         self.assertEqual(chat_item.question, self.valid_payload["question"])
         self.assertEqual(chat_item.answer, data["answer"])
         self.assertEqual(chat_item.status, ChatItem.Status.SUCCESS)
+
+    @patch("chat.views.get_gemini_answer")
+    def test_chat_create_passes_language_histories_question_and_empty_memory(
+        self,
+        mock_answer,
+    ):
+        mock_answer.return_value = (True, "Gemini answer")
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            self.url,
+            data=self.valid_payload,
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        mock_answer.assert_called_once()
+        language, histories, question, memory = mock_answer.call_args.args
+        self.assertEqual(language, "ja")
+        self.assertEqual(
+            histories,
+            [
+                {
+                    "targetName": self.history.target_name,
+                    "received": self.history.received,
+                    "value": self.history.value,
+                    "cultureBase": self.history.culture_base,
+                    "category": self.history.category,
+                    "date": self.history.date.isoformat(),
+                }
+            ],
+        )
+        self.assertEqual(question, self.valid_payload["question"])
+        self.assertEqual(memory, "")
+
+    @patch("chat.views.get_gemini_answer")
+    def test_chat_create_builds_memory_from_previous_success_chat_items(
+        self,
+        mock_answer,
+    ):
+        mock_answer.return_value = (True, "Next answer")
+        first_chat = ChatItem.objects.create(
+            form=self.form,
+            question='[{"question":"질문", "answer":"답변"}]',
+            answer="Gemini 답변",
+            status=ChatItem.Status.SUCCESS,
+        )
+        second_chat = ChatItem.objects.create(
+            form=self.form,
+            question="사용자 입력 질문1",
+            answer="Gemini 답변 1",
+            status=ChatItem.Status.SUCCESS,
+        )
+        ChatItem.objects.create(
+            form=self.form,
+            question="아직 처리 중인 질문",
+            answer="",
+            status=ChatItem.Status.PENDING,
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            self.url,
+            data=self.valid_payload,
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        memory = mock_answer.call_args.args[3]
+        self.assertIn("사전 질문:", memory)
+        self.assertIn(first_chat.question, memory)
+        self.assertIn(first_chat.answer, memory)
+        self.assertIn("추가 질문:", memory)
+        self.assertIn(second_chat.question, memory)
+        self.assertIn(second_chat.answer, memory)
+        self.assertNotIn("아직 처리 중인 질문", memory)
 
     def test_anonymous_user_cannot_create_chat_item(self):
         response = self.client.post(
@@ -141,6 +254,30 @@ class ChatCreateTests(TestCase):
         data = response.json()
         self.assertEqual(data["success"], False)
         self.assertEqual(data["status"], ChatItem.Status.PENDING)
+
+        chat_item = ChatItem.objects.get(id=data["chatItemId"])
+        self.assertEqual(chat_item.status, ChatItem.Status.PENDING)
+        self.assertEqual(chat_item.answer, "")
+
+    @patch("chat.views.get_gemini_answer")
+    def test_chat_item_remains_pending_when_answer_generation_returns_false(
+        self,
+        mock_answer,
+    ):
+        mock_answer.return_value = (False, "temporary failure")
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            self.url,
+            data=self.valid_payload,
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 500)
+        data = response.json()
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["status"], ChatItem.Status.PENDING)
+        self.assertEqual(data["detail"], "temporary failure")
 
         chat_item = ChatItem.objects.get(id=data["chatItemId"])
         self.assertEqual(chat_item.status, ChatItem.Status.PENDING)

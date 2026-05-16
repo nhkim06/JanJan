@@ -28,3 +28,6 @@ build_files.sh
 .env
 .env.*
 !.env.example
+
+# .pyc
+*.pyc

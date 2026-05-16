@@ -7,7 +7,153 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, TypedDict
+import sys
+from typing import TYPE_CHECKING, Any, TypedDict, cast
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
+if TYPE_CHECKING:
+    from ai_yk.type_def import History as AiYkHistory
+    from mj_at.etiquette import History as MjHistory
+
+
+def __wrapper_ai_yk_payment(
+    language: str,
+    histories: list[dict[str, Any]],
+    question: Any,
+    category: str,
+    current_context="",
+    target_name="",
+    culture_base="",
+) -> "GeminiResult":
+    from ai_yk.proper_payment_amount import proper_payment_amount
+
+    return cast(
+        GeminiResult,
+        proper_payment_amount(
+            language,
+            cast("list[AiYkHistory]", histories),
+            question,
+            category,
+        ),
+    )
+
+
+def __wrapper_ai_yk_question(
+    language: str,
+    histories: list[dict[str, Any]],
+    user_question: str,
+    memory: str,
+    *,
+    current_context: dict[str, Any] | None = None,
+    category: str | None = None,
+    target_name: str = "",
+    culture_base: str | None = None,
+) -> "GeminiResult":
+    try:
+        from ai_yk.question_api import question as question_answer
+    except Exception as exc:
+        return _wrap_result(False, f"ai_yk question import failed: {exc}")
+
+    context = current_context or {}
+    try:
+        return cast(
+            GeminiResult,
+            question_answer(
+                language,
+                histories,
+                user_question,
+                memory,
+                category=category or _string_or_none(context.get("category")),
+                target_name=target_name
+                or _string_or_none(context.get("targetName"))
+                or _string_or_none(context.get("target_name")),
+                culture_base=culture_base
+                or _string_or_none(context.get("cultureBase"))
+                or _string_or_none(context.get("culture_base")),
+                presurvey=context,
+            ),
+        )
+    except Exception as exc:
+        return _wrap_result(False, f"ai_yk question failed: {exc}")
+
+
+def __wrapper_mj_etiquette(
+    language: str,
+    histories: list[dict[str, Any]],
+    question: str,
+    memory: str,
+) -> "GeminiResult":
+    try:
+        from mj_at.etiquette import func as etiquette_func
+    except ModuleNotFoundError as exc:
+        if exc.name == "google":
+            return _wrap_result(
+                False,
+                "google-genai is missing. Install backend requirements before using mj_at etiquette.",
+            )
+        raise
+
+    mj_histories = [_with_culture_base(history) for history in histories]
+    return cast(
+        GeminiResult,
+        etiquette_func(language, cast("list[MjHistory]", mj_histories), question, memory),
+    )
+
+
+def get_ai_yk_payment_report(
+    language: str,
+    histories: list[dict[str, Any]],
+    question: Any,
+    category: str,
+) -> "GeminiResult":
+    return __wrapper_ai_yk_payment(language, histories, question, category)
+
+
+def get_ai_yk_question_answer(
+    language: str,
+    histories: list[dict[str, Any]],
+    user_question: str,
+    memory: str,
+    *,
+    current_context: dict[str, Any] | None = None,
+    category: str | None = None,
+    target_name: str = "",
+    culture_base: str | None = None,
+) -> "GeminiResult":
+    return __wrapper_ai_yk_question(
+        language,
+        histories,
+        user_question,
+        memory,
+        current_context=current_context,
+        category=category,
+        target_name=target_name,
+        culture_base=culture_base,
+    )
+
+
+def get_mj_etiquette_answer(
+    language: str,
+    histories: list[dict[str, Any]],
+    question: str,
+    memory: str,
+) -> "GeminiResult":
+    return __wrapper_mj_etiquette(language, histories, question, memory)
+
+
+def _with_culture_base(history: dict[str, Any]) -> dict[str, Any]:
+    if "cultureBase" in history:
+        return history
+
+    normalized = dict(history)
+    if "currency" in normalized:
+        normalized["cultureBase"] = normalized["currency"]
+    return normalized
 
 
 DEFAULT_MODEL = "gemini-2.5-flash"
@@ -362,7 +508,7 @@ Core task:
 
 Output JSON shape:
 {{
-  "money": "recommended amount/range and currency, or 0 with a reason when money is not appropriate",
+  "money": "recommended amount/range and currency, or 0 when money is not appropriate",
   "text": "direct practical answer to the user's selected app question"
 }}
 

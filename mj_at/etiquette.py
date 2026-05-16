@@ -389,7 +389,7 @@ def _generate_etiquette_report(
         category = _normalize_category(histories[-1].get("category"))
     for h in reversed(histories):
         if h.get("category"):
-            category = _normalize_category(h["category"])
+            category = _normalize_category(h.get("category"))
             break
 
     prompt = _build_report_prompt(

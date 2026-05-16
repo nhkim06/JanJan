@@ -28,6 +28,8 @@ python manage.py runserver
 
 - `api`: 공통 API, 헬스체크
 - `auth_app`: Google 로그인, 회원가입, 로그아웃
+- `chat`: 챗봇 대화 저장 API
+- `form`: 폼 생성 API
 
 ### 환경 변수
 
@@ -116,3 +118,120 @@ Google 로그인 링크로 redirect 시킵니다.
 ```
 
 프론트는 Google 로그인 시작 시 redirect URI를 백엔드 콜백 주소로 지정합니다.
+
+### Form API
+
+- `POST /form/new`
+
+현재 로그인된 계정으로 form을 저장합니다.
+
+```jsonb
+{
+  "answers": [
+    {
+      "question": "좋아하는 음식은?",
+      "answer": "김치찌개"
+    }
+  ],
+  "targetName": "홍길동",
+  "cultureBase": "ko"
+}
+```
+
+```jsonb
+{
+  "success": true,
+  "formId": 1
+}
+```
+
+- `GET /form/list`
+
+현재 로그인된 계정의 form 목록을 반환합니다.
+
+```jsonb
+{
+  "success": true,
+  "forms": [
+    {
+      "formId": 1,
+      "answers": [
+        {
+          "question": "좋아하는 음식은?",
+          "answer": "김치찌개"
+        }
+      ],
+      "targetName": "홍길동",
+      "cultureBase": "ko",
+      "createdAt": "2026-05-16T22:30:00+09:00",
+      "updatedAt": "2026-05-16T22:30:00+09:00"
+    }
+  ]
+}
+```
+
+- `GET /form/{id}`
+
+현재 로그인된 계정의 특정 form 데이터를 반환합니다.
+
+```jsonb
+{
+  "success": true,
+  "form": {
+    "formId": 1,
+    "answers": [
+      {
+        "question": "좋아하는 음식은?",
+        "answer": "김치찌개"
+      }
+    ],
+    "targetName": "홍길동",
+    "cultureBase": "ko",
+    "createdAt": "2026-05-16T22:30:00+09:00",
+    "updatedAt": "2026-05-16T22:30:00+09:00"
+  }
+}
+```
+
+### Chat API
+
+- `POST /chat/new`
+
+현재 로그인된 계정의 form에 챗봇 대화를 저장합니다. 지금은 실제 Gemini API 대신 테스트 응답을 저장합니다.
+
+```jsonb
+{
+  "formId": 1,
+  "question": "다음에는 어떤 말을 하면 좋을까?"
+}
+```
+
+```jsonb
+{
+  "success": true,
+  "chatItemId": 1,
+  "status": "success",
+  "answer": "그만 말해도 괜찮을 것 같아!"
+}
+```
+
+- `GET /chat/list?formId=1`
+
+현재 로그인된 계정의 특정 form에 연결된 챗봇 대화 목록을 반환합니다.
+
+```jsonb
+{
+  "success": true,
+  "chatItems": [
+    {
+      "chatItemId": 1,
+      "formId": 1,
+      "question": "다음에는 어떤 말을 하면 좋을까?",
+      "answer": "Test Success! This is gemini answer",
+      "status": "success",
+      "createdAt": "2026-05-16T22:30:00+09:00",
+      "updatedAt": "2026-05-16T22:30:00+09:00"
+    }
+  ]
+}
+```

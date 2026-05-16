@@ -79,6 +79,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "api",
     "auth_app",
+    "chat",
+    "form",
 ]
 
 MIDDLEWARE = [

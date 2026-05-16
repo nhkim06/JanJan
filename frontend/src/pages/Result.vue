@@ -123,7 +123,7 @@
             :category="categoryName"
             :target-name="formDetail.targetName"
             :culture-base="formDetail.cultureBase"
-            :room-id="route.query.roomId"
+            :room-id="(route.query.roomId as string)"
           />
         </div>
       </div>
@@ -156,6 +156,15 @@ const isLoading = ref(true);
 const isReportExpanded = ref(false);
 const formDetail = ref<any>(null);
 
+const aiReport = ref({
+  intro: '',
+  amount: 0,
+  currency: 'KRW',
+  villainPreventionSummary: '',
+  messageGuide: '',
+  fullReport: ''
+});
+
 const categoryName = computed(() => {
   const cat = route.params.category as string || formDetail.value?.category;
   if (!cat) return 'Unknown';
@@ -167,10 +176,6 @@ const categoryName = computed(() => {
     }
   }
   return 'Unknown';
-});
-
-const aiReport = computed(() => {
-  return formDetail.value?.aiResponse || {};
 });
 
 const parsedVillainTips = computed(() => {
@@ -187,13 +192,69 @@ const parsedMessages = computed(() => {
   return raw.split('\n').map((line: string) => line.replace(/^[•\-\*\d\.]+\s*|^["']|["']$/g, '').trim()).filter(Boolean);
 });
 
+const parseAnalysisResults = (chatItems: any[]) => {
+  if (chatItems.length >= 1) {
+    const amountItem = chatItems[0].answer;
+    const lines = amountItem.split('\n').filter((l: string) => l.trim());
+    if (lines.length >= 2) {
+      aiReport.value.intro = lines[0];
+      const amountMatch = lines[1].match(/(\d+)\s*(\w+)/);
+      if (amountMatch) {
+        aiReport.value.amount = parseInt(amountMatch[1]);
+        aiReport.value.currency = amountMatch[2];
+      }
+    } else {
+      aiReport.value.intro = amountItem;
+    }
+  }
+
+  if (chatItems.length >= 2) {
+    try {
+      const etiquetteData = JSON.parse(chatItems[1].answer);
+      aiReport.value.fullReport = etiquetteData.fullReport;
+      aiReport.value.villainPreventionSummary = etiquetteData.summary;
+    } catch (e) {
+      aiReport.value.fullReport = chatItems[1].answer;
+    }
+  }
+
+  if (chatItems.length >= 3) {
+    aiReport.value.messageGuide = chatItems[2].answer;
+  }
+};
+
 onMounted(async () => {
   const roomId = route.query.roomId;
   if (roomId) {
     try {
-      const response = await apiClient.get(`/form/${roomId}`);
-      if (response.data.success) {
-        formDetail.value = response.data.form;
+      // 1. Fetch Form Details
+      const formResponse = await apiClient.get(`/form/${roomId}`);
+      if (formResponse.data.success) {
+        formDetail.value = formResponse.data.form;
+      }
+
+      // 2. Fetch or Trigger Analysis
+      const chatResponse = await apiClient.get(`/chat/list?formId=${roomId}`);
+      if (chatResponse.data.success) {
+        let chatItems = chatResponse.data.chatItems;
+        
+        // If analysis not complete, trigger missing steps
+        if (chatItems.length < 3) {
+          const stepsToRun = 3 - chatItems.length;
+          for (let i = 0; i < stepsToRun; i++) {
+            const newChatResponse = await apiClient.post('/chat/new', {
+              formId: roomId,
+              question: "__CHAT_ITEM__"
+            });
+            if (newChatResponse.data.success) {
+              chatItems.push({
+                answer: newChatResponse.data.answer
+              });
+            }
+          }
+        }
+        
+        parseAnalysisResults(chatItems);
       }
     } catch (error) {
       console.error('Error loading result data:', error);

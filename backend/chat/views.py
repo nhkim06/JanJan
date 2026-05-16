@@ -11,6 +11,7 @@ from history.models import History
 from utils.gemini import (
     __wrapper_ai_yk_question as ai_yk_question_wrapper,
     __wrapper_mj_etiquette as mj_etiquette_wrapper,
+    __wrapper_mj_message as mj_message_wrapper,
     __wrapper_ai_yk_payment as ai_yk_payment_wrapper,
 )
 
@@ -134,15 +135,12 @@ class ChatCreateView(APIView):
             ).exclude(id=chat_item.id).order_by("created_at", "id")
             category = serializer.validated_data.get("category") or form.category
             
-            cnt = ChatItem.objects.filter(
-                form=form,
-            ).count()
-
             if chat_item.question == "__CHAT_ITEM__":
                 chat_item.question = json.dumps(chat_item.form.answers, ensure_ascii=False)
                 chat_item.save(update_fields=["question", "updated_at"])
 
             memory = build_chat_memory(previous_chat_items)
+            cnt = previous_chat_items.count()
             if cnt == 0:
                 gemini_result = ai_yk_payment_wrapper(
                     get_user_language(request.user),
@@ -157,6 +155,14 @@ class ChatCreateView(APIView):
 
             elif cnt == 1:
                 gemini_result = mj_etiquette_wrapper(
+                    get_user_language(request.user),
+                    histories,
+                    chat_item.question,
+                    memory,
+                    category,
+                )
+            elif cnt == 2:
+                gemini_result = mj_message_wrapper(
                     get_user_language(request.user),
                     histories,
                     chat_item.question,

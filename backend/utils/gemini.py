@@ -122,6 +122,31 @@ def __wrapper_mj_etiquette(
     )
 
 
+def __wrapper_mj_message(
+    language: str,
+    histories: list[dict[str, Any]],
+    question: str,
+    memory: str,
+    category: str = "",
+) -> "GeminiResult":
+    try:
+        from mj_mes.message_api import message_guide
+    except Exception as exc:
+        return _wrap_result(False, f"mj_mes message import failed: {exc}")
+
+    mj_histories = [_with_currency(history) for history in histories]
+    return cast(
+        GeminiResult,
+        message_guide(
+            language,
+            cast("list[MjHistory]", mj_histories),
+            question,
+            memory,
+            category,
+        ),
+    )
+
+
 def get_ai_yk_payment_report(
     language: str,
     histories: list[dict[str, Any]],
@@ -148,6 +173,28 @@ def get_ai_yk_question_answer(
         user_question,
         memory,
         current_context=current_context,
+        category=category,
+        target_name=target_name,
+        culture_base=culture_base,
+    )
+
+
+def get_mj_etiquette_answer(
+    language: str,
+    histories: list[dict[str, Any]],
+    question: str,
+    memory: str,
+) -> "GeminiResult":
+    return __wrapper_mj_etiquette(language, histories, question, memory)
+
+
+def get_mj_message_answer(
+    language: str,
+    histories: list[dict[str, Any]],
+    question: str,
+    memory: str,
+) -> "GeminiResult":
+    return __wrapper_mj_message(language, histories, question, memory)
         category=category,
         target_name=target_name,
         culture_base=culture_base,

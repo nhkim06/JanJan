@@ -133,7 +133,7 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { peopleData } from '../data/mockData';
+import apiClient from '../utils/api';
 
 const props = defineProps({
   isComponent: {
@@ -167,63 +167,58 @@ onMounted(() => {
     props.roomId || (route.query.roomId ? parseInt(route.query.roomId) : null);
 
   if (roomId) {
-    // 1. 기존 대화방 진입 시: 해당 roomId의 history 로드
-    let foundHistory = null;
-    peopleData.forEach((p) => {
-      const room = p.chatRooms.find((r) => r.roomId === parseInt(roomId));
-      if (room) {
-        foundHistory = room.history;
+    fetchChatHistory(roomId);
+  } else {
+    // 결과 페이지에서 넘어왔을 때 초기 메시지 설정
+    const category = props.category || route.query.category || '일반';
+    const targetName = props.targetName || route.query.targetName || '상대방';
+    const cultureBase = props.cultureBase || route.query.cultureBase || '한국';
+
+    const initialUserMessage = `지금 ${cultureBase}에서 ${category} 상황인 ${targetName}님과의 에티켓에 대해 더 자세히 알려줘.`;
+    
+    // UI에만 표시하거나, 첫 질문으로 서버에 보낼 수 있음
+    messages.value.push({ sender: 'user', text: initialUserMessage });
+    // 서버 응답 기다리는 시늉
+    messages.value.push({ sender: 'ai', isLoading: true, text: '' });
+    
+    // 만약 formId가 나중에 생기면 그때 보낼 수도 있지만, 지금은 mock으로 응답만 보여줌
+    setTimeout(() => {
+      const aiMessageIndex = messages.value.findIndex(m => m.sender === 'ai' && m.isLoading);
+      if (aiMessageIndex !== -1) {
+        messages.value[aiMessageIndex].isLoading = false;
+        messages.value[aiMessageIndex].text = `${targetName}님과의 ${category} 상황이시군요! ${cultureBase} 문화권을 기준으로 더 구체적인 조언을 드릴게요.\n\n어떤 점이 가장 궁금하신가요?`;
+        scrollToBottom();
       }
-    });
-
-    if (foundHistory) {
-      messages.value = [...foundHistory];
-      scrollToBottom();
-      return;
-    }
+    }, 1000);
   }
-
-  // 2. 결과 페이지에서 넘어왔을 때 (또는 새로운 대화 시작 시)
-  const category = props.category || route.query.category || '일반';
-  const targetName = props.targetName || route.query.targetName || '상대방';
-  const cultureBase = props.cultureBase || route.query.cultureBase || '한국';
-
-  const initialUserMessage = `지금 ${cultureBase}에서 ${category} 상황인 ${targetName}님과의 에티켓에 대해 더 자세히 알려줘.`;
-
-  messages.value.push({
-    sender: 'user',
-    text: initialUserMessage,
-  });
-
-  messages.value.push({
-    sender: 'ai',
-    isLoading: true,
-    text: '',
-  });
-
-  scrollToBottom();
-
-  setTimeout(() => {
-    const aiMessageIndex = messages.value.findIndex(
-      (m) => m.sender === 'ai' && m.isLoading,
-    );
-    if (aiMessageIndex !== -1) {
-      messages.value[aiMessageIndex].isLoading = false;
-      messages.value[aiMessageIndex].text =
-        `${targetName}님과의 ${category} 상황이시군요! ${cultureBase} 문화권을 기준으로 더 구체적인 조언을 드릴게요.\n\n어떤 점이 가장 궁금하신가요? (예: 구체적인 선물 추천, 복장, 건네면 좋은 말 등)`;
-      scrollToBottom();
-    }
-  }, 1000);
 });
 
+const fetchChatHistory = async (roomId) => {
+  try {
+    const response = await apiClient.get(`/chat/list?formId=${roomId}`);
+    if (response.data.success) {
+      messages.value = response.data.chatItems.flatMap(item => [
+        { sender: 'user', text: item.question },
+        { sender: 'ai', text: item.answer }
+      ]);
+      scrollToBottom();
+    }
+  } catch (error) {
+    console.error('채팅 내역 조회 에러:', error);
+  }
+};
+
 // 메시지 전송 로직
-const sendMessage = () => {
+const sendMessage = async () => {
   if (!inputMessage.value.trim()) return;
+
+  const userText = inputMessage.value;
+  const roomId = props.roomId || (route.query.roomId ? parseInt(route.query.roomId) : null);
 
   // 1. 유저 메시지 추가
   messages.value.push({
     sender: 'user',
-    text: inputMessage.value,
+    text: userText,
   });
 
   inputMessage.value = '';
@@ -238,18 +233,39 @@ const sendMessage = () => {
 
   scrollToBottom();
 
-  // 3. 실제 API 연동을 흉내 낸 타이밍 처리 (2초 후 답변)
-  setTimeout(() => {
-    const aiMessageIndex = messages.value.findIndex(
-      (m) => m.sender === 'ai' && m.isLoading,
-    );
+  try {
+    if (roomId) {
+      const response = await apiClient.post('/chat/new', {
+        formId: roomId,
+        question: userText
+      });
+
+      const aiMessageIndex = messages.value.findIndex(m => m.sender === 'ai' && m.isLoading);
+      if (aiMessageIndex !== -1) {
+        messages.value[aiMessageIndex].isLoading = false;
+        messages.value[aiMessageIndex].text = response.data.answer;
+        scrollToBottom();
+      }
+    } else {
+      // roomId가 없는 경우 (임시 대응)
+      setTimeout(() => {
+        const aiMessageIndex = messages.value.findIndex(m => m.sender === 'ai' && m.isLoading);
+        if (aiMessageIndex !== -1) {
+          messages.value[aiMessageIndex].isLoading = false;
+          messages.value[aiMessageIndex].text = "질문을 저장하려면 먼저 설문을 완료해주세요.";
+          scrollToBottom();
+        }
+      }, 1000);
+    }
+  } catch (error) {
+    console.error('메시지 전송 에러:', error);
+    const aiMessageIndex = messages.value.findIndex(m => m.sender === 'ai' && m.isLoading);
     if (aiMessageIndex !== -1) {
       messages.value[aiMessageIndex].isLoading = false;
-      messages.value[aiMessageIndex].text =
-        `구체적인 상황을 더 말씀해주시면 더욱 정확한 에티켓 가이드를 드릴 수 있습니다. (예시 답변: 지인 관계라면 5~10만원 정도의 축의금이 적당하며, 밝은 톤의 단정한 정장을 추천합니다.)`;
+      messages.value[aiMessageIndex].text = "오류가 발생했습니다. 다시 시도해주세요.";
       scrollToBottom();
     }
-  }, 1500);
+  }
 };
 
 // watch messages to scroll bottom

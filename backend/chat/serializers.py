@@ -6,6 +6,12 @@ from .models import ChatItem
 class ChatCreateSerializer(serializers.Serializer):
     formId = serializers.IntegerField()
     question = serializers.CharField(allow_blank=False, trim_whitespace=True)
+    category = serializers.CharField(
+        allow_blank=True,
+        max_length=64,
+        required=False,
+        trim_whitespace=True,
+    )
 
 
 class ChatListQuerySerializer(serializers.Serializer):

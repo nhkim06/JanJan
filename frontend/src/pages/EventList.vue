@@ -59,14 +59,13 @@ const options = computed(() => eventInfo.value.options);
 // 클릭 이벤트 핸들러
 const selectOption = (title) => {
   const mapping = {
-    "출산": "childbirth",
+    "출산": "birth",
     "결혼식": "wedding",
-    "승진/취업": "career",
-    "입학/졸업": "admission",
-    "퇴직/이직": "career", // 공유할 수도 있음
+    "취업": "employment",
+    "입학": "school_admission",
     "장례식": "funeral",
     "병문안": "hospital_visit",
-    "개업/창업": "business",
+    "개업/창업": "business_opening",
     "돌잔치": "first_birthday"
   };
   

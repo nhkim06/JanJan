@@ -6,7 +6,7 @@
       <!-- 상단 헤더: 뒤로가기 & 프로그레스 바 -->
       <div class="flex items-center mb-6">
         <button
-          @click="handlePrev"
+          @click="handleExit"
           class="mr-4 text-slate-600 hover:text-slate-900 active:scale-95 transition bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-100"
         >
           <font-awesome-icon icon="fa-solid fa-chevron-left" />

@@ -18,8 +18,14 @@
         </h1>
       </header>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoading" class="flex flex-col items-center justify-center h-64">
+        <div class="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3"></div>
+        <p class="text-sm font-medium text-slate-400">대화 목록을 불러오는 중...</p>
+      </div>
+
       <div
-        v-if="chatRooms.length === 0"
+        v-else-if="chatRooms.length === 0"
         class="flex flex-col items-center justify-center h-64 text-slate-400"
       >
         <p class="text-sm md:text-base font-medium">진행 중인 대화방이 없습니다.</p>
@@ -72,9 +78,11 @@ const router = useRouter();
 
 const personName = computed(() => route.params.personId); // Using personId as targetName
 const chatRooms = ref([]);
+const isLoading = ref(true);
 
-onMounted(() => {
-  fetchChatRooms();
+onMounted(async () => {
+  await fetchChatRooms();
+  isLoading.value = false;
 });
 
 const fetchChatRooms = async () => {

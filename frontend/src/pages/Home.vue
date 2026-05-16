@@ -138,7 +138,14 @@ const goToChatList = (targetName) => {
       @save="handleSettingSave"
     />
 
+    <!-- 로딩 상태 표시 -->
+    <div v-if="isLoading" class="w-full max-w-md md:max-w-2xl lg:max-w-3xl flex flex-col items-center justify-center min-h-screen">
+       <div class="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+       <p class="text-slate-500 font-medium">데이터를 불러오는 중입니다...</p>
+    </div>
+
     <div
+      v-else
       class="w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50/30 via-white to-white flex flex-col px-6 pt-12 pb-6 min-h-screen relative select-none"
     >
       <div class="flex flex-col h-full space-y-8">

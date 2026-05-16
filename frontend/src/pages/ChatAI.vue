@@ -29,7 +29,15 @@
         isComponent ? '' : '',
       ]"
     >
-      <div v-for="(msg, index) in messages" :key="index" class="w-full">
+      <div v-if="isHistoryLoading" class="w-full flex items-center justify-center py-10 flex-1">
+         <div class="animate-pulse flex flex-col items-center">
+           <div class="w-8 h-8 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3"></div>
+           <p class="text-sm font-medium text-slate-400">대화 내역을 불러오는 중...</p>
+         </div>
+      </div>
+
+      <template v-else>
+        <div v-for="(msg, index) in messages" :key="index" class="w-full">
         <div
           v-if="msg.sender === 'user'"
           class="flex flex-col items-end pl-12 md:pl-24"
@@ -154,6 +162,7 @@ const inputMessage = ref('');
 
 // 메시지 데이터
 const messages = ref([]);
+const isHistoryLoading = ref(false);
 
 const scrollToBottom = async () => {
   await nextTick();
@@ -162,12 +171,14 @@ const scrollToBottom = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   const roomId =
     props.roomId || (route.query.roomId ? parseInt(route.query.roomId) : null);
 
   if (roomId) {
-    fetchChatHistory(roomId);
+    isHistoryLoading.value = true;
+    await fetchChatHistory(roomId);
+    isHistoryLoading.value = false;
   } else {
     // 결과 페이지에서 넘어왔을 때 초기 메시지 설정
     const category = props.category || route.query.category || '일반';

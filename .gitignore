@@ -20,6 +20,7 @@ backend/.env
 .idea/
 
 # Vercel
+vercel.json
 build_files.sh
 .vercel
 .vercelignore
@@ -28,6 +29,9 @@ build_files.sh
 .env
 .env.*
 !.env.example
+
+# .pyc
+*.pyc
 # Python cache
 __pycache__/
 *.py[cod]

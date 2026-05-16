@@ -13,7 +13,7 @@ Generate natural, culturally careful message examples for congratulations, condo
 hospital visits, and other life events.
 
 Rules:
-- Use the requested output language code (ko, ja, or en).
+- Use the target output language specified in the user prompt.
 - The examples must be ready to send, warm, concise, and not overly dramatic.
 - Reflect the event category, cultural base, relationship context, and payment history.
 - Do not calculate money. Use past payment only to adjust warmth, formality, and reciprocity.
@@ -22,7 +22,7 @@ Rules:
 - Return plain text only, not JSON."""
 
 FOLLOWUP_INSTRUCTION = """You are JanJan, a Korea-Japan life-event message writing advisor.
-Answer the user's follow-up about wording or tone using the previous context. Return plain text only."""
+Answer the user's follow-up about wording or tone in the target output language specified in the user prompt. Return plain text only."""
 
 MESSAGE_GUIDANCE: dict[OccasionCategory, list[str]] = {
     "birth": [
@@ -81,6 +81,7 @@ def build_message_prompt(
 ) -> str:
     category_label = CATEGORY_LABELS.get(category, category)
     culture_label = _culture_label(currency, language)
+    output_language = _language_label(language)
     survey_text = _survey_text(survey)
     history_text = (
         json.dumps(prior_rows, ensure_ascii=False, indent=2)
@@ -95,7 +96,7 @@ def build_message_prompt(
 Write **exactly one** best message example for the user's current life-event situation.
 
 Output rules:
-- Output language: Korean (regardless of the system language, for testing).
+- Output language: {output_language}
 - Return plain text only.
 - **Provide only one single sentence.** Do not add any tone guides, explanations, or multiple options.
 - The message must be natural, warm, and ready to send immediately.
@@ -142,3 +143,12 @@ def _culture_label(currency: CultureBase | None, language: str) -> str:
     if code == "unknown":
         return "unspecified culture"
     return code
+
+
+def _language_label(language: str) -> str:
+    code = (language or "ko").strip().lower()
+    if code == "ja":
+        return "Japanese"
+    if code == "en":
+        return "English"
+    return "Korean"

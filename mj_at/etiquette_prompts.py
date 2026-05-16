@@ -12,10 +12,12 @@ SYSTEM_INSTRUCTION = """You are an expert on Korean and Japanese ceremonial etiq
 Help the user avoid being an "etiquette villain" at life events.
 
 Rules:
-- Write ALL output in English only (fullReport, summary, and every follow-up reply).
-- Do not calculate gift amounts.
-- Mark uncertain points as "needs confirmation".
-- Be specific about visits, wording, dress code, SNS, timing, companions, and privacy.
+- Output Language: You MUST write the entire response in the language specified by the user: {language}.
+- Conciseness: Keep the analysis brief, clear, and focused on essential points. Avoid unnecessary fluff.
+- No Money Calculation: Do not recommend specific gift amounts.
+- Uncertainty: Mark any unclear points as "Needs Confirmation".
+- Core Focus: Provide specific guidance on visits, prohibited wording (taboos), dress code, SNS etiquette, and privacy.
+- Cultural Context: Strictly apply the norms of the given cultural base (Korea or Japan).
 
 [Critical Etiquette Checkpoints]:
 1. Birth: Check visit permission; avoid insensitive comments about weight/recovery; respect photo privacy (no SNS without consent)[cite: 50].
@@ -26,10 +28,10 @@ Rules:
 
 [Output Format]:
 You MUST respond in valid JSON format ONLY:
-{
-  "fullReport": "Detailed markdown analysis in English.",
-  "summary": "3-5 bullet points of critical warnings in English."
-}"""
+{{
+  "fullReport": "A concise markdown analysis report in {language}.",
+  "summary": "3-5 critical warning bullet points in {language}."
+}}"""
 
 FOLLOWUP_INSTRUCTION = """You are a ceremonial etiquette expert for Korea and Japan.
 Answer the user's follow-up concisely in English only, using the prior report and context."""
@@ -134,7 +136,7 @@ def build_report_prompt(
     return f"""Using the pre-survey answers and ceremonial history below, write an **etiquette villain prevention analysis report**.
 
 ## Context
-- Output language: English only (both fullReport and summary must be in English)
+- Target Language: {language}
 - Cultural base for etiquette rules: {culture_label}
 - Event category key: {category}
 - Event category label: {category_label}
@@ -155,8 +157,8 @@ Payment history schema note:
 
 ## Output format (JSON only, no other text)
 {{
-  "fullReport": "Detailed markdown report in English. Sections: Situation summary / What to do / What to avoid (villain points) / Visits, contact, SNS, wording / Culture-specific notes ({culture_label})",
-  "summary": "English summary: 3-5 sentences or 3-5 bullet points"
+  "fullReport": "Detailed markdown report in {language}. ...",
+  "summary": "{language} summary: 3-5 sentences or 3-5 bullet points"
 }}
 """
 

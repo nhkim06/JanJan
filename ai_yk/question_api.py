@@ -477,6 +477,21 @@ CULTURE_ALIASES: Final[dict[str, CultureBase]] = {
     "아직 모르겠음": "unknown",
 }
 
+PLACEHOLDER_TARGET_NAMES: Final[set[str]] = {
+    "?",
+    "??",
+    "???",
+    "??님",
+    "???님",
+    "unknown",
+    "(unknown)",
+    "(not provided)",
+    "not provided",
+    "none",
+    "null",
+    "상대방",
+}
+
 SYSTEM_INSTRUCTION = """
 You are JanJan, a practical etiquette and cost advisor for Korean and Japanese
 congratulation and condolence situations.
@@ -499,11 +514,18 @@ Interpretation rules:
 Answering rules:
 - Answer only in the requested language.
 - Return plain text only.
-- Focus on the user's latest free-form question, but ground every answer in the current
-  pre-survey context and target-specific history.
-- If money is relevant, include a specific amount or a short range and the currency/culture
-  basis. If money is inappropriate, say so and recommend an alternative.
-- Include behavior cautions and message-writing tips when they are relevant to the question.
+- Answer only the user's latest free-form question. Use the current pre-survey context and
+  target-specific history only as evidence for that answer.
+- Write 150 to 300 characters total, including spaces and punctuation.
+- Give the direct answer first, then provide enough context-based reasoning for why that
+  answer fits. Do not use headings or bullet lists unless the user explicitly asks for them.
+- Do not proactively add neighboring advice about money, visits, gifts, attire, photos,
+  public posting, or message wording unless the user explicitly asks about it.
+- If the user asks about money, answer the amount and only the minimal reason or caution.
+  If the user asks about wording, answer with wording and only the minimal tone note.
+  If the user asks about an action, answer that action and only the minimal etiquette caveat.
+- Add an unasked caution only when omitting it would create a clear etiquette, privacy, or
+  safety risk.
 - Prefer choices that reduce burden, protect privacy, and respect refusals such as no visits,
   no money, no photos, no public posting, or no reply pressure.
 - For medical or funeral contexts, be especially conservative about visits, privacy, photos,
@@ -529,6 +551,8 @@ def question(
     if invalid_reason:
         return {"success": False, "answer": invalid_reason}
 
+    resolved_target_name = _resolve_target_name(target_name, histories)
+    histories_for_prompt = _histories_for_prompt(histories, resolved_target_name)
     normalized_category = _normalize_category(category)
     normalized_culture = _normalize_culture_base(culture_base)
     survey_data = survey_answers if survey_answers is not None else presurvey
@@ -536,12 +560,12 @@ def question(
     conversation_memory = memory.strip()
     prompt = _build_prompt(
         language=language,
-        histories=histories,
+        histories=histories_for_prompt,
         user_question=question,
         memory=conversation_memory,
         category=normalized_category,
         raw_category=category,
-        target_name=target_name,
+        target_name=resolved_target_name,
         culture_base=normalized_culture,
         raw_culture_base=culture_base,
         survey_answers=survey_data,
@@ -556,6 +580,66 @@ def question(
         "success": bool(result.get("success")),
         "answer": str(result.get("answer", "")),
     }
+
+
+def _resolve_target_name(target_name: Any, histories: list[dict[str, Any]]) -> str | None:
+    direct_name = _clean_target_name(target_name)
+    if direct_name:
+        return direct_name
+
+    for history in reversed(histories):
+        history_name = _target_name_from_history(history)
+        if history_name:
+            return history_name
+    return None
+
+
+def _histories_for_prompt(
+    histories: list[dict[str, Any]],
+    resolved_target_name: str | None,
+) -> list[dict[str, Any]]:
+    prompt_histories: list[dict[str, Any]] = []
+    for history in histories:
+        prompt_history = dict(history)
+        history_name = _target_name_from_history(prompt_history)
+
+        if history_name:
+            prompt_history["targetName"] = history_name
+        elif resolved_target_name:
+            prompt_history["targetName"] = resolved_target_name
+        elif "targetName" in prompt_history:
+            prompt_history["targetName"] = "unknown"
+
+        prompt_histories.append(prompt_history)
+    return prompt_histories
+
+
+def _target_name_from_history(history: dict[str, Any]) -> str | None:
+    for key in ("targetName", "target_name", "name"):
+        name = _clean_target_name(history.get(key))
+        if name:
+            return name
+    return None
+
+
+def _clean_target_name(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+
+    name = value.strip()
+    if not name:
+        return None
+
+    lower_name = name.lower()
+    if lower_name in PLACEHOLDER_TARGET_NAMES:
+        return None
+
+    name_without_honorific = name[:-1].strip() if name.endswith("님") else name
+    meaningful = name_without_honorific.replace("?", "").replace("�", "").strip()
+    if not meaningful:
+        return None
+
+    return name
 
 
 def _build_prompt(
@@ -581,10 +665,22 @@ to avoid, or how to write a message in this exact congratulation/condolence situ
 Output rules:
 - Answer in language code: {language}
 - Return plain text only.
-- If the user asks broadly, use these short sections: 추천 금액, 행동 지침, 메시지 요령.
-- If the user asks narrowly, answer directly and add only the necessary caution.
+- Length must be 150 to 300 characters total, including spaces and punctuation.
+- Structure the answer as one concise paragraph: direct answer first, then enough evidence
+  from the pre-survey/history/culture context to justify it.
+- Before returning, verify internally that the final answer is within 150 to 300 characters.
+- First infer the user's requested intent from the latest question: amount, action, wording,
+  timing, caution, comparison, or clarification.
+- Answer only that requested intent. Do not include fixed sections or a general guide unless
+  the user explicitly asks for a full guide.
+- Do not add message examples, gift ideas, visit advice, money advice, or behavior checklists
+  unless that is what the user asked for.
+- If a narrow answer needs a critical etiquette, privacy, or safety caveat, add one short
+  caution after the direct answer.
 - Do not answer as a generic category guide. Use the pre-survey answers as the current
   context and the history as target-specific reciprocity context.
+- Do not mention unrelated context just because it appears in the pre-survey, history, or
+  memory.
 - Continue from the conversation memory when the latest question depends on earlier turns.
   Do not repeat already-settled context unless it is needed to answer accurately.
 - If the latest question updates or corrects earlier memory, follow the latest question.
@@ -593,6 +689,13 @@ Output rules:
 
 Current target:
 - target_name: {target_name or "(not provided)"}
+
+Target name handling:
+- If target_name is provided, refer to that person using the exact provided name.
+- If target_name is omitted but target-specific history contains targetName, treat that
+  targetName as the current person.
+- Never write placeholder names such as "??", "???", "unknown", or "(not provided)" in the
+  final answer. If no real name is available, use a neutral phrase in the requested language.
 
 Current event category:
 - key: {category_key}

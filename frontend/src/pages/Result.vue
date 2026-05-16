@@ -1,8 +1,9 @@
 <template>
   <div class="min-h-screen bg-slate-50 flex flex-col items-center p-6 pb-24 font-sans text-slate-800">
+    <!-- Global Data Loading -->
     <div v-if="isLoading" class="flex-1 flex flex-col items-center justify-center">
       <div class="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
-      <p class="text-slate-500 font-medium text-lg">AI is preparing your guide...</p>
+      <p class="text-slate-500 font-medium text-lg">Initializing your custom guide...</p>
     </div>
 
     <div v-else-if="!formDetail" class="flex-1 flex flex-col items-center justify-center">
@@ -32,7 +33,10 @@
            </span>
            <span class="text-[10px] font-bold text-slate-300">Base: {{ formDetail.cultureBase }}</span>
         </div>
-        <h1 class="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
+        <div v-if="loadingSteps.amount" class="space-y-2 animate-pulse">
+           <div class="h-8 bg-slate-100 rounded-lg w-3/4"></div>
+        </div>
+        <h1 v-else class="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
           {{ aiReport.intro || `Custom guide for ${formDetail.targetName}.` }}
         </h1>
       </div>
@@ -41,7 +45,12 @@
       <div class="bg-indigo-600 rounded-[32px] p-10 shadow-xl shadow-indigo-100 flex flex-col items-center justify-center text-center text-white relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,_rgba(255,255,255,0.1),_transparent)]"></div>
         <h2 class="text-sm font-bold opacity-80 mb-2 uppercase tracking-widest">Recommended Amount</h2>
-        <div class="flex items-baseline space-x-2">
+        
+        <div v-if="loadingSteps.amount" class="flex flex-col items-center animate-pulse">
+           <div class="h-16 bg-white/20 rounded-2xl w-48 mb-4"></div>
+           <div class="h-4 bg-white/10 rounded w-24"></div>
+        </div>
+        <div v-else class="flex items-baseline space-x-2">
           <span class="text-6xl md:text-7xl font-black tracking-tighter">
             {{ (aiReport.amount || 0).toLocaleString() }}
           </span>
@@ -57,11 +66,19 @@
             <font-awesome-icon icon="fa-solid fa-shield-halved" class="mr-2" />
             Etiquette Pitfalls
           </div>
-          <div class="space-y-3">
+          
+          <div v-if="loadingSteps.etiquette" class="space-y-3 animate-pulse">
+             <div v-for="i in 3" :key="i" class="flex items-center">
+                <div class="w-2 h-2 bg-rose-200 rounded-full mr-2"></div>
+                <div class="h-4 bg-rose-100 rounded w-full"></div>
+             </div>
+          </div>
+          <div v-else class="space-y-3">
              <div v-for="(tip, idx) in parsedVillainTips" :key="idx" class="flex items-start">
                <span class="text-rose-400 mt-1 mr-2 flex-shrink-0">•</span>
                <p class="text-sm md:text-base font-bold text-rose-900 leading-snug">{{ tip }}</p>
              </div>
+             <p v-if="!parsedVillainTips.length && !loadingSteps.etiquette" class="text-xs text-rose-300 italic">No specific tips available yet.</p>
           </div>
         </div>
 
@@ -71,13 +88,18 @@
             <font-awesome-icon icon="fa-solid fa-pen-nib" class="mr-2" />
             Message Template
           </div>
-          <div class="space-y-4">
+          
+          <div v-if="loadingSteps.message" class="space-y-4 animate-pulse">
+             <div v-for="i in 2" :key="i" class="p-4 bg-white/50 rounded-2xl h-16"></div>
+          </div>
+          <div v-else class="space-y-4">
              <div v-for="(msg, idx) in parsedMessages" :key="idx" class="bg-white/80 rounded-2xl p-4 border border-emerald-100/50 shadow-sm relative group cursor-pointer hover:border-emerald-300 transition-all active:scale-95" @click="copyToClipboard(msg)">
                <p class="text-xs md:text-sm font-bold text-emerald-900 italic leading-relaxed">"{{ msg }}"</p>
                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                  <font-awesome-icon icon="fa-solid fa-copy" class="text-emerald-400 text-[10px]" />
                </div>
              </div>
+             <p v-if="!parsedMessages.length && !loadingSteps.message" class="text-xs text-emerald-300 italic">No templates available yet.</p>
           </div>
         </div>
       </div>
@@ -94,14 +116,20 @@
            </button>
         </div>
 
+        <div v-if="loadingSteps.etiquette" class="space-y-3 animate-pulse">
+           <div class="h-4 bg-slate-100 rounded w-full"></div>
+           <div class="h-4 bg-slate-100 rounded w-5/6"></div>
+           <div class="h-4 bg-slate-100 rounded w-4/6"></div>
+        </div>
         <div 
+          v-else
           :class="[
             'text-sm md:text-base leading-relaxed text-slate-600 font-medium whitespace-pre-wrap transition-all duration-500 overflow-hidden',
             isReportExpanded ? 'max-h-[2000px]' : 'max-h-40 relative'
           ]"
         >
-          {{ aiReport.fullReport }}
-          <div v-if="!isReportExpanded" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent"></div>
+          {{ aiReport.fullReport || 'Detailed report is being generated...' }}
+          <div v-if="!isReportExpanded && aiReport.fullReport" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent"></div>
         </div>
       </div>
 
@@ -121,8 +149,8 @@
           <ChatAI
             is-component
             :category="categoryName"
-            :target-name="formDetail.targetName"
-            :culture-base="formDetail.cultureBase"
+            :target-name="formDetail?.targetName"
+            :culture-base="formDetail?.cultureBase"
             :room-id="(route.query.roomId as string)"
           />
         </div>
@@ -142,7 +170,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import surveyData from '@/assets/surveyData.json';
 import ChatAI from './ChatAI.vue';
@@ -155,6 +183,12 @@ const chatSection = ref<HTMLElement | null>(null);
 const isLoading = ref(true);
 const isReportExpanded = ref(false);
 const formDetail = ref<any>(null);
+
+const loadingSteps = reactive({
+  amount: false,
+  etiquette: false,
+  message: false
+});
 
 const aiReport = ref({
   intro: '',
@@ -192,10 +226,9 @@ const parsedMessages = computed(() => {
   return raw.split('\n').map((line: string) => line.replace(/^[•\-\*\d\.]+\s*|^["']|["']$/g, '').trim()).filter(Boolean);
 });
 
-const parseAnalysisResults = (chatItems: any[]) => {
-  if (chatItems.length >= 1 && chatItems[0].answer) {
-    const amountItem = chatItems[0].answer;
-    const lines = amountItem.split('\n').filter((l: string) => l.trim());
+const parseStepResult = (step: number, answer: string) => {
+  if (step === 0) { // Amount
+    const lines = answer.split('\n').filter((l: string) => l.trim());
     if (lines.length >= 2) {
       aiReport.value.intro = lines[0];
       const amountMatch = lines[1].match(/(\d+)\s*(\w+)/);
@@ -204,65 +237,111 @@ const parseAnalysisResults = (chatItems: any[]) => {
         aiReport.value.currency = amountMatch[2];
       }
     } else {
-      aiReport.value.intro = amountItem;
+      aiReport.value.intro = answer;
     }
-  }
-
-  if (chatItems.length >= 2 && chatItems[1].answer) {
+  } else if (step === 1) { // Etiquette
     try {
-      const etiquetteData = JSON.parse(chatItems[1].answer);
+      const etiquetteData = JSON.parse(answer);
       aiReport.value.fullReport = etiquetteData.fullReport || etiquetteData.answer || '';
       aiReport.value.villainPreventionSummary = etiquetteData.summary || '';
     } catch (e) {
-      aiReport.value.fullReport = chatItems[1].answer;
+      aiReport.value.fullReport = answer;
     }
-  }
-
-  if (chatItems.length >= 3 && chatItems[2].answer) {
-    aiReport.value.messageGuide = chatItems[2].answer;
+  } else if (step === 2) { // Message
+    aiReport.value.messageGuide = answer;
   }
 };
 
 onMounted(async () => {
-  const roomId = route.query.roomId;
-  if (roomId) {
-    try {
-      // 1. Fetch Form Details
+  let roomId = route.query.roomId as string;
+  const pendingFormStr = sessionStorage.getItem('pendingForm');
+
+  try {
+    // 1. If no roomId but pending data, create the form first
+    if (!roomId && pendingFormStr) {
+      const pendingData = JSON.parse(pendingFormStr);
+      isLoading.value = false; // Show card structure immediately
+      loadingSteps.amount = true;
+      loadingSteps.etiquette = true;
+      loadingSteps.message = true;
+
+      const createResponse = await apiClient.post('/form/new', pendingData);
+      if (createResponse.data.success) {
+        roomId = createResponse.data.formId;
+        // Update URL query without refresh
+        router.replace({ 
+          query: { ...route.query, roomId },
+          params: route.params 
+        });
+        sessionStorage.removeItem('pendingForm');
+      } else {
+        throw new Error('Failed to save form data');
+      }
+    }
+
+    if (roomId) {
+      // 2. Fetch Form Details
       const formResponse = await apiClient.get(`/form/${roomId}`);
       if (formResponse.data.success) {
         formDetail.value = formResponse.data.form;
       }
+      
+      // Stop global loading if it was still on
+      isLoading.value = false;
 
-      // 2. Fetch or Trigger Analysis
+      // 3. Fetch or Trigger Analysis
       const chatResponse = await apiClient.get(`/chat/list?formId=${roomId}`);
       if (chatResponse.data.success) {
         let chatItems = chatResponse.data.chatItems;
         
-        // If analysis not complete, trigger missing steps
-        if (chatItems.length < 3) {
-          const stepsToRun = 3 - chatItems.length;
-          for (let i = 0; i < stepsToRun; i++) {
-            const newChatResponse = await apiClient.post('/chat/new', {
-              formId: roomId,
-              question: "__CHAT_ITEM__"
-            });
-            if (newChatResponse.data.success) {
-              chatItems.push({
-                answer: newChatResponse.data.answer
-              });
-            }
-          }
+        // Parse existing items
+        chatItems.forEach((item: any, idx: number) => {
+          if (idx < 3) parseStepResult(idx, item.answer);
+        });
+
+        // Trigger missing steps sequentially
+        const currentCount = chatItems.length;
+        
+        // Set loading states for what's missing
+        if (currentCount < 1) loadingSteps.amount = true;
+        if (currentCount < 2) loadingSteps.etiquette = true;
+        if (currentCount < 3) loadingSteps.message = true;
+
+        if (currentCount < 1) {
+          const res = await apiClient.post('/chat/new', { formId: roomId, question: "__CHAT_ITEM__" });
+          if (res.data.success) parseStepResult(0, res.data.answer);
+          loadingSteps.amount = false;
+        } else {
+          loadingSteps.amount = false;
         }
         
-        parseAnalysisResults(chatItems);
+        if (currentCount < 2) {
+          const res = await apiClient.post('/chat/new', { formId: roomId, question: "__CHAT_ITEM__" });
+          if (res.data.success) parseStepResult(1, res.data.answer);
+          loadingSteps.etiquette = false;
+        } else {
+          loadingSteps.etiquette = false;
+        }
+
+        if (currentCount < 3) {
+          const res = await apiClient.post('/chat/new', { formId: roomId, question: "__CHAT_ITEM__" });
+          if (res.data.success) parseStepResult(2, res.data.answer);
+          loadingSteps.message = false;
+        } else {
+          loadingSteps.message = false;
+        }
       }
-    } catch (error) {
-      console.error('Error loading result data:', error);
-    } finally {
+    } else {
       isLoading.value = false;
     }
-  } else {
+  } catch (error) {
+    console.error('Error in Result page lifecycle:', error);
+    alert('Analysis failed. Please check your connection or try again.');
     isLoading.value = false;
+    // Reset all loading states on error
+    loadingSteps.amount = false;
+    loadingSteps.etiquette = false;
+    loadingSteps.message = false;
   }
 });
 

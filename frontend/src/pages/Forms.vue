@@ -244,35 +244,28 @@ const handleNext = async () => {
     currentStep.value++;
   } else {
     try {
-      isSubmitting.value = true;
       const formattedAnswers = questions.value.map((q: any, idx: number) => ({
         question: q.question,
         answer: answers.value[idx] === 'Not sure' || answers.value[idx] === '모르겠음' ? null : answers.value[idx],
       }));
 
-      const response = await apiClient.post('/form/new', {
+      // Store data for Result page to pick up
+      const pendingForm = {
         answers: formattedAnswers,
         targetName: preSurveyData.value.targetName,
         cultureBase: preSurveyData.value.cultureBase,
         category: category.value
-      });
+      };
+      sessionStorage.setItem('pendingForm', JSON.stringify(pendingForm));
 
-      if (response.data.success) {
-        router.push({
-          name: 'result',
-          params: { category: category.value },
-          query: {
-            targetName: preSurveyData.value.targetName,
-            cultureBase: preSurveyData.value.cultureBase,
-            roomId: response.data.formId,
-          },
-        });
-      }
+      // Navigate immediately
+      router.push({ 
+        name: 'result',
+        params: { category: category.value }
+      });
     } catch (error) {
-      console.error('Error saving form:', error);
-      alert('An error occurred while saving data.');
-    } finally {
-      isSubmitting.value = false;
+      console.error('Error preparing result transition:', error);
+      alert('An error occurred. Please try again.');
     }
   }
 };

@@ -33,8 +33,14 @@ class FormCreateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        form = serializer.save()
-        return Response({"success": True, "formId": form.id})
+        try:
+            form = serializer.save()
+            return Response({"success": True, "formId": form.id})
+        except Exception as exc:
+            return Response(
+                {"success": False, "detail": f"Internal server error during form save: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class FormListView(APIView):

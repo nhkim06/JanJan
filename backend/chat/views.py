@@ -9,10 +9,10 @@ from rest_framework.views import APIView
 from form.models import Form
 from history.models import History
 from utils.gemini import (
-    __wrapper_ai_yk_question as ai_yk_question_wrapper,
-    __wrapper_mj_etiquette as mj_etiquette_wrapper,
-    __wrapper_mj_message as mj_message_wrapper,
-    __wrapper_ai_yk_payment as ai_yk_payment_wrapper,
+    get_ai_yk_payment_report,
+    get_ai_yk_question_answer,
+    get_mj_etiquette_answer,
+    get_mj_message_answer,
 )
 
 from .models import ChatItem
@@ -142,35 +142,29 @@ class ChatCreateView(APIView):
             memory = build_chat_memory(previous_chat_items)
             cnt = previous_chat_items.count()
             if cnt == 0:
-                gemini_result = ai_yk_payment_wrapper(
+                gemini_result = get_ai_yk_payment_report(
                     get_user_language(request.user),
                     histories,
                     chat_item.question,
-                    memory,
-                    current_context=build_current_context(form, category),
                     category=category,
-                    target_name=form.target_name,
-                    culture_base=form.culture_base,
                 )
 
             elif cnt == 1:
-                gemini_result = mj_etiquette_wrapper(
+                gemini_result = get_mj_etiquette_answer(
                     get_user_language(request.user),
                     histories,
                     chat_item.question,
                     memory,
-                    category,
                 )
             elif cnt == 2:
-                gemini_result = mj_message_wrapper(
+                gemini_result = get_mj_message_answer(
                     get_user_language(request.user),
                     histories,
                     chat_item.question,
                     memory,
-                    category,
                 )
             else:
-                gemini_result = ai_yk_question_wrapper(
+                gemini_result = get_ai_yk_question_answer(
                     get_user_language(request.user),
                     histories,
                     chat_item.question,

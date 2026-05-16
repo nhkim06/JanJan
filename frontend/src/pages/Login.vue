@@ -112,6 +112,8 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const apiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL || 'https://janjan-backend.vercel.app';
 
 // 현재 선택된 언어 상태 ('ko' | 'en' | 'ja')
 const currentLang = ref('ko');
@@ -158,7 +160,7 @@ const t = computed(() => languages[currentLang.value]);
 const handleGoogleLogin = () => {
   console.log(`[${currentLang.value.toUpperCase()}] Google 로그인 시도...`);
   // 백엔드 구글 로그인 엔드포인트로 리다이렉트
-  window.location.href = 'https://janjan-backend.vercel.app/auth/login';
+  window.location.href = `${apiBaseUrl}/auth/login`;
 };
 </script>
 

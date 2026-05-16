@@ -54,21 +54,17 @@ router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   
   // URL 쿼리 파라미터 확인
-  const tokenInUrl = to.query.token as string;
   const success = to.query.success === 'True' || to.query.success === 'true';
   const hasData = to.query.hasData === 'True' || to.query.hasData === 'true';
 
-  // 1. 로그인 콜백 처리 (토큰이 있거나, 성공했지만 데이터가 없는 경우)
+  // 1. 로그인 콜백 처리
   if (success) {
-    if (tokenInUrl) {
-      console.log('기존 유저 로그인 성공: 토큰 저장 중...');
-      authStore.setToken(tokenInUrl);
+    if (hasData) {
+      authStore.setAuthenticated(true);
     }
 
     // 쿼리 정리 및 리다이렉트 설정
     const query: any = { ...to.query };
-    delete query.token;
-    delete query.refresh;
     delete query.success;
     delete query.hasData;
 

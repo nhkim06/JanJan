@@ -9,7 +9,7 @@ class ChatCreateSerializer(serializers.Serializer):
 
 
 class ChatListQuerySerializer(serializers.Serializer):
-    formId = serializers.IntegerField()
+    formId = serializers.IntegerField(required=False)
 
 
 class ChatItemReadSerializer(serializers.ModelSerializer):

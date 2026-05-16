@@ -1,21 +1,19 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth';
 
+const apiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL || 'https://janjan-backend.vercel.app';
+
 const apiClient = axios.create({
-  baseURL: 'https://janjan-backend.vercel.app',
-  withCredentials: true, // 세션 쿠키를 포함하여 요청 (회원가입 세션 유지용)
+  baseURL: apiBaseUrl,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// 요청 인터셉터: 토큰 자동 주입
 apiClient.interceptors.request.use(
   (config) => {
-    const authStore = useAuthStore();
-    if (authStore.token) {
-      config.headers.Authorization = `Bearer ${authStore.token}`;
-    }
     return config;
   },
   (error) => {
@@ -23,7 +21,6 @@ apiClient.interceptors.request.use(
   }
 );
 
-// 응답 인터셉터: 401 에러(토큰 만료) 처리
 apiClient.interceptors.response.use(
   (response) => {
     return response;

@@ -1,3 +1,4 @@
+
 # Python
 __pycache__/
 *.py[cod]
@@ -19,7 +20,11 @@ backend/.env
 .idea/
 
 # Vercel
-vercel.json
 build_files.sh
 .vercel
 .vercelignore
+
+# Environment variables
+.env
+.env.*
+!.env.example

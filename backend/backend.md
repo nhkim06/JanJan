@@ -238,7 +238,7 @@ Google 로그인 링크로 redirect 시킵니다.
   "targetName": "홍길동",
   "received": true,
   "value": 50000,
-  "cultureBase": "ko",
+  "currency": "ko",
   "category": "결혼",
   "date": "2026-05-16"
 }
@@ -264,7 +264,7 @@ Google 로그인 링크로 redirect 시킵니다.
       "targetName": "홍길동",
       "received": true,
       "value": 50000,
-      "cultureBase": "ko",
+      "currency": "ko",
       "category": "결혼",
       "date": "2026-05-16",
       "createdAt": "2026-05-17T00:40:00+09:00",
@@ -284,7 +284,7 @@ Google 로그인 링크로 redirect 시킵니다.
     "targetName": "홍길동",
     "received": true,
     "value": 50000,
-    "cultureBase": "ko",
+    "currency": "ko",
     "category": "결혼",
     "date": "2026-05-16",
     "createdAt": "2026-05-17T00:40:00+09:00",
@@ -302,7 +302,7 @@ Google 로그인 링크로 redirect 시킵니다.
   "targetName": "홍길동",
   "received": false,
   "value": 70000,
-  "cultureBase": "ko",
+  "currency": "ko",
   "category": "축의금",
   "date": "2026-05-17"
 }
@@ -316,7 +316,7 @@ Google 로그인 링크로 redirect 시킵니다.
     "targetName": "홍길동",
     "received": false,
     "value": 70000,
-    "cultureBase": "ko",
+    "currency": "ko",
     "category": "축의금",
     "date": "2026-05-17",
     "createdAt": "2026-05-17T00:40:00+09:00",

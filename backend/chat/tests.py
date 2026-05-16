@@ -50,7 +50,7 @@ class ChatCreateTests(TestCase):
             target_name="Yuna",
             received=True,
             value=50000,
-            culture_base="ko",
+            currency="ko",
             category="Money",
             date=date(2026, 5, 16),
         )
@@ -59,7 +59,7 @@ class ChatCreateTests(TestCase):
             target_name="Different target",
             received=False,
             value=70000,
-            culture_base="ja",
+            currency="ja",
             category="Filtered out",
             date=date(2026, 5, 17),
         )
@@ -68,7 +68,7 @@ class ChatCreateTests(TestCase):
             target_name="Yuna",
             received=True,
             value=90000,
-            culture_base="ko",
+            currency="ko",
             category="Other user",
             date=date(2026, 5, 18),
         )
@@ -119,7 +119,7 @@ class ChatCreateTests(TestCase):
                     "targetName": self.history.target_name,
                     "received": self.history.received,
                     "value": self.history.value,
-                    "cultureBase": self.history.culture_base,
+                    "currency": self.history.currency,
                     "category": self.history.category,
                     "date": self.history.date.isoformat(),
                 }

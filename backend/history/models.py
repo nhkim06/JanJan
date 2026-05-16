@@ -12,7 +12,7 @@ class History(models.Model):
     target_name = models.CharField(max_length=255)
     received = models.BooleanField(default=True)
     value = models.IntegerField()
-    culture_base = models.CharField(max_length=20, default="ko")
+    currency = models.CharField(max_length=20, default="ko")
     category = models.TextField()
     date = models.DateField(default=timezone.localdate)
     created_at = models.DateTimeField(auto_now_add=True)

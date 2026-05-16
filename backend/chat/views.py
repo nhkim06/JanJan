@@ -34,7 +34,7 @@ def format_history_for_gemini(history):
         "targetName": history.target_name,
         "received": history.received,
         "value": history.value,
-        "cultureBase": history.culture_base,
+        "currency": history.currency,
         "category": history.category,
         "date": history.date.isoformat(),
     }

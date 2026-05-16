@@ -18,51 +18,56 @@ const isLoading = ref(true);
 
 const peopleData = ref<any[]>([]);
 
+const fetchFormsAndHistories = async () => {
+  try {
+    const [formsRes, historiesRes] = await Promise.all([
+      apiClient.get('/form/list'),
+      apiClient.get('/history/list')
+    ]);
+
+    const grouped: Record<string, any> = {};
+
+    // 1. 폼 데이터 가공
+    if (formsRes.data.success) {
+      formsRes.data.forms.forEach((form: any) => {
+        if (!grouped[form.targetName]) {
+          grouped[form.targetName] = { id: form.targetName, name: form.targetName, itemsCount: 0 };
+        }
+        grouped[form.targetName].itemsCount++;
+      });
+    }
+
+    // 2. 히스토리 데이터 가공
+    if (historiesRes.data.success) {
+      historiesRes.data.histories.forEach((h: any) => {
+        if (!grouped[h.target_name]) {
+          grouped[h.target_name] = { id: h.target_name, name: h.target_name, itemsCount: 0 };
+        }
+        grouped[h.target_name].itemsCount++;
+      });
+    }
+
+    peopleData.value = Object.values(grouped);
+  } catch (error) {
+    console.error('데이터 로드 에러:', error);
+  }
+};
+
 onMounted(async () => {
-  // 회원가입 모달 처리
   if (route.query.isNewUser === 'true') {
     isSignUpModalOpen.value = true;
     router.replace({ query: {} });
   }
   
   try {
-    // 폼 목록 및 프로필 정보 로드
     await Promise.all([
-      fetchForms(),
+      fetchFormsAndHistories(),
       authStore.isAuthenticated ? fetchUserProfile() : Promise.resolve()
     ]);
-  } catch (error) {
-    console.error('초기 데이터 로딩 에러:', error);
   } finally {
-    // 자연스러운 전환을 위해 약간의 지연 후 로딩 해제
-    setTimeout(() => {
-      isLoading.value = false;
-    }, 300);
+    setTimeout(() => { isLoading.value = false; }, 300);
   }
 });
-
-const fetchForms = async () => {
-  try {
-    const response = await apiClient.get('/form/list');
-    if (response.data.success) {
-      // targetName 기준으로 그룹화
-      const grouped = response.data.forms.reduce((acc: any, form: any) => {
-        if (!acc[form.targetName]) {
-          acc[form.targetName] = {
-            id: form.targetName,
-            name: form.targetName,
-            chatRooms: []
-          };
-        }
-        acc[form.targetName].chatRooms.push(form);
-        return acc;
-      }, {});
-      peopleData.value = Object.values(grouped);
-    }
-  } catch (error) {
-    console.error('폼 목록 조회 에러:', error);
-  }
-};
 
 const fetchUserProfile = async () => {
   try {

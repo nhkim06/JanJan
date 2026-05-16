@@ -227,13 +227,9 @@ import ChatAI from './ChatAI.vue';
 const route = useRoute();
 const router = useRouter();
 
-<<<<<<< HEAD
 const chatSection = ref(null);
 
 const category = computed(() => route.params.category || 'childbirth');
-=======
-const category = computed(() => route.params.category || 'birth');
->>>>>>> dev/question_api
 const targetName = computed(() => route.query.targetName || '상대방');
 const cultureBase = computed(() => route.query.cultureBase || '미지정');
 const categoryName = computed(

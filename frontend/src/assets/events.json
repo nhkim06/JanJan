@@ -1,6 +1,6 @@
 {
-  "경사": {
-    "title": "경사 상황 선택",
+  "축하": {
+    "title": "축하 상황 선택",
     "description": "축하할 상황을 선택해주세요",
     "options": [
       { "title": "출산", "icon": "fa-solid fa-baby" },

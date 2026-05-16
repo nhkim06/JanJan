@@ -54,6 +54,18 @@
         >
           {{ option }}
         </button>
+
+        <button
+          @click="selectDontKnowAndNext"
+          :class="[
+            'w-full bg-white rounded-2xl py-4 px-6 text-left font-bold border text-base transition-all duration-150',
+            answers[currentStep] === '모르겠음'
+              ? 'border-indigo-600 text-indigo-600 shadow-sm bg-indigo-50/10'
+              : 'border-slate-100 text-slate-400 hover:border-slate-200 bg-slate-50/30 font-medium',
+          ]"
+        >
+          모르겠음
+        </button>
       </div>
     </div>
 
@@ -67,21 +79,24 @@
 
       <div class="flex gap-3 w-full">
         <button
-          v-if="currentStep > 0"
           @click="prevStep"
-          class="flex-1 bg-indigo-600 text-white font-bold py-4 rounded-3xl active:scale-[0.98] transition-transform text-base"
+          :disabled="currentStep === 0"
+          :class="[
+            'flex-1 font-bold py-4 rounded-3xl transition-all text-base border',
+            currentStep === 0
+              ? 'bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed shadow-none'
+              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 active:scale-[0.98]',
+          ]"
         >
           이전
         </button>
 
-        <div v-else class="flex-1"></div>
-
         <button
           @click="nextStep"
-          :disabled="!answers[currentStep]"
+          :disabled="answers[currentStep] === undefined"
           :class="[
             'flex-1 font-bold py-4 rounded-3xl text-white shadow-lg active:scale-[0.98] transition-all text-base',
-            answers[currentStep]
+            answers[currentStep] !== undefined
               ? 'bg-indigo-600 shadow-indigo-600/20'
               : 'bg-slate-300 cursor-not-allowed shadow-none',
           ]"
@@ -114,19 +129,29 @@ const currentQuestion = computed(() => questions.value[currentStep.value]);
 
 const answers = ref([]);
 
-// 선택 목록 클릭 시 작동
+// 일반 선택 목록 클릭 시 작동
 const selectAnswerAndNext = (option) => {
   answers.value[currentStep.value] = option;
-
-  // 시각적 피드백용 미세 딜레이
   setTimeout(() => {
     nextStep();
   }, 150);
 };
 
-// 1. [요구사항] 건너뛰기 시 기존 선택 해제 후 다음 단계로
+// [요구사항] '모르겠음' 선택 시 건너뛰기와 동일하게 처리
+const selectDontKnowAndNext = () => {
+  // 1. 내부 상태를 '모르겠음' 문자열로 주어 UI 체크 표시 유지용 피드백 제공 후 넘어갈 때 null 처리
+  answers.value[currentStep.value] = '모르겠음';
+
+  setTimeout(() => {
+    // 2. 건너뛰기 로직인 null 처리를 한 뒤 다음 단계로 전송
+    answers.value[currentStep.value] = null;
+    nextStep();
+  }, 150);
+};
+
+// 건너뛰기 기능 (답변을 null로 밀어버림)
 const skipStep = () => {
-  answers.value[currentStep.value] = null; // 선택했던 항목을 null로 밀어버려 해제함
+  answers.value[currentStep.value] = null;
   nextStep();
 };
 

@@ -65,14 +65,14 @@
 
         <section class="space-y-4">
           <button
-            @click="router.push('/events/경사')"
+            @click="router.push('/events/축하')"
             class="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-[0_10px_30px_rgb(0,0,0,0.02)] border border-slate-50 hover:border-indigo-100 hover:shadow-[0_12px_35px_rgb(99,102,241,0.05)] active:scale-[0.99] transition-all text-left group"
           >
             <div>
               <h2
                 class="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1"
               >
-                경사
+                축하
               </h2>
               <p class="text-xs font-medium text-slate-400">
                 결혼, 승진, 출산 등

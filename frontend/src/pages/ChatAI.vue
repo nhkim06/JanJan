@@ -29,64 +29,86 @@
         isComponent ? '' : '',
       ]"
     >
-      <div v-for="(msg, index) in messages" :key="index" class="w-full">
-        <div
-          v-if="msg.sender === 'user'"
-          class="flex flex-col items-end pl-12 md:pl-24"
-        >
+      <!-- 로딩 상태 스피너 -->
+      <div
+        v-if="isHistoryLoading"
+        class="w-full flex items-center justify-center py-10 flex-1"
+      >
+        <div class="animate-pulse flex flex-col items-center">
           <div
-            class="flex items-center gap-1 mb-1 text-xs text-slate-400 font-medium"
-          >
-            <span>나</span>
-            <font-awesome-icon icon="fa-solid fa-user" class="w-3 h-3" />
-          </div>
-          <div
-            class="bg-gradient-to-br from-indigo-600 to-indigo-500 text-white rounded-3xl rounded-tr-sm py-3 px-5 text-[15px] md:text-base font-medium leading-relaxed shadow-sm shadow-indigo-600/10 whitespace-pre-wrap break-all"
-          >
-            {{ msg.text }}
-          </div>
+            class="w-8 h-8 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3"
+          ></div>
+          <p class="text-sm font-medium text-slate-400">
+            대화 내역을 불러오는 중...
+          </p>
         </div>
+      </div>
 
-        <div v-else class="flex flex-col items-start pr-12 md:pr-24">
+      <!-- 대화 메시지 목록 영역 (문제가 된 template v-else 부분을 div 계층으로 안정화) -->
+      <div v-else class="w-full space-y-6">
+        <div v-for="(msg, index) in messages" :key="index" class="w-full">
+          <!-- 유저 메시지 -->
           <div
-            class="flex items-center gap-1.5 mb-1.5 text-xs text-indigo-600 font-bold"
+            v-if="msg.sender === 'user'"
+            class="flex flex-col items-end pl-12 md:pl-24"
           >
-            <font-awesome-icon
-              icon="fa-solid fa-wand-magic-sparkles"
-              class="w-3.5 h-3.5 animate-pulse"
-            />
-            <span>에티켓 AI</span>
+            <div
+              class="flex items-center gap-1 mb-1 text-xs text-slate-400 font-medium"
+            >
+              <span>나</span>
+              <font-awesome-icon icon="fa-solid fa-user" class="w-3 h-3" />
+            </div>
+            <div
+              class="bg-gradient-to-br from-indigo-600 to-indigo-500 text-white rounded-3xl rounded-tr-sm py-3 px-5 text-[15px] md:text-base font-medium leading-relaxed shadow-sm shadow-indigo-600/10 whitespace-pre-wrap break-all"
+            >
+              {{ msg.text }}
+            </div>
           </div>
 
-          <div class="flex items-start gap-2.5 w-full">
+          <!-- AI 답변 메시지 -->
+          <div v-else class="flex flex-col items-start pr-12 md:pr-24">
             <div
-              class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-slate-100 shadow-sm flex-shrink-0 flex items-center justify-center text-indigo-400"
+              class="flex items-center gap-1.5 mb-1.5 text-xs text-indigo-600 font-bold"
             >
-              <font-awesome-icon icon="fa-solid fa-wand-magic-sparkles" />
+              <font-awesome-icon
+                icon="fa-solid fa-wand-magic-sparkles"
+                class="w-3.5 h-3.5 animate-pulse"
+              />
+              <span>에티켓 AI</span>
             </div>
-            <div class="w-full">
+
+            <div class="flex items-start gap-2.5 w-full">
               <div
-                v-if="msg.isLoading"
-                class="flex gap-1.5 items-center bg-white border border-slate-100 rounded-3xl rounded-tl-sm py-4 px-5 shadow-sm min-h-[50px]"
+                class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-slate-110 shadow-sm flex-shrink-0 flex items-center justify-center text-indigo-400"
               >
-                <span
-                  class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                  style="animation-delay: 0ms"
-                ></span>
-                <span
-                  class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                  style="animation-delay: 150ms"
-                ></span>
-                <span
-                  class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                  style="animation-delay: 300ms"
-                ></span>
+                <font-awesome-icon icon="fa-solid fa-wand-magic-sparkles" />
               </div>
-              <div
-                v-else
-                class="bg-white border border-slate-100 text-slate-800 rounded-3xl rounded-tl-sm py-3 px-5 text-[15px] md:text-base font-medium leading-relaxed shadow-sm whitespace-pre-wrap break-all"
-              >
-                {{ msg.text }}
+              <div class="w-full">
+                <!-- AI 로딩 중 스켈레톤 -->
+                <div
+                  v-if="msg.isLoading"
+                  class="flex gap-1.5 items-center bg-white border border-slate-100 rounded-3xl rounded-tl-sm py-4 px-5 shadow-sm min-h-[50px]"
+                >
+                  <span
+                    class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                    style="animation-delay: 0ms"
+                  ></span>
+                  <span
+                    class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                    style="animation-delay: 150ms"
+                  ></span>
+                  <span
+                    class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                    style="animation-delay: 300ms"
+                  ></span>
+                </div>
+                <!-- AI 답변 본문 -->
+                <div
+                  v-else
+                  class="bg-white border border-slate-100 text-slate-800 rounded-3xl rounded-tl-sm py-3 px-5 text-[15px] md:text-base font-medium leading-relaxed shadow-sm whitespace-pre-wrap break-all"
+                >
+                  {{ msg.text }}
+                </div>
               </div>
             </div>
           </div>
@@ -94,6 +116,7 @@
       </div>
     </div>
 
+    <!-- 하단 입력 폼 영역 -->
     <div
       :class="[
         'w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-transparent px-6 pt-2',
@@ -133,7 +156,7 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { peopleData } from '../data/mockData';
+import apiClient from '../utils/api';
 
 const props = defineProps({
   isComponent: {
@@ -149,11 +172,9 @@ const props = defineProps({
 const route = useRoute();
 const messageContainer = ref(null);
 
-// 입력값 상태 관리
 const inputMessage = ref('');
-
-// 메시지 데이터
 const messages = ref([]);
+const isHistoryLoading = ref(false);
 
 const scrollToBottom = async () => {
   await nextTick();
@@ -162,74 +183,68 @@ const scrollToBottom = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   const roomId =
     props.roomId || (route.query.roomId ? parseInt(route.query.roomId) : null);
 
   if (roomId) {
-    // 1. 기존 대화방 진입 시: 해당 roomId의 history 로드
-    let foundHistory = null;
-    peopleData.forEach((p) => {
-      const room = p.chatRooms.find((r) => r.roomId === parseInt(roomId));
-      if (room) {
-        foundHistory = room.history;
+    isHistoryLoading.value = true;
+    await fetchChatHistory(roomId);
+    isHistoryLoading.value = false;
+  } else {
+    const category = props.category || route.query.category || '일반';
+    const targetName = props.targetName || route.query.targetName || '상대방';
+    const cultureBase = props.cultureBase || route.query.cultureBase || '한국';
+
+    const initialUserMessage = `지금 ${cultureBase}에서 ${category} 상황인 ${targetName}님과의 에티켓에 대해 더 자세히 알려줘.`;
+
+    messages.value.push({ sender: 'user', text: initialUserMessage });
+    messages.value.push({ sender: 'ai', isLoading: true, text: '' });
+
+    setTimeout(() => {
+      const aiMessageIndex = messages.value.findIndex(
+        (m) => m.sender === 'ai' && m.isLoading,
+      );
+      if (aiMessageIndex !== -1) {
+        messages.value[aiMessageIndex].isLoading = false;
+        messages.value[aiMessageIndex].text =
+          `${targetName}님과의 ${category} 상황이시군요! ${cultureBase} 문화권을 기준으로 더 구체적인 조언을 드릴게요.\n\n어떤 점이 가장 궁금하신가요?`;
+        scrollToBottom();
       }
-    });
-
-    if (foundHistory) {
-      messages.value = [...foundHistory];
-      scrollToBottom();
-      return;
-    }
+    }, 1000);
   }
-
-  // 2. 결과 페이지에서 넘어왔을 때 (또는 새로운 대화 시작 시)
-  const category = props.category || route.query.category || '일반';
-  const targetName = props.targetName || route.query.targetName || '상대방';
-  const cultureBase = props.cultureBase || route.query.cultureBase || '한국';
-
-  const initialUserMessage = `지금 ${cultureBase}에서 ${category} 상황인 ${targetName}님과의 에티켓에 대해 더 자세히 알려줘.`;
-
-  messages.value.push({
-    sender: 'user',
-    text: initialUserMessage,
-  });
-
-  messages.value.push({
-    sender: 'ai',
-    isLoading: true,
-    text: '',
-  });
-
-  scrollToBottom();
-
-  setTimeout(() => {
-    const aiMessageIndex = messages.value.findIndex(
-      (m) => m.sender === 'ai' && m.isLoading,
-    );
-    if (aiMessageIndex !== -1) {
-      messages.value[aiMessageIndex].isLoading = false;
-      messages.value[aiMessageIndex].text =
-        `${targetName}님과의 ${category} 상황이시군요! ${cultureBase} 문화권을 기준으로 더 구체적인 조언을 드릴게요.\n\n어떤 점이 가장 궁금하신가요? (예: 구체적인 선물 추천, 복장, 건네면 좋은 말 등)`;
-      scrollToBottom();
-    }
-  }, 1000);
 });
 
-// 메시지 전송 로직
-const sendMessage = () => {
+const fetchChatHistory = async (roomId) => {
+  try {
+    const response = await apiClient.get(`/chat/list?formId=${roomId}`);
+    if (response.data.success) {
+      messages.value = response.data.chatItems.flatMap((item) => [
+        { sender: 'user', text: item.question },
+        { sender: 'ai', text: item.answer },
+      ]);
+      scrollToBottom();
+    }
+  } catch (error) {
+    console.error('채팅 내역 조회 에러:', error);
+  }
+};
+
+const sendMessage = async () => {
   if (!inputMessage.value.trim()) return;
 
-  // 1. 유저 메시지 추가
+  const userText = inputMessage.value;
+  const roomId =
+    props.roomId || (route.query.roomId ? parseInt(route.query.roomId) : null);
+
   messages.value.push({
     sender: 'user',
-    text: inputMessage.value,
+    text: userText,
   });
 
   inputMessage.value = '';
   scrollToBottom();
 
-  // 2. AI 대기 상태 메시지 추가
   messages.value.push({
     sender: 'ai',
     isLoading: true,
@@ -238,21 +253,48 @@ const sendMessage = () => {
 
   scrollToBottom();
 
-  // 3. 실제 API 연동을 흉내 낸 타이밍 처리 (2초 후 답변)
-  setTimeout(() => {
+  try {
+    if (roomId) {
+      const response = await apiClient.post('/chat/new', {
+        formId: roomId,
+        question: userText,
+      });
+
+      const aiMessageIndex = messages.value.findIndex(
+        (m) => m.sender === 'ai' && m.isLoading,
+      );
+      if (aiMessageIndex !== -1) {
+        messages.value[aiMessageIndex].isLoading = false;
+        messages.value[aiMessageIndex].text = response.data.answer;
+        scrollToBottom();
+      }
+    } else {
+      setTimeout(() => {
+        const aiMessageIndex = messages.value.findIndex(
+          (m) => m.sender === 'ai' && m.isLoading,
+        );
+        if (aiMessageIndex !== -1) {
+          messages.value[aiMessageIndex].isLoading = false;
+          messages.value[aiMessageIndex].text =
+            '질문을 저장하려면 먼저 설문을 완료해주세요.';
+          scrollToBottom();
+        }
+      }, 1000);
+    }
+  } catch (error) {
+    console.error('메시지 전송 에러:', error);
     const aiMessageIndex = messages.value.findIndex(
       (m) => m.sender === 'ai' && m.isLoading,
     );
     if (aiMessageIndex !== -1) {
       messages.value[aiMessageIndex].isLoading = false;
       messages.value[aiMessageIndex].text =
-        `구체적인 상황을 더 말씀해주시면 더욱 정확한 에티켓 가이드를 드릴 수 있습니다. (예시 답변: 지인 관계라면 5~10만원 정도의 축의금이 적당하며, 밝은 톤의 단정한 정장을 추천합니다.)`;
+        '오류가 발생했습니다. 다시 시도해주세요.';
       scrollToBottom();
     }
-  }, 1500);
+  }
 };
 
-// watch messages to scroll bottom
 watch(
   messages,
   () => {
@@ -263,7 +305,6 @@ watch(
 </script>
 
 <style scoped>
-/* 부드러운 스크롤을 원할 경우 */
 .overflow-y-auto {
   scroll-behavior: smooth;
 }

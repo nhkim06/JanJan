@@ -31,7 +31,7 @@
             class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-3xl flex items-center justify-center shadow-xl shadow-indigo-200 mb-8 animate-bounce-subtle overflow-hidden p-4 md:p-5"
           >
             <img
-              src="/app-logo.png"
+              src="/logo-white.png"
               alt="JanJan Logo"
               class="w-full h-full object-contain"
             />

@@ -137,6 +137,11 @@ class ChatCreateView(APIView):
             cnt = ChatItem.objects.filter(
                 form=form,
             ).count()
+
+            if chat_item.question == "__CHAT_ITEM__":
+                chat_item.question = json.dumps(chat_item.form.answers, ensure_ascii=False)
+                chat_item.save(update_fields=["question", "updated_at"])
+
             memory = build_chat_memory(previous_chat_items)
             if cnt == 0:
                 gemini_result = ai_yk_payment_wrapper(
@@ -156,6 +161,7 @@ class ChatCreateView(APIView):
                     histories,
                     chat_item.question,
                     memory,
+                    category,
                 )
             else:
                 gemini_result = ai_yk_question_wrapper(

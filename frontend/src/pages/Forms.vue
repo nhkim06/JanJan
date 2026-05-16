@@ -24,8 +24,11 @@
         <span class="text-xs md:text-sm font-bold text-indigo-600 block mb-1"
           >기본 정보 입력</span
         >
-        <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 leading-snug mb-8">
-          상대방의<br class="md:hidden" /> 이름을 입력해주세요
+        <h1
+          class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 leading-snug mb-8"
+        >
+          상대방의<br class="md:hidden" />
+          이름을 입력해주세요
         </h1>
         <div class="max-w-xl mx-auto">
           <input
@@ -43,11 +46,16 @@
         <span class="text-xs md:text-sm font-bold text-indigo-600 block mb-1"
           >기준 설정</span
         >
-        <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 leading-snug mb-8">
-          어느 문화권 기준으로<br class="md:hidden" /> 판단할까요?
+        <h1
+          class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 leading-snug mb-8"
+        >
+          어느 문화권 기준으로<br class="md:hidden" />
+          판단할까요?
         </h1>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-xl mx-auto">
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-xl mx-auto"
+        >
           <button
             v-for="culture in ['한국', '일본', '둘 다', '아직 모르겠음']"
             :key="culture"
@@ -70,7 +78,9 @@
           <span class="text-xs md:text-sm font-bold text-indigo-600 block mb-1">
             Q{{ currentStep - 1 }}.
           </span>
-          <h1 class="text-2xl md:text-3xl font-bold text-slate-900 leading-snug">
+          <h1
+            class="text-2xl md:text-3xl font-bold text-slate-900 leading-snug"
+          >
             {{ currentQuestion.question }}
           </h1>
         </div>
@@ -140,6 +150,7 @@
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import surveyData from '@/assets/surveyData.json';
+import apiClient from '../utils/api';
 
 const route = useRoute();
 const router = useRouter();
@@ -216,26 +227,43 @@ const handlePrev = () => {
 };
 
 // [다음 / 결과확인] 제어 버튼 및 페이지 이동 처리 통합
-const handleNext = () => {
+const handleNext = async () => {
   if (isNextDisabled.value) return;
 
   if (currentStep.value < totalSteps.value - 1) {
     currentStep.value++;
   } else {
+    isSubmitting.value = true;
     // 최종 제출 시점 데이터 가공
-    const processedAnswers = answers.value.map((ans) =>
-      ans === '모르겠음' ? null : ans,
-    );
+    const formattedAnswers = questions.value.map((q, idx) => ({
+      question: q.question,
+      answer: answers.value[idx] === '모르겠음' ? null : answers.value[idx],
+    }));
 
-    router.push({
-      name: 'result',
-      params: { category: category.value },
-      query: {
+    try {
+      const response = await apiClient.post('/form/new', {
+        answers: formattedAnswers,
         targetName: preSurveyData.value.targetName,
         cultureBase: preSurveyData.value.cultureBase,
-        answers: JSON.stringify(processedAnswers),
-      },
-    });
+      });
+
+      if (response.data.success) {
+        router.push({
+          name: 'result',
+          params: { category: category.value },
+          query: {
+            targetName: preSurveyData.value.targetName,
+            cultureBase: preSurveyData.value.cultureBase,
+            roomId: response.data.formId,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('폼 저장 에러:', error);
+      alert('데이터 저장 중 오류가 발생했습니다.');
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 };
 </script>

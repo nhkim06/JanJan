@@ -1,87 +1,72 @@
-"""
-Etiquette villain-prevention API — re-exports from ai_yk.etiquette_api.
-
-Backend call:
-    result = analyze_etiquette(language, histories, question, memory, category="wedding")
-    # result["success"]: bool
-    # result["answer"]: str
-"""
-
 from __future__ import annotations
 
 import json
 import re
-from typing import Any, TypedDict
+from typing import Any, Final
 
 from google import genai
 from google.genai.types import GenerateContentConfig
 
+try:
+    from ..ai_yk.type_def import (
+        AIResponse,
+        CATEGORY_LABELS,
+        OCCASION_CATEGORIES,
+        CultureBase,
+        History,
+        OccasionCategory,
+        is_occasion_category,
+        validate_histories,
+    )
+except ImportError:  # pragma: no cover - supports direct script execution
+    from type_def import (
+        AIResponse,
+        CATEGORY_LABELS,
+        OCCASION_CATEGORIES,
+        CultureBase,
+        History,
+        OccasionCategory,
+        is_occasion_category,
+        validate_histories,
+    )
+
 MODEL = "gemini-3-flash-preview"
 
-# ---------------------------------------------------------------------------
-# Per-category etiquette checkpoints (English; sent to Gemini)
-# ---------------------------------------------------------------------------
-ETIQUETTE_QUESTIONS: dict[str, list[str]] = {
-    "출산": [
+ETIQUETTE_QUESTIONS: dict[OccasionCategory, list[str]] = {
+    "birth": [
         "Is it acceptable to give a gift before the birth?",
         "May I visit the hospital or postpartum care center right after birth?",
         "What should I avoid saying to the new mother?",
         "May I take or post baby photos on social media?",
     ],
-    "결혼": [
+    "wedding": [
         "What is appropriate wedding attire?",
         "May I wear white or flashy clothing?",
         "May I bring an uninvited companion?",
     ],
-    "취업": [
+    "employment": [
         "May I congratulate if the new job is not public yet?",
         "May I post congratulations on social media?",
         "May I congratulate a colleague's job change privately?",
     ],
-    "이직": [
-        "May I congratulate if the new job is not public yet?",
-        "May I post congratulations on social media?",
-        "May I congratulate a colleague's job change privately?",
-    ],
-    "입학": [
+    "school_admission": [
         "Should I acknowledge a friend's child's school enrollment?",
         "Is a message alone enough for a colleague's child's enrollment?",
     ],
-    "개업": [
+    "business_opening": [
         "When and how should I visit to congratulate on a business opening?",
         "Is a personal gesture appropriate for this relationship?",
         "May I post promotional support on social media?",
     ],
-    "창업": [
-        "When and how should I visit to congratulate on a business opening?",
-        "Is a personal gesture appropriate for this relationship?",
-        "May I post promotional support on social media?",
-    ],
-    "돌": [
+    "first_birthday": [
         "May I take photos or post about the event on social media?",
     ],
-    "돌잔치": [
-        "May I take photos or post about the event on social media?",
-    ],
-    "첫돌": [
-        "May I take photos or post about the event on social media?",
-    ],
-    "장례": [
+    "funeral": [
         "Should I attend the funeral in person?",
         "What should I wear and how should I behave at the service?",
         "May I share obituary or funeral details with others?",
     ],
-    "부고": [
-        "Should I attend the funeral in person?",
-        "What should I wear and how should I behave at the service?",
-        "May I share obituary or funeral details with others?",
-    ],
-    "조문": [
-        "Should I attend the funeral in person?",
-        "What should I wear and how should I behave at the service?",
-        "May I share obituary or funeral details with others?",
-    ],
-    "병문안": [
+    "hospital_visit": [
         "Is an in-person hospital visit appropriate?",
         "If visiting, when and how should I go?",
         "Is a message alone acceptable without visiting?",
@@ -90,54 +75,56 @@ ETIQUETTE_QUESTIONS: dict[str, list[str]] = {
     ],
 }
 
-# Extra checkpoints when cultural base is Japan
-ETIQUETTE_QUESTIONS_JA: dict[str, list[str]] = {
-    "출산": [
+ETIQUETTE_QUESTIONS_JA: dict[OccasionCategory, list[str]] = {
+    "birth": [
         "When is the right time to give oshuku-zukai (birth celebration)?",
         "Should cash be avoided for birth gifts in Japan?",
         "Is giving a gift before birth acceptable in Japan?",
     ],
-    "결혼": [
+    "wedding": [
         "How to prepare and present goshugi (wedding gift envelope)?",
         "Taboo amounts or numbers for wedding gifts in Japan?",
         "How to reply to a wedding invitation?",
     ],
-    "취업": ["Is cash natural for job-celebration gifts in Japan?"],
-    "입학": [
+    "employment": ["Is cash natural for job-celebration gifts in Japan?"],
+    "school_admission": [
         "Who should receive school-enrollment gifts in Japan?",
         "Is buying a randoseru as a gift appropriate?",
     ],
-    "개업": [
+    "business_opening": [
         "Is public celebration of a business opening appropriate?",
         "Could a visit burden the other person?",
     ],
-    "돌잔치": ["Rules for photos and SNS posts"],
-    "장례": [
+    "first_birthday": ["Rules for photos and SNS posts"],
+    "funeral": [
         "Actions aligned with religion and funeral style",
         "Timeline for wake, funeral, and memorial services",
         "Whether to follow up through memorial rites for this relationship",
     ],
-    "병문안": [
+    "hospital_visit": [
         "Visiting hours, infection risk, and hospital rules",
         "Whether it is appropriate to ask about the illness in detail",
     ],
 }
 
-CATEGORY_ALIASES: dict[str, str] = {
-    "출산": "출산",
-    "결혼": "결혼",
-    "취업": "취업",
-    "이직": "취업",
-    "입학": "입학",
-    "개업": "개업",
-    "창업": "개업",
-    "돌": "돌잔치",
-    "돌잔치": "돌잔치",
-    "첫돌": "돌잔치",
-    "장례": "장례",
-    "부고": "장례",
-    "조문": "장례",
-    "병문안": "병문안",
+# Legacy Korean labels and English aliases from older clients
+CATEGORY_ALIASES: Final[dict[str, OccasionCategory]] = {
+    "출산": "birth",
+    "결혼": "wedding",
+    "취업": "employment",
+    "이직": "employment",
+    "입학": "school_admission",
+    "개업": "business_opening",
+    "창업": "business_opening",
+    "돌": "first_birthday",
+    "돌잔치": "first_birthday",
+    "첫돌": "first_birthday",
+    "장례": "funeral",
+    "부고": "funeral",
+    "조문": "funeral",
+    "병문안": "hospital_visit",
+    "childbirth": "birth",
+    "business": "business_opening",
 }
 
 SYSTEM_INSTRUCTION = """You are an expert on Korean and Japanese ceremonial etiquette (weddings, funerals, births, openings, etc.).
@@ -154,45 +141,46 @@ FOLLOWUP_INSTRUCTION = """You are a ceremonial etiquette expert for Korea and Ja
 Answer the user's follow-up concisely in English only, using the prior report and context."""
 
 
-class History(TypedDict, total=False):
-    targetName: str
-    received: bool  # True: 상대가 나에게 지불, False: 내가 상대에게 지불
-    value: int
-    cultureBase: str  # "ko" | "ja"
-    category: str
-    date: str
-
-
-class FuncResult(TypedDict):
-    success: bool
-    answer: str
-
-
 def _history_date(h: History) -> str:
-    """백엔드 필드 오타('date ') 대응."""
-    return str(h.get("date") or h.get("date ") or "")
+    raw = h.get("date")
+    if raw:
+        return str(raw)
+    legacy = h.get("date ")  # type: ignore[literal-required]
+    return str(legacy or "")
 
 
-def _normalize_category(raw: str | None) -> str:
+def _normalize_category(raw: str | None) -> OccasionCategory | None:
     if not raw:
-        return "결혼"
-    key = raw.strip()
-    for alias, canonical in CATEGORY_ALIASES.items():
-        if alias in key or key in alias:
-            return canonical
-    return key
+        return None
+    normalized = raw.strip()
+    normalized = CATEGORY_ALIASES.get(normalized, normalized)
+    if is_occasion_category(normalized):
+        return normalized
+    return None
 
 
-def _questions_for_category(category: str, culture_base: str | None) -> list[str]:
-    canonical = CATEGORY_ALIASES.get(category, category)
-    base = list(
-        ETIQUETTE_QUESTIONS.get(canonical, ETIQUETTE_QUESTIONS.get(category, []))
-    )
-    if (culture_base or "").lower() == "ja":
-        extra = ETIQUETTE_QUESTIONS_JA.get(
-            canonical, ETIQUETTE_QUESTIONS_JA.get(category, [])
-        )
-        for q in extra:
+def _resolve_category(
+    histories: list[History], explicit_category: str | None
+) -> OccasionCategory:
+    if explicit_category:
+        resolved = _normalize_category(explicit_category)
+        if resolved:
+            return resolved
+
+    for h in reversed(histories):
+        resolved = _normalize_category(h.get("category"))
+        if resolved:
+            return resolved
+
+    return "wedding"
+
+
+def _questions_for_category(
+    category: OccasionCategory, currency: CultureBase | None
+) -> list[str]:
+    base = list(ETIQUETTE_QUESTIONS.get(category, []))
+    if currency in ("ja", "both"):
+        for q in ETIQUETTE_QUESTIONS_JA.get(category, []):
             if q not in base:
                 base.append(q)
     return base
@@ -220,61 +208,65 @@ def _parse_survey(question: str) -> list[dict[str, str]] | None:
 def _target_name_from_histories(histories: list[History]) -> str | None:
     if not histories:
         return None
-    return histories[-1].get("targetName") or histories[0].get("targetName")
+    return histories[-1]["targetName"]
+
+
+def _currency_from_histories(histories: list[History]) -> CultureBase | None:
+    for h in reversed(histories):
+        currency = h.get("currency")
+        if currency:
+            return currency
+    return None
 
 
 def _prior_payments(
     histories: list[History], target_name: str | None
 ) -> tuple[int, list[dict[str, Any]]]:
-    """상대방이 나에게 지불한 경조사(received=True) 합계 및 내역."""
     rows: list[dict[str, Any]] = []
     total = 0
     for h in histories:
-        if not h.get("received"):
+        if not h["received"]:
             continue
-        if target_name and h.get("targetName") != target_name:
+        if target_name and h["targetName"] != target_name:
             continue
-        amount = int(h.get("value") or 0)
+        amount = int(h["value"])
         total += amount
         rows.append(
             {
-                "targetName": h.get("targetName"),
+                "targetName": h["targetName"],
                 "value": amount,
-                "category": h.get("category"),
-                "cultureBase": h.get("cultureBase"),
+                "currency": h["currency"],
+                "category": h["category"],
                 "date": _history_date(h),
             }
         )
     return total, rows
 
 
-def _culture_from_histories(histories: list[History]) -> str | None:
-    for h in reversed(histories):
-        base = h.get("cultureBase")
-        if base:
-            return base
-    return None
-
-
-def _culture_label(culture_base: str | None, language: str) -> str:
-    code = (culture_base or language or "ko").strip().lower()
+def _culture_label(currency: CultureBase | None, language: str) -> str:
+    code = (currency or language or "ko").strip().lower()
     if code == "ja":
         return "Japan"
     if code == "ko":
         return "Korea"
+    if code == "both":
+        return "Korea and Japan"
+    if code == "unknown":
+        return "unspecified culture"
     return code
 
 
 def _build_report_prompt(
     language: str,
     survey: list[dict[str, str]],
-    category: str,
+    category: OccasionCategory,
     target_name: str | None,
     prior_total: int,
     prior_rows: list[dict[str, Any]],
-    culture_base: str | None,
+    currency: CultureBase | None,
 ) -> str:
-    etiquette_checks = _questions_for_category(category, culture_base)
+    category_label = CATEGORY_LABELS.get(category, category)
+    etiquette_checks = _questions_for_category(category, currency)
     checks_text = (
         "\n".join(f"- {q}" for q in etiquette_checks)
         if etiquette_checks
@@ -291,18 +283,23 @@ def _build_report_prompt(
         else "none"
     )
 
-    culture_label = _culture_label(culture_base, language)
+    culture_label = _culture_label(currency, language)
 
     return f"""Using the pre-survey answers and ceremonial history below, write an **etiquette villain prevention analysis report**.
 
 ## Context
 - Output language: English only (both fullReport and summary must be in English)
 - Cultural base for etiquette rules: {culture_label}
-- Event category: {category}
+- Event category key: {category}
+- Event category label: {category_label}
 - Counterparty name: {target_name or "(not specified)"}
 - Total amount the counterparty previously paid to the user (KRW): {prior_total:,}
 - Payment history:
 {history_text}
+
+Payment history schema note:
+- Each history item uses currency to mark the cash/culture context of that past amount.
+- currency values are ko, ja, both, or unknown.
 
 ## Pre-survey (Q&A; questions/answers may be in Korean or Japanese—interpret them)
 {survey_text}
@@ -379,18 +376,11 @@ def _generate_etiquette_report(
     language: str,
     survey: list[dict[str, str]],
     histories: list[History],
+    category: OccasionCategory,
 ) -> dict[str, str]:
     target_name = _target_name_from_histories(histories)
     prior_total, prior_rows = _prior_payments(histories, target_name)
-    culture_base = _culture_from_histories(histories)
-
-    category = "결혼"
-    if histories:
-        category = _normalize_category(histories[-1].get("category"))
-    for h in reversed(histories):
-        if h.get("category"):
-            category = _normalize_category(h.get("category"))
-            break
+    currency = _currency_from_histories(histories)
 
     prompt = _build_report_prompt(
         language,
@@ -399,7 +389,7 @@ def _generate_etiquette_report(
         target_name,
         prior_total,
         prior_rows,
-        culture_base,
+        currency,
     )
     raw = _call_gemini(prompt, json_mode=True)
     parsed = _extract_json_object(raw)
@@ -412,48 +402,41 @@ def _generate_etiquette_report(
     return {"fullReport": full_report, "summary": summary}
 
 
-def func(
+def analyze_etiquette(
     language: str,
     histories: list[History],
     question: str,
     memory: str,
-) -> FuncResult:
+    category: str = "",
+) -> AIResponse:
     """
-    에티켓 빌런 방지 API 진입점.
+    Etiquette villain-prevention API entry point.
 
-    Parameters
-    ----------
-    language : str
-        "ko" | "ja" | "en"
-    histories : list[History]
-        경조사 주고받은 이력 (received=True → 상대가 나에게 지불)
-    question : str
-        첫 호출: 사전조사 JSON 문자열
-        이후: 사용자 챗봇 질문
-    memory : str
-        이전 분석 보고서·대화 맥락 (후속 질문용)
-
-    Returns
-    -------
-    dict
-        {"success": bool, "answer": str}
-        첫 호출 시 answer는 {"fullReport","summary"} JSON 문자열 (내용은 영어)
-        모든 Gemini 프롬프트·응답은 영어로 생성됩니다.
+    First call: question is pre-survey JSON; answer is JSON with fullReport + summary (English).
+    Follow-up: question is plain text; answer is plain text (English).
     """
     lang = (language or "ko").strip().lower()
     if lang not in ("ko", "ja", "en"):
-        return {
-            "success": False,
-            "answer": json.dumps(
-                {"error": f"Unsupported language: {language}"},
-                ensure_ascii=False,
-            ),
-        }
+        return {"success": False, "answer": f"Unsupported language: {language}"}
+
+    if category.strip():
+        normalized = _normalize_category(category)
+        if normalized is None:
+            allowed = ", ".join((*OCCASION_CATEGORIES, *CATEGORY_ALIASES))
+            return {"success": False, "answer": f"category must be one of: {allowed}"}
+
+    invalid_reason = validate_histories(histories)
+    if invalid_reason:
+        return {"success": False, "answer": invalid_reason}
+
+    event_category = _resolve_category(histories, category or None)
 
     try:
         survey = _parse_survey(question)
         if survey is not None:
-            report = _generate_etiquette_report(lang, survey, histories)
+            report = _generate_etiquette_report(
+                lang, survey, histories, event_category
+            )
             return {
                 "success": True,
                 "answer": json.dumps(report, ensure_ascii=False),
@@ -466,17 +449,10 @@ def func(
         return {"success": True, "answer": reply}
 
     except Exception as exc:
-        return {
-            "success": False,
-            "answer": json.dumps(
-                {"error": str(exc)},
-                ensure_ascii=False,
-            ),
-        }
+        return {"success": False, "answer": str(exc)}
 
 
 def parse_etiquette_answer(answer: str) -> dict[str, str]:
-    """첫 호출 성공 시 answer JSON → fullReport, summary."""
     data = json.loads(answer)
     if not isinstance(data, dict):
         raise ValueError("answer must be a JSON object.")
@@ -492,8 +468,8 @@ if __name__ == "__main__":
             "targetName": "홍길동",
             "received": True,
             "value": 50000,
-            "cultureBase": "ko",
-            "category": "결혼",
+            "currency": "ko",
+            "category": "wedding",
             "date": "2026-05-16",
         }
     ]
@@ -505,20 +481,5 @@ if __name__ == "__main__":
         ensure_ascii=False,
     )
 
-    result = func("ko", sample_histories, sample_survey, "")
-    print("success:", result["success"])
-    print("answer:", result["answer"][:500], "..." if len(result["answer"]) > 500 else "")
-try:
-    from .etiquette_api import analyze_etiquette, parse_etiquette_answer
-    from ..ai_yk.type_def import AIResponse, History
-except ImportError:  # pragma: no cover - direct script execution
-    import sys
-    from pathlib import Path
-
-    _AI_YK = Path(__file__).resolve().parents[1] / "ai_yk"
-    if str(_AI_YK) not in sys.path:
-        sys.path.insert(0, str(_AI_YK))
-    from etiquette_api import analyze_etiquette, parse_etiquette_answer  # type: ignore[import-not-found]
-    from type_def import AIResponse, History  # type: ignore[import-not-found]
-
-__all__ = ["analyze_etiquette", "parse_etiquette_answer", "AIResponse", "History"]
+    result = analyze_etiquette("ko", sample_histories, sample_survey, "", "wedding")
+    print(result)

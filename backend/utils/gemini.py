@@ -18,29 +18,39 @@ if str(PROJECT_ROOT) not in sys.path:
 
 if TYPE_CHECKING:
     from ai_yk.type_def import History as AiYkHistory
-    from mj_at.etiquette import History as MjHistory
+    from mj_at.type_def import History as MjHistory
 
 
 def __wrapper_ai_yk_payment(
     language: str,
     histories: list[dict[str, Any]],
     question: Any,
-    category: str,
-    current_context="",
-    target_name="",
-    culture_base="",
+    memory: str = "",
+    *,
+    current_context: dict[str, Any] | None = None,
+    category: str | None = None,
+    target_name: str = "",
+    culture_base: str | None = None,
 ) -> "GeminiResult":
-    from ai_yk.proper_payment_amount import proper_payment_amount
+    try:
+        from ai_yk.proper_payment_amount import proper_payment_amount
+    except Exception as exc:
+        return _wrap_result(False, f"ai_yk payment import failed: {exc}")
 
-    return cast(
-        GeminiResult,
-        proper_payment_amount(
-            language,
-            cast("list[AiYkHistory]", histories),
-            question,
-            category,
-        ),
-    )
+    context = current_context or {}
+    resolved_category = category or _string_or_none(context.get("category")) or ""
+    try:
+        return cast(
+            GeminiResult,
+            proper_payment_amount(
+                language,
+                cast("list[AiYkHistory]", histories),
+                question,
+                resolved_category,
+            ),
+        )
+    except Exception as exc:
+        return _wrap_result(False, f"ai_yk payment failed: {exc}")
 
 
 def __wrapper_ai_yk_question(
@@ -87,9 +97,10 @@ def __wrapper_mj_etiquette(
     histories: list[dict[str, Any]],
     question: str,
     memory: str,
+    category: str = "",
 ) -> "GeminiResult":
     try:
-        from mj_at.etiquette import func as etiquette_func
+        from mj_at.etiquette_api import analyze_etiquette
     except ModuleNotFoundError as exc:
         if exc.name == "google":
             return _wrap_result(
@@ -98,10 +109,16 @@ def __wrapper_mj_etiquette(
             )
         raise
 
-    mj_histories = [_with_culture_base(history) for history in histories]
+    mj_histories = [_with_currency(history) for history in histories]
     return cast(
         GeminiResult,
-        etiquette_func(language, cast("list[MjHistory]", mj_histories), question, memory),
+        analyze_etiquette(
+            language,
+            cast("list[MjHistory]", mj_histories),
+            question,
+            memory,
+            category,
+        ),
     )
 
 
@@ -111,7 +128,7 @@ def get_ai_yk_payment_report(
     question: Any,
     category: str,
 ) -> "GeminiResult":
-    return __wrapper_ai_yk_payment(language, histories, question, category)
+    return __wrapper_ai_yk_payment(language, histories, question, category=category)
 
 
 def get_ai_yk_question_answer(
@@ -153,6 +170,16 @@ def _with_culture_base(history: dict[str, Any]) -> dict[str, Any]:
     normalized = dict(history)
     if "currency" in normalized:
         normalized["cultureBase"] = normalized["currency"]
+    return normalized
+
+
+def _with_currency(history: dict[str, Any]) -> dict[str, Any]:
+    if "currency" in history:
+        return history
+
+    normalized = dict(history)
+    if "cultureBase" in normalized:
+        normalized["currency"] = normalized["cultureBase"]
     return normalized
 
 

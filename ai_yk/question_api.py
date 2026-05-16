@@ -4,6 +4,7 @@ from typing import Any, Final, TypedDict, cast
 
 try:
     from .gemini_client import call_gemini, pretty_json
+    from .language_rules import language_output_rule
     from .type_def import (
         AIResponse,
         CATEGORY_LABELS,
@@ -15,6 +16,7 @@ try:
     )
 except ImportError:  # pragma: no cover - supports direct script execution
     from gemini_client import call_gemini, pretty_json
+    from language_rules import language_output_rule
     from type_def import (
         AIResponse,
         CATEGORY_LABELS,
@@ -515,7 +517,10 @@ Interpretation rules:
   missing factor only if it changes the action.
 
 Answering rules:
-- Answer only in the requested language.
+- Answer only in the requested output language. Interpret common language codes as
+  ko=Korean, ja=Japanese, and en=English.
+- Do not let currency, culture marker, question text, survey text, history, or memory choose
+  the output language.
 - Return plain text only.
 - Answer only the user's latest free-form question. Use the current pre-survey context and
   target-specific history only as evidence for that answer.
@@ -665,13 +670,16 @@ def _build_prompt(
 ) -> str:
     category_label = CATEGORY_LABELS.get(category, category) if category else "(unknown)"
     category_key = category or "(unknown)"
+    output_language_rule = language_output_rule(language)
     return f"""
 Task:
 Answer the user's latest free-form question about what to do, how much to spend, what
 to avoid, or how to write a message in this exact congratulation/condolence situation.
 
+Output language:
+{output_language_rule}
+
 Output rules:
-- Answer in language code: {language}
 - Return plain text only.
 - Length must be 150 to 300 characters total, including spaces and punctuation.
 - Structure the answer as one concise paragraph: direct answer first, then enough evidence

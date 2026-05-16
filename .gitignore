@@ -32,3 +32,6 @@ build_files.sh
 
 # .pyc
 *.pyc
+# Python cache
+__pycache__/
+*.py[cod]

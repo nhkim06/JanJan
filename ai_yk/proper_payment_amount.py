@@ -33,12 +33,20 @@ cash gifts, and wording. Consider reciprocity from the payment history, but do n
 as a rigid debt. Avoid stereotypes, explain uncertainty, and prefer options that reduce
 social burden. Answer only in the requested language.
 
-For every category, synthesize the pre-survey answers into one practical report instead of
-answering each survey question separately. The report must include a short situation/context
-summary, money-calculation reasoning, gift/action guidance, an "etiquette villain prevention"
-warning about the most dangerous behaviors to avoid, message-writing guidance, and one
-category-relevant ad slot idea when it naturally fits. The ad slot idea must be generic and
-must not pretend that a real sponsor exists.
+The question data is not optional background. It is the user's current situation itself.
+Treat it as the authoritative boundary of the task. Only output action guidelines that are
+limited to that current situation. Do not output guidance for other possible cases in the
+same category, and do not explain etiquette points that fall outside the current context.
+Category customs and payment history are secondary context only; they must never override or
+expand beyond the current situation described by the question data. Every recommendation must
+answer: "What should the user do in this exact situation?"
+
+For every category, synthesize the question data into one practical report instead of
+answering each survey question separately. Do not produce a broad category guide. Do not stop
+after the context summary. The report must include all required subsections: context_summary,
+action_guide, money_calculation, gift_or_action, etiquette_villain_prevention, message_guide,
+and ad_slot_idea. The ad slot idea must be generic and must not pretend that a real sponsor
+exists.
 
 The recommended_amount section must contain exactly one integer and nothing else. Do not add
 currency symbols, commas, ranges, explanations, or units in that section. Put all currency,
@@ -197,7 +205,7 @@ def proper_payment_amount(
         prompt,
         system_instruction=_system_instruction_for_category(normalized_category),
         temperature=0.25,
-        max_output_tokens=2500,
+        max_output_tokens=4000,
     )
 
 
@@ -210,8 +218,20 @@ def _build_prompt(
     category_label = CATEGORY_LABELS.get(category, category)
     return f"""
 Task:
-Create an analysis report about gifts and cash etiquette for the current event, then
-recommend one proper congratulations/condolence payment amount.
+Create an action-oriented report for the current situation defined by the question data,
+then recommend one proper congratulations/condolence payment amount.
+
+Current situation rule:
+- The question data below is the user's current situation itself.
+- Treat every answered question as a concrete constraint on what the user should do now.
+- Output only behavior guidelines that are limited to this current situation.
+- Do not output advice for other cases, other relationships, other attendance states, other
+  cultures, or other timing unless they are explicitly part of the question data.
+- Do not replace the current situation with generic category advice.
+- Use category customs and payment history only to interpret this exact situation, not to
+  expand the answer beyond it.
+- If the question data conflicts with payment history or general etiquette, follow the
+  question data and explain the uncertainty briefly in the report.
 
 Output rules:
 - Answer in language code: {language}
@@ -219,9 +239,27 @@ Output rules:
 - Output exactly two top-level sections, in this order:
   1. report:
   2. recommended_amount:
-- In report, explain the concrete social context inferred from the pre-survey answers,
-  the gift/cash-gift reasoning, relevant reciprocity from payment history, etiquette risks,
-  and any missing factors that make the recommendation uncertain.
+- In report, output all of these subsections in this exact order:
+  context_summary:
+  action_guide:
+  money_calculation:
+  gift_or_action:
+  etiquette_villain_prevention:
+  message_guide:
+  ad_slot_idea:
+- context_summary must define only the current situation from the question data within 350
+  Korean characters or equivalent length in the requested language.
+- action_guide must give direct, concrete instructions for what the user should do in this
+  current situation. It should read like "do this / avoid this / choose this timing or method",
+  not like a general encyclopedia answer. Exclude guidance that is outside the current context.
+- money_calculation must explain the concrete social context from the question data, relevant
+  reciprocity from payment history, and why the final integer amount fits.
+- gift_or_action must cover whether cash, gift, group contribution, visit, message, or no
+  action is most natural in this current situation.
+- etiquette_villain_prevention must list the actions the user should especially avoid.
+- message_guide must include wording guidance and at least one message example if it fits.
+- ad_slot_idea must suggest one generic category-related ad idea, or "none" if an ad would
+  feel inappropriate.
 - In report, include the currency or culturally implied unit when it can be inferred from
   the question or histories.
 - In recommended_amount, output exactly one integer and nothing else.
@@ -238,7 +276,7 @@ Current event category:
 - key: {category}
 - label: {category_label}
 
-Pre-survey answers:
+Current situation constraints from question data:
 {_format_question_data(question)}
 
 Payment history:

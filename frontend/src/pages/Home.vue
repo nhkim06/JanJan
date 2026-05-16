@@ -13,21 +13,33 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 const isSignUpModalOpen = ref(false);
-// 2. 경조사 입력 모달 상태 관리를 위한 ref 추가
 const isInputModalOpen = ref(false);
 const isSettingModalOpen = ref(false);
+const isLoading = ref(true);
 
 const peopleData = ref([]);
 
-onMounted(() => {
+onMounted(async () => {
   if (route.query.isNewUser === 'true') {
     isSignUpModalOpen.value = true;
     router.replace({ query: {} });
   }
-  
-  fetchForms();
-  if (authStore.isAuthenticated) {
-    fetchUserProfile();
+
+  try {
+    await fetchForms();
+    if (authStore.isAuthenticated) {
+      await fetchUserProfile();
+    }
+  } finally {
+    // 최소 0.5초 정도는 로딩을 보여주어 깜빡임 방지 (선택 사항)
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 500);
+  }
+});
+
+  } finally {
+    isLoading.value = false;
   }
 });
 

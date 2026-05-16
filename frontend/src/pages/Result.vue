@@ -260,7 +260,6 @@ onMounted(async () => {
     // 1. If no roomId but pending data, create the form first
     if (!roomId && pendingFormStr) {
       const pendingData = JSON.parse(pendingFormStr);
-      isLoading.value = false; // Show card structure immediately
       loadingSteps.amount = true;
       loadingSteps.etiquette = true;
       loadingSteps.message = true;
@@ -275,7 +274,8 @@ onMounted(async () => {
         });
         sessionStorage.removeItem('pendingForm');
       } else {
-        throw new Error('Failed to save form data');
+        const errorDetail = createResponse.data.detail || 'Failed to save form data';
+        throw new Error(errorDetail);
       }
     }
 
@@ -334,9 +334,10 @@ onMounted(async () => {
     } else {
       isLoading.value = false;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in Result page lifecycle:', error);
-    alert('Analysis failed. Please check your connection or try again.');
+    const msg = error.response?.data?.detail || error.message || 'Analysis failed. Please try again.';
+    alert(`Error: ${msg}`);
     isLoading.value = false;
     // Reset all loading states on error
     loadingSteps.amount = false;

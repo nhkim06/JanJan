@@ -147,6 +147,7 @@ class ChatCreateView(APIView):
                     histories,
                     chat_item.question,
                     category=category,
+                    culture_base=form.culture_base,
                 )
 
             elif cnt == 1:
@@ -155,6 +156,7 @@ class ChatCreateView(APIView):
                     histories,
                     chat_item.question,
                     memory,
+                    category=category,
                 )
             elif cnt == 2:
                 gemini_result = get_mj_message_answer(
@@ -162,6 +164,7 @@ class ChatCreateView(APIView):
                     histories,
                     chat_item.question,
                     memory,
+                    category=category,
                 )
             else:
                 gemini_result = get_ai_yk_question_answer(

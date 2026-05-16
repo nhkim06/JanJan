@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import re
 from typing import Any, Final
 
 try:
@@ -55,8 +57,8 @@ The function output must contain exactly two user-facing items:
 1. Money recommendation: a natural prose recommendation about cash, gift, group contribution,
    account transfer, or not spending money. This recommendation text must be 300 to 600
    English characters, including spaces and punctuation.
-2. Recommended amount: exactly one integer for the event spending amount, with no comma, currency
-   symbol, unit, range, or explanation.
+2. Recommended amount: exactly one integer for the event spending amount followed by one space
+   and the required currency unit, with no comma, range, or explanation.
 
 Never output internal labels, field names, snake_case names, JSON-like keys, or developer
 schema markers. If giving money is inappropriate because the other side refused money or the
@@ -172,6 +174,43 @@ CATEGORY_ALIASES: Final[dict[str, OccasionCategory]] = {
     "business": "business_opening",
 }
 
+CURRENCY_FIELD_NAMES: Final[tuple[str, ...]] = (
+    "currency",
+    "currencyCode",
+    "currency_code",
+    "cultureBase",
+    "culture_base",
+    "country",
+    "countryCode",
+    "country_code",
+)
+
+CURRENCY_MARKER_TO_UNIT: Final[dict[str, str]] = {
+    "ko": "KRW",
+    "kr": "KRW",
+    "korea": "KRW",
+    "southkorea": "KRW",
+    "republicofkorea": "KRW",
+    "krw": "KRW",
+    "won": "KRW",
+    "₩": "KRW",
+    "원": "KRW",
+    "ja": "JPY",
+    "jp": "JPY",
+    "japan": "JPY",
+    "jpy": "JPY",
+    "yen": "JPY",
+    "¥": "JPY",
+    "엔": "JPY",
+    "us": "USD",
+    "usa": "USD",
+    "america": "USD",
+    "unitedstates": "USD",
+    "usd": "USD",
+    "dollar": "USD",
+    "$": "USD",
+}
+
 MONEY_CALCULATOR_QUESTIONS: Final[dict[OccasionCategory, tuple[str, ...]]] = {
     "birth": (
         "출산 축하금은 얼마가 적당한가요?",
@@ -233,6 +272,7 @@ def proper_payment_amount(
     histories: list[History],
     question: Any,
     category: str,
+    currency: Any | None = None,
 ) -> AIResponse:
     normalized_category = _normalize_category(category)
     if normalized_category is None:
@@ -243,13 +283,28 @@ def proper_payment_amount(
     if invalid_reason:
         return {"success": False, "answer": invalid_reason}
 
-    prompt = _build_prompt(language, histories, question, normalized_category)
-    return call_gemini(
+    raw_currency = currency if currency is not None else _extract_currency_marker(question)
+    currency_unit = _resolve_currency_unit(raw_currency)
+    prompt = _build_prompt(
+        language,
+        histories,
+        question,
+        normalized_category,
+        raw_currency=raw_currency,
+        currency_unit=currency_unit,
+    )
+    response = call_gemini(
         prompt,
         system_instruction=_system_instruction_for_category(normalized_category),
         temperature=0.25,
         max_output_tokens=4000,
     )
+    if response["success"] and currency_unit:
+        response["answer"] = _ensure_recommended_amount_currency(
+            response["answer"],
+            currency_unit,
+        )
+    return response
 
 
 def _build_prompt(
@@ -257,8 +312,15 @@ def _build_prompt(
     histories: list[History],
     question: Any,
     category: OccasionCategory,
+    *,
+    raw_currency: Any,
+    currency_unit: str | None,
 ) -> str:
     category_label = CATEGORY_LABELS.get(category, category)
+    amount_format_rule = _amount_format_rule(currency_unit)
+    amount_line_rule = _amount_line_rule(currency_unit)
+    currency_display = _format_raw_currency(raw_currency)
+    required_unit_display = currency_unit or "(infer from question.currency/country)"
     return f"""
 Task:
 Create money-related guidance for the current situation defined by the question data, then
@@ -291,14 +353,13 @@ Output rules:
   Money recommendation: one natural prose paragraph about cash, gift, group contribution, account
   transfer, or not spending money. This paragraph must be 300 to 600 English characters,
   including spaces and punctuation.
-  Recommended amount: exactly one integer only.
+  {amount_format_rule}
 - The first item must discuss only money, gifts, group contributions, account transfers, or
   why spending money is inappropriate. Do not include visit manners, clothing, photo/SNS
   cautions, message examples, ad ideas, or other etiquette advice.
 - Before returning, verify internally that the first item is 300 to 600 characters total,
   including spaces and punctuation.
-- The second item must contain one integer with no comma, currency symbol, unit, range, or
-  explanation. Use 0 when money/gift spending is not appropriate.
+- {amount_line_rule}
 - Explain the concrete social context from the question data, relevant reciprocity from
   payment history, and why the final amount fits inside the first item.
 - If there is not enough information, still give the safest conservative amount and briefly
@@ -308,11 +369,17 @@ Output rules:
 
 Payment history schema note:
 - Each history item uses currency to mark the cash/culture context of that past amount.
-- currency values are ko, ja, both, or unknown.
+- currency values are ko, ja, both, unknown, or ISO currency codes such as KRW, JPY, USD.
 
 Current event category:
 - key: {category}
 - label: {category_label}
+
+Current output currency:
+- raw_input: {currency_display}
+- required_unit: {required_unit_display}
+- The recommended amount must always use this currency unit. Do not switch to another
+  country's money and do not omit the unit.
 
 Allowed "(돈계산기)" questions for this category:
 {_format_money_calculator_questions(category)}
@@ -331,6 +398,154 @@ def _normalize_category(category: str) -> OccasionCategory | None:
     if is_occasion_category(normalized):
         return normalized
     return None
+
+
+def _extract_currency_marker(value: Any) -> Any | None:
+    if isinstance(value, dict):
+        for field_name in CURRENCY_FIELD_NAMES:
+            if field_name in value:
+                return value[field_name]
+
+        for nested_value in value.values():
+            marker = _extract_currency_marker(nested_value)
+            if marker is not None:
+                return marker
+        return None
+
+    if isinstance(value, (list, tuple)):
+        for item in value:
+            marker = _extract_currency_marker(item)
+            if marker is not None:
+                return marker
+        return None
+
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            return None
+
+        try:
+            parsed = json.loads(stripped)
+        except json.JSONDecodeError:
+            parsed = None
+        if parsed is not None:
+            marker = _extract_currency_marker(parsed)
+            if marker is not None:
+                return marker
+
+        match = re.search(
+            r"\b(?:currency|currencyCode|currency_code|cultureBase|culture_base|country|countryCode|country_code)\b\s*[:=]\s*['\"]?([A-Za-z_$¥₩원엔]+)",
+            stripped,
+            flags=re.IGNORECASE,
+        )
+        if match:
+            return match.group(1)
+
+    return None
+
+
+def _resolve_currency_unit(value: Any) -> str | None:
+    if value is None:
+        return None
+
+    marker = str(value).strip()
+    if not marker:
+        return None
+
+    normalized = re.sub(r"[\s_\-]+", "", marker.casefold())
+    if normalized in {"both", "unknown"}:
+        return None
+
+    mapped_unit = CURRENCY_MARKER_TO_UNIT.get(normalized)
+    if mapped_unit:
+        return mapped_unit
+
+    compact_upper = re.sub(r"[^A-Za-z]", "", marker).upper()
+    if len(compact_upper) == 3:
+        return compact_upper
+
+    return None
+
+
+def _format_raw_currency(value: Any) -> str:
+    if value is None:
+        return "(not provided)"
+    if isinstance(value, str):
+        return value.strip() or "(not provided)"
+    return pretty_json(value)
+
+
+def _amount_format_rule(currency_unit: str | None) -> str:
+    if currency_unit:
+        return (
+            "Recommended amount: exactly one integer followed by one space and "
+            f"{currency_unit}."
+        )
+    return (
+        "Recommended amount: exactly one integer followed by one space and the currency unit "
+        "from the input currency/country."
+    )
+
+
+def _amount_line_rule(currency_unit: str | None) -> str:
+    if currency_unit:
+        return (
+            "The second item must contain one integer with no comma, range, or explanation, "
+            f"followed by exactly one space and {currency_unit}. Use 0 {currency_unit} when "
+            "money/gift spending is not appropriate."
+        )
+    return (
+        "The second item must contain one integer with no comma, range, or explanation, "
+        "followed by exactly one space and the input currency unit. Use 0 with the same "
+        "currency unit when money/gift spending is not appropriate."
+    )
+
+
+def _ensure_recommended_amount_currency(answer: str, currency_unit: str) -> str:
+    pattern = re.compile(
+        r"^(?P<prefix>\s*(?:\d+\.\s*)?Recommended amount\s*:\s*)(?P<value>.*)$",
+        flags=re.IGNORECASE | re.MULTILINE,
+    )
+
+    def replace_amount_line(match: re.Match[str]) -> str:
+        return (
+            f"{match.group('prefix')}"
+            f"{_format_amount_with_currency(match.group('value'), currency_unit)}"
+        )
+
+    normalized_answer, replacement_count = pattern.subn(
+        replace_amount_line,
+        answer,
+        count=1,
+    )
+    if replacement_count:
+        return normalized_answer
+
+    lines = answer.splitlines()
+    for index in range(len(lines) - 1, -1, -1):
+        if not lines[index].strip():
+            continue
+
+        line_match = re.match(r"^(?P<prefix>\s*(?:\d+\.\s*)?)(?P<value>.*)$", lines[index])
+        if line_match:
+            lines[index] = (
+                f"{line_match.group('prefix')}"
+                f"{_format_amount_with_currency(line_match.group('value'), currency_unit)}"
+            )
+        else:
+            lines[index] = _format_amount_with_currency(lines[index], currency_unit)
+        return "\n".join(lines)
+
+    return f"Recommended amount: 0 {currency_unit}"
+
+
+def _format_amount_with_currency(value: str, currency_unit: str) -> str:
+    amount_match = re.search(r"\d[\d,]*", value)
+    if not amount_match:
+        return f"0 {currency_unit}"
+
+    amount = re.sub(r"\D", "", amount_match.group(0))
+    return f"{amount} {currency_unit}"
 
 
 def _system_instruction_for_category(category: OccasionCategory) -> str:

@@ -5,6 +5,7 @@ from typing import Final, Literal, TypedDict
 
 LanguageCode = Literal["ko", "ja", "en"]
 CultureBase = Literal["ko", "ja", "both", "unknown"]
+CurrencyCode = Literal["KRW", "JPY", "USD"]
 OccasionGroup = Literal["celebration", "condolence"]
 OccasionCategory = Literal[
     "birth",
@@ -27,6 +28,12 @@ CULTURE_BASES: Final[tuple[CultureBase, ...]] = (
     "ja",
     "both",
     "unknown",
+)
+
+SUPPORTED_CURRENCY_CODES: Final[tuple[CurrencyCode, ...]] = (
+    "KRW",
+    "JPY",
+    "USD",
 )
 
 OCCASION_CATEGORIES: Final[tuple[OccasionCategory, ...]] = (
@@ -69,7 +76,7 @@ class History(TypedDict):
     targetName: str
     received: bool
     value: int
-    currency: CultureBase
+    currency: CultureBase | CurrencyCode
     category: OccasionCategory
     date: str
 
@@ -86,8 +93,8 @@ def is_occasion_category(value: str) -> bool:
 def validate_histories(histories: list[History]) -> str | None:
     for index, history in enumerate(histories):
         currency = history.get("currency")
-        if not isinstance(currency, str) or currency not in CULTURE_BASES:
-            allowed = ", ".join(CULTURE_BASES)
+        if not isinstance(currency, str) or not _is_valid_currency(currency):
+            allowed = ", ".join((*CULTURE_BASES, *SUPPORTED_CURRENCY_CODES))
             return f"histories[{index}].currency must be one of: {allowed}"
 
         category = history.get("category")
@@ -95,3 +102,7 @@ def validate_histories(histories: list[History]) -> str | None:
             allowed = ", ".join(OCCASION_CATEGORIES)
             return f"histories[{index}].category must be one of: {allowed}"
     return None
+
+
+def _is_valid_currency(currency: str) -> bool:
+    return currency in CULTURE_BASES or currency.upper() in SUPPORTED_CURRENCY_CODES

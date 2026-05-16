@@ -3,8 +3,8 @@ import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { peopleData } from '../data/mockData';
 import SignUpModal from '../components/SignUpModal.vue';
-// 1. 새 모달 컴포넌트 임포트
 import InputReceivedModal from '../components/InputReceivedModal.vue';
+import SettingModal from '../components/SettingModal.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -12,6 +12,7 @@ const route = useRoute();
 const isSignUpModalOpen = ref(false);
 // 2. 경조사 입력 모달 상태 관리를 위한 ref 추가
 const isInputModalOpen = ref(false);
+const isSettingModalOpen = ref(false);
 
 onMounted(() => {
   if (route.query.isNewUser === 'true') {
@@ -30,6 +31,12 @@ const handleInputSubmit = (data) => {
   console.log('경조사 입력 데이터 제출:', data);
   // data 내부에는 경조사 종류, 날짜, 금액 등이 들어옵니다.
   isInputModalOpen.value = false;
+};
+
+const handleSettingSave = (data) => {
+  console.log('설정 변경 데이터:', data);
+  // 실제 저장 로직(localStorage 등)이 필요하면 여기에 추가
+  isSettingModalOpen.value = false;
 };
 
 const goToChatList = (personId) => {
@@ -51,10 +58,28 @@ const goToChatList = (personId) => {
       @close="isInputModalOpen = false"
     />
 
+    <!-- 설정 모달 컴포넌트 배치 -->
+    <SettingModal
+      :isOpen="isSettingModalOpen"
+      @close="isSettingModalOpen = false"
+      @save="handleSettingSave"
+    />
+
     <div
       class="w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50/30 via-white to-white flex flex-col px-6 pt-12 pb-6 min-h-screen relative select-none"
     >
       <div class="flex flex-col h-full space-y-8">
+        <button
+          @click="isSettingModalOpen = true"
+          class="absolute top-6 right-6 w-10 h-10 mt-3 hover:bg-slate-50 text-slate-500 hover:text-slate-700 rounded-xl flex items-center justify-center border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)] active:scale-95 transition-all z-40 group"
+          aria-label="설정"
+        >
+          <font-awesome-icon
+            icon="fa-solid fa-gear"
+            class="w-5 h-5 transition-transform group-hover:rotate-45"
+          />
+        </button>
+
         <header class="md:text-center md:mb-4">
           <h1
             class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mb-2"

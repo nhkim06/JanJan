@@ -41,7 +41,8 @@
             <label class="text-xs font-bold text-slate-400 ml-1">
               {{ i18n.langLabel }}
             </label>
-            <div class="grid grid-cols-2 gap-3">
+            <!-- 3개 국어가 한 줄에 균등하게 배치되도록 grid-cols-3으로 변경 -->
+            <div class="grid grid-cols-3 gap-2">
               <button
                 v-for="lang in languages"
                 :key="lang.code"
@@ -93,12 +94,14 @@ const formData = ref({
   language: 'ko',
 });
 
+// 영어(English) 옵션 추가
 const languages = [
   { code: 'ko', label: '한국어' },
+  { code: 'en', label: 'English' },
   { code: 'ja', label: '日本語' },
 ];
 
-// 다국어 텍스트 사전 정의
+// 다국어 텍스트 사전 정의 (영어 추가)
 const contentText = {
   ko: {
     title: '환영합니다!',
@@ -107,6 +110,14 @@ const contentText = {
     placeholder: '이름을 입력해주세요',
     langLabel: '선호 언어',
     submitBtn: '시작하기',
+  },
+  en: {
+    title: 'Welcome!',
+    description: 'Please enter your basic profile details to get started.',
+    nameLabel: 'Name',
+    placeholder: 'Enter your name',
+    langLabel: 'Preferred Language',
+    submitBtn: 'Get Started',
   },
   ja: {
     title: 'ようこそ！',

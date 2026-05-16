@@ -2,7 +2,7 @@
   <div
     :class="[
       'flex flex-col items-center font-sans relative w-full',
-      isComponent ? 'h-full' : 'min-h-screen bg-slate-50 justify-between'
+      isComponent ? 'h-full' : 'min-h-screen bg-slate-50 justify-between',
     ]"
   >
     <header
@@ -16,7 +16,9 @@
         >
           <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-4 h-4" />
         </button>
-        <span class="font-bold text-slate-800 text-lg md:text-xl">에티켓 AI 상담실</span>
+        <span class="font-bold text-slate-800 text-lg md:text-xl"
+          >에티켓 AI 상담실</span
+        >
       </div>
     </header>
 
@@ -24,11 +26,14 @@
       ref="messageContainer"
       :class="[
         'flex-1 w-full max-w-md md:max-w-2xl lg:max-w-3xl overflow-y-auto px-6 py-6 space-y-6 flex flex-col',
-        isComponent ? '' : ''
+        isComponent ? '' : '',
       ]"
     >
       <div v-for="(msg, index) in messages" :key="index" class="w-full">
-        <div v-if="msg.sender === 'user'" class="flex flex-col items-end pl-12 md:pl-24">
+        <div
+          v-if="msg.sender === 'user'"
+          class="flex flex-col items-end pl-12 md:pl-24"
+        >
           <div
             class="flex items-center gap-1 mb-1 text-xs text-slate-400 font-medium"
           >
@@ -46,7 +51,10 @@
           <div
             class="flex items-center gap-1.5 mb-1.5 text-xs text-indigo-600 font-bold"
           >
-            <font-awesome-icon icon="fa-solid fa-wand-magic-sparkles" class="w-3.5 h-3.5 animate-pulse" />
+            <font-awesome-icon
+              icon="fa-solid fa-wand-magic-sparkles"
+              class="w-3.5 h-3.5 animate-pulse"
+            />
             <span>에티켓 AI</span>
           </div>
 
@@ -89,7 +97,7 @@
     <div
       :class="[
         'w-full max-w-md md:max-w-2xl lg:max-w-3xl bg-transparent px-6 pt-2',
-        isComponent ? 'pb-4' : 'pb-8 sticky bottom-0 z-10'
+        isComponent ? 'pb-4' : 'pb-8 sticky bottom-0 z-10',
       ]"
     >
       <div
@@ -112,7 +120,10 @@
               : 'bg-slate-100 text-slate-400 cursor-not-allowed',
           ]"
         >
-          <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-5 h-5 md:w-6 md:h-6 transform rotate-45 -translate-x-[1px] translate-y-[1px]" />
+          <font-awesome-icon
+            icon="fa-solid fa-paper-plane"
+            class="w-5 h-5 md:w-6 md:h-6 transform rotate-45 -translate-x-[1px] translate-y-[1px]"
+          />
         </button>
       </div>
     </div>
@@ -127,12 +138,12 @@ import { peopleData } from '../data/mockData';
 const props = defineProps({
   isComponent: {
     type: Boolean,
-    default: false
+    default: false,
   },
   category: String,
   targetName: String,
   cultureBase: String,
-  roomId: [Number, String]
+  roomId: [Number, String],
 });
 
 const route = useRoute();
@@ -152,13 +163,14 @@ const scrollToBottom = async () => {
 };
 
 onMounted(() => {
-  const roomId = props.roomId || (route.query.roomId ? parseInt(route.query.roomId) : null);
+  const roomId =
+    props.roomId || (route.query.roomId ? parseInt(route.query.roomId) : null);
 
   if (roomId) {
     // 1. 기존 대화방 진입 시: 해당 roomId의 history 로드
     let foundHistory = null;
-    peopleData.forEach(p => {
-      const room = p.chatRooms.find(r => r.roomId === parseInt(roomId));
+    peopleData.forEach((p) => {
+      const room = p.chatRooms.find((r) => r.roomId === parseInt(roomId));
       if (room) {
         foundHistory = room.history;
       }
@@ -177,7 +189,7 @@ onMounted(() => {
   const cultureBase = props.cultureBase || route.query.cultureBase || '한국';
 
   const initialUserMessage = `지금 ${cultureBase}에서 ${category} 상황인 ${targetName}님과의 에티켓에 대해 더 자세히 알려줘.`;
-  
+
   messages.value.push({
     sender: 'user',
     text: initialUserMessage,
@@ -197,7 +209,7 @@ onMounted(() => {
     );
     if (aiMessageIndex !== -1) {
       messages.value[aiMessageIndex].isLoading = false;
-      messages.value[aiMessageIndex].text = 
+      messages.value[aiMessageIndex].text =
         `${targetName}님과의 ${category} 상황이시군요! ${cultureBase} 문화권을 기준으로 더 구체적인 조언을 드릴게요.\n\n어떤 점이 가장 궁금하신가요? (예: 구체적인 선물 추천, 복장, 건네면 좋은 말 등)`;
       scrollToBottom();
     }
@@ -241,9 +253,13 @@ const sendMessage = () => {
 };
 
 // watch messages to scroll bottom
-watch(messages, () => {
-  scrollToBottom();
-}, { deep: true });
+watch(
+  messages,
+  () => {
+    scrollToBottom();
+  },
+  { deep: true },
+);
 </script>
 
 <style scoped>
@@ -252,4 +268,3 @@ watch(messages, () => {
   scroll-behavior: smooth;
 }
 </style>
-

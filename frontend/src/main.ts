@@ -41,6 +41,8 @@ import {
   faBandage,
   faComments,
   faChevronDown,
+  faXmark,
+  faCheck,
 } from '@fortawesome/free-solid-svg-icons';
 
 /* add icons to the library */
@@ -77,6 +79,8 @@ library.add(
   faBandage,
   faComments,
   faChevronDown,
+  faXmark,
+  faCheck,
 );
 
 import App from './App.vue';

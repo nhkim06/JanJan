@@ -59,6 +59,10 @@ User's latest question:
 Payment history:
 {pretty_json(histories)}
 
+Payment history schema note:
+- Each history item uses currency to mark the cash/culture context of that past amount.
+- currency values are ko, ja, both, or unknown.
+
 Conversation memory:
 {memory.strip() or "(none)"}
 """.strip()

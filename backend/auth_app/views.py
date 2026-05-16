@@ -84,12 +84,14 @@ class CallbackView(APIView):
 
             login(request, profile.user)
             request.session.pop(PENDING_GOOGLE_AUTH_SESSION_KEY, None)
+            request.session.save()
             return self._redirect_to_frontend(
                 success=True, 
                 hasData=True, 
             )
 
         request.session[PENDING_GOOGLE_AUTH_SESSION_KEY] = google_user
+        request.session.save()
         return self._redirect_to_frontend(success=True, hasData=False)
 
     def _redirect_to_frontend(self, **query):
@@ -166,6 +168,7 @@ class RegisterView(APIView):
         # tokens = get_tokens_for_user(user)
         login(request, user)
         request.session.pop(PENDING_GOOGLE_AUTH_SESSION_KEY, None)
+        request.session.save()
         return Response({
             "success": True,
             # "token": tokens["access"],

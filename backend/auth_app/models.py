@@ -6,6 +6,7 @@ class UserProfile(models.Model):
     class Language(models.TextChoices):
         KOREAN = "ko", "Korean"
         JAPANESE = "ja", "Japanese"
+        ENGLISH = "en", "English"
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,

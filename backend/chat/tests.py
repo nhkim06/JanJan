@@ -73,7 +73,12 @@ class ChatCreateTests(TestCase):
             date=date(2026, 5, 18),
         )
 
-    def test_authenticated_user_can_create_chat_item(self):
+    @patch("chat.views.ai_yk_question_wrapper")
+    def test_authenticated_user_can_create_chat_item(self, mock_answer):
+        mock_answer.return_value = {
+            "success": True,
+            "answer": "Test Success! This is gemini answer",
+        }
         self.client.force_login(self.user)
 
         response = self.client.post(
@@ -94,12 +99,12 @@ class ChatCreateTests(TestCase):
         self.assertEqual(chat_item.answer, data["answer"])
         self.assertEqual(chat_item.status, ChatItem.Status.SUCCESS)
 
-    @patch("chat.views.get_gemini_answer")
+    @patch("chat.views.mj_etiquette_wrapper")
     def test_chat_create_passes_language_histories_question_and_empty_memory(
         self,
         mock_answer,
     ):
-        mock_answer.return_value = (True, "Gemini answer")
+        mock_answer.return_value = {"success": True, "answer": "Gemini answer"}
         self.client.force_login(self.user)
 
         response = self.client.post(
@@ -128,12 +133,12 @@ class ChatCreateTests(TestCase):
         self.assertEqual(question, self.valid_payload["question"])
         self.assertEqual(memory, "")
 
-    @patch("chat.views.get_gemini_answer")
+    @patch("chat.views.mj_etiquette_wrapper")
     def test_chat_create_builds_memory_from_previous_success_chat_items(
         self,
         mock_answer,
     ):
-        mock_answer.return_value = (True, "Next answer")
+        mock_answer.return_value = {"success": True, "answer": "Next answer"}
         first_chat = ChatItem.objects.create(
             form=self.form,
             question='[{"question":"질문", "answer":"답변"}]',
@@ -144,6 +149,18 @@ class ChatCreateTests(TestCase):
             form=self.form,
             question="사용자 입력 질문1",
             answer="Gemini 답변 1",
+            status=ChatItem.Status.SUCCESS,
+        )
+        third_chat = ChatItem.objects.create(
+            form=self.form,
+            question="사용자 입력 질문2",
+            answer="Gemini 답변 2",
+            status=ChatItem.Status.SUCCESS,
+        )
+        fourth_chat = ChatItem.objects.create(
+            form=self.form,
+            question="사용자 입력 질문3",
+            answer="Gemini 답변 3",
             status=ChatItem.Status.SUCCESS,
         )
         ChatItem.objects.create(
@@ -165,9 +182,13 @@ class ChatCreateTests(TestCase):
         self.assertIn("사전 질문:", memory)
         self.assertIn(first_chat.question, memory)
         self.assertIn(first_chat.answer, memory)
-        self.assertIn("추가 질문:", memory)
         self.assertIn(second_chat.question, memory)
         self.assertIn(second_chat.answer, memory)
+        self.assertIn(third_chat.question, memory)
+        self.assertIn(third_chat.answer, memory)
+        self.assertIn("추가 질문:", memory)
+        self.assertIn(fourth_chat.question, memory)
+        self.assertIn(fourth_chat.answer, memory)
         self.assertNotIn("아직 처리 중인 질문", memory)
 
     def test_anonymous_user_cannot_create_chat_item(self):
@@ -239,7 +260,7 @@ class ChatCreateTests(TestCase):
         self.assertEqual(response.json()["success"], False)
         self.assertEqual(ChatItem.objects.count(), 0)
 
-    @patch("chat.views.get_gemini_answer")
+    @patch("chat.views.mj_etiquette_wrapper")
     def test_chat_item_remains_pending_when_answer_generation_fails(self, mock_answer):
         mock_answer.side_effect = RuntimeError("temporary failure")
         self.client.force_login(self.user)
@@ -259,12 +280,12 @@ class ChatCreateTests(TestCase):
         self.assertEqual(chat_item.status, ChatItem.Status.PENDING)
         self.assertEqual(chat_item.answer, "")
 
-    @patch("chat.views.get_gemini_answer")
+    @patch("chat.views.mj_etiquette_wrapper")
     def test_chat_item_remains_pending_when_answer_generation_returns_false(
         self,
         mock_answer,
     ):
-        mock_answer.return_value = (False, "temporary failure")
+        mock_answer.return_value = {"success": False, "answer": "temporary failure"}
         self.client.force_login(self.user)
 
         response = self.client.post(

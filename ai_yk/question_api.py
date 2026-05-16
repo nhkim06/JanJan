@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Final, TypedDict
+from typing import Any, Final, TypedDict, cast
 
 try:
     from .gemini_client import call_gemini, pretty_json
@@ -33,6 +33,9 @@ class SurveyQuestion(TypedDict):
     text: str
     options: tuple[str, ...]
     cultures: tuple[CultureBase, ...]
+
+
+HistoryInput = list[History] | list[dict[str, Any]]
 
 
 QUESTION_BANK: Final[dict[OccasionCategory, tuple[SurveyQuestion, ...]]] = {
@@ -540,7 +543,7 @@ Answering rules:
 
 def question(
     language: str,
-    histories: list[History] | list[dict[str, Any]],
+    histories: HistoryInput,
     question: str,
     memory: str = "",
     *,
@@ -556,8 +559,9 @@ def question(
     if invalid_reason:
         return {"success": False, "answer": invalid_reason}
 
-    resolved_target_name = _resolve_target_name(target_name, histories)
-    histories_for_prompt = _histories_for_prompt(histories, resolved_target_name)
+    normalized_histories = _normalize_histories(histories)
+    resolved_target_name = _resolve_target_name(target_name, normalized_histories)
+    histories_for_prompt = _histories_for_prompt(normalized_histories, resolved_target_name)
     normalized_category = _normalize_category(category)
     normalized_culture = _normalize_culture_base(culture_base)
     survey_data = survey_answers if survey_answers is not None else presurvey
@@ -585,6 +589,10 @@ def question(
         "success": bool(result.get("success")),
         "answer": str(result.get("answer", "")),
     }
+
+
+def _normalize_histories(histories: HistoryInput) -> list[dict[str, Any]]:
+    return [dict(cast(dict[str, Any], history)) for history in histories]
 
 
 def _resolve_target_name(target_name: Any, histories: list[dict[str, Any]]) -> str | None:
@@ -748,14 +756,18 @@ def _normalize_category(category: str | None) -> OccasionCategory | None:
     if alias:
         return alias
     if is_occasion_category(normalized):
-        return normalized
+        return cast(OccasionCategory, normalized)
     return None
 
 
 def _normalize_culture_base(culture_base: str | None) -> CultureBase:
     if not culture_base:
         return "unknown"
-    return CULTURE_ALIASES.get(culture_base.strip().lower(), CULTURE_ALIASES.get(culture_base.strip(), "unknown"))
+    normalized = CULTURE_ALIASES.get(
+        culture_base.strip().lower(),
+        CULTURE_ALIASES.get(culture_base.strip(), "unknown"),
+    )
+    return cast(CultureBase, normalized)
 
 
 def _questions_for_culture(
@@ -801,8 +813,8 @@ def _format_survey_answers(
         return pretty_json(survey_answers)
 
     if isinstance(survey_answers, list):
-        normalized = _normalize_survey_answer_list(category, culture_base, survey_answers)
-        return pretty_json(normalized)
+        normalized_answers = _normalize_survey_answer_list(category, culture_base, survey_answers)
+        return pretty_json(normalized_answers)
 
     return str(survey_answers).strip() or "(none provided)"
 
@@ -816,17 +828,17 @@ def _normalize_survey_answer_list(
         return [_normalize_question_answer_item(item) for item in survey_answers]
 
     questions = _questions_for_culture(category, culture_base) if category else ()
-    normalized: list[dict[str, Any]] = []
+    normalized_answers: list[dict[str, Any]] = []
     for index, answer in enumerate(survey_answers):
         question_item = questions[index] if index < len(questions) else None
-        normalized.append(
+        normalized_answers.append(
             {
                 "id": question_item["id"] if question_item else f"Q{index + 1}",
                 "question": question_item["text"] if question_item else "(unknown question)",
                 "answer": "잘 모르겠음" if answer is None else answer,
             }
         )
-    return normalized
+    return normalized_answers
 
 
 def _looks_like_question_answer_list(value: list[Any]) -> bool:
@@ -844,7 +856,7 @@ def _normalize_question_answer_item(item: Any) -> dict[str, Any]:
     if answer is None:
         answer = item.get("value")
 
-    normalized = {
+    normalized: dict[str, Any] = {
         "question": question_text,
         "answer": "잘 모르겠음" if answer is None else answer,
     }

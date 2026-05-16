@@ -236,6 +236,19 @@ Google 로그인 링크로 redirect 시킵니다.
 }
 ```
 
+
+- answer 형식
+1. 첫번째는 찾아보는중
+2. etiquette ```
+{
+  "fullReport": "Detailed markdown report in English. Sections: Situation summary / What to do / What to avoid (villain points) / Visits, contact, SNS, wording / Culture-specific notes ({culture_label})",
+  "summary": "English summary: 3–5 sentences or 3–5 bullet points"
+}
+```
+3. 세번째는 아마 {"message":"asfd"}일거같은데 함찾아볼게용
+
+
+
 - `GET /chat/list`
 - `GET /chat/list?formId=1`
 

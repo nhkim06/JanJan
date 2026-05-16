@@ -1,4 +1,5 @@
 import json
+import logging
 
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
@@ -7,7 +8,11 @@ from rest_framework.views import APIView
 
 from form.models import Form
 from history.models import History
-from utils.gemini import get_gemini_answer
+from utils.gemini import (
+    __wrapper_ai_yk_question as ai_yk_question_wrapper,
+    __wrapper_mj_etiquette as mj_etiquette_wrapper,
+    __wrapper_ai_yk_payment as ai_yk_payment_wrapper,
+)
 
 from .models import ChatItem
 from .serializers import (
@@ -15,6 +20,9 @@ from .serializers import (
     ChatItemReadSerializer,
     ChatListQuerySerializer,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -45,14 +53,17 @@ def build_chat_memory(chat_items):
     if not chat_items:
         return ""
 
-    first_chat = chat_items[0]
+    first_chats = chat_items[:3]
+    first_chat_memory_parts = []
+    for chat_item in first_chats:
+        first_chat_memory_parts.extend([chat_item.question, chat_item.answer])
+    first_chat_memory = "\n".join(first_chat_memory_parts)
     memory = [
         "사전 질문:",
-        first_chat.question,
-        first_chat.answer,
+        first_chat_memory,
     ]
 
-    extra_chats = chat_items[1:]
+    extra_chats = chat_items[3:]
     if extra_chats:
         memory.extend(["", "추가 질문:"])
         for chat_item in extra_chats:
@@ -122,25 +133,58 @@ class ChatCreateView(APIView):
                 status=ChatItem.Status.SUCCESS,
             ).exclude(id=chat_item.id).order_by("created_at", "id")
             category = serializer.validated_data.get("category") or form.category
-            gemini_result = get_gemini_answer(
-                get_user_language(request.user),
-                histories,
-                chat_item.question,
-                build_chat_memory(previous_chat_items),
-                current_context=build_current_context(form, category),
-                category=category,
-                target_name=form.target_name,
-                culture_base=form.culture_base,
-            )
+            
+            cnt = ChatItem.objects.filter(
+                form=form,
+            ).count()
+
+            if chat_item.question == "__CHAT_ITEM__":
+                chat_item.question = json.dumps(chat_item.form.answers, ensure_ascii=False)
+                chat_item.save(update_fields=["question", "updated_at"])
+
+            memory = build_chat_memory(previous_chat_items)
+            if cnt == 0:
+                gemini_result = ai_yk_payment_wrapper(
+                    get_user_language(request.user),
+                    histories,
+                    chat_item.question,
+                    memory,
+                    current_context=build_current_context(form, category),
+                    category=category,
+                    target_name=form.target_name,
+                    culture_base=form.culture_base,
+                )
+
+            elif cnt == 1:
+                gemini_result = mj_etiquette_wrapper(
+                    get_user_language(request.user),
+                    histories,
+                    chat_item.question,
+                    memory,
+                    category,
+                )
+            else:
+                gemini_result = ai_yk_question_wrapper(
+                    get_user_language(request.user),
+                    histories,
+                    chat_item.question,
+                    memory,
+                    current_context=build_current_context(form, category),
+                    category=category,
+                    target_name=form.target_name,
+                    culture_base=form.culture_base,
+                )
+
             success = gemini_result["success"]
             answer = gemini_result["answer"]
-        except Exception:
+        except Exception as exc:
+            logger.exception("Failed to get chat answer.")
             return Response(
                 {
                     "success": False,
                     "chatItemId": chat_item.id,
                     "status": chat_item.status,
-                    "detail": "Failed to get chat answer.",
+                    "detail": f"Failed to get chat answer: {exc}",
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

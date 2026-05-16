@@ -11,49 +11,50 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'submit']);
 
-// 카테고리 데이터 가공
+// Process category data based on events.json
 const categoriesByGroup = computed(() => {
   const result = {};
   for (const key in eventData) {
+    // key will be "Celebration" or "Condolence"
     result[key] = eventData[key].options.map((opt) => opt.title);
   }
   return result;
 });
 
-// 입력 폼 상태 관리
-const isReceived = ref(true); // true: 받은 것, false: 준 것
-const eventType = ref('축하');
+// Input form state management
+const isReceived = ref(true); // true: received, false: sent
+const eventType = ref('Celebration');
 const personName = ref('');
 const selectedCategory = ref('');
 const eventDate = ref('');
 const amount = ref('');
-const currency = ref('KRW'); // 통화 상태 추가 ('KRW', 'USD', 'JPY')
+const currency = ref('KRW'); // Currency state ('KRW', 'USD', 'JPY')
 
-// 통화 기호 매핑 함수
+// Currency symbol mapping
 const currencySymbol = computed(() => {
   if (currency.value === 'USD') return '$';
   if (currency.value === 'JPY') return '¥';
   return '₩';
 });
 
-// 구분(축하/위로)이 바뀔 때마다 상세 카테고리 초기화
+// Reset detail category whenever eventType changes
 watch(eventType, (newType) => {
   if (categoriesByGroup.value[newType]) {
     selectedCategory.value = categoriesByGroup.value[newType][0];
   }
 });
 
-// 모달이 열릴 때마다 폼 기본값 초기화
+// Reset form defaults whenever modal opens
 watch(
   () => props.isOpen,
   (newVal) => {
     if (newVal) {
       isReceived.value = true;
-      eventType.value = '축하';
+      eventType.value = 'Celebration';
       personName.value = '';
-      currency.value = 'KRW'; // 통화 기본값 원화로 초기화
-      if (categoriesByGroup.value['축하']) {
-        selectedCategory.value = categoriesByGroup.value['축하'][0];
+      currency.value = 'KRW';
+      if (categoriesByGroup.value['Celebration']) {
+        selectedCategory.value = categoriesByGroup.value['Celebration'][0];
       }
       eventDate.value = new Date().toISOString().substring(0, 10);
       amount.value = '';
@@ -61,7 +62,7 @@ watch(
   },
 );
 
-// 천단위 콤마 포맷팅 (달러 소수점 등 복잡한 계산 배제하고 순수 숫자 콤마 유지)
+// Format amount with thousands separator
 const formatAmount = (e) => {
   let value = e.target.value.replace(/[^0-9]/g, '');
   if (value) {
@@ -77,28 +78,28 @@ const handleClose = () => {
 
 const handleSubmit = () => {
   if (!personName.value.trim()) {
-    alert('이름을 입력해주세요.');
+    alert('Please enter a name.');
     return;
   }
   if (!selectedCategory.value) {
-    alert('카테고리를 선택해주세요.');
+    alert('Please select a category.');
     return;
   }
   if (!eventDate.value) {
-    alert('날짜를 선택해주세요.');
+    alert('Please select a date.');
     return;
   }
   if (!amount.value) {
-    alert('금액을 입력해주세요.');
+    alert('Please enter an amount.');
     return;
   }
 
-  // 데이터 전송 포맷 매핑
+  // Map to data transfer format
   emit('submit', {
     targetName: personName.value.trim(),
     received: isReceived.value,
     value: Number(amount.value.replace(/,/g, '')),
-    currency: currency.value, // cultureBase 대신 변경된 currency 데이터 전송
+    currency: currency.value,
     category: selectedCategory.value,
     date: eventDate.value,
   });
@@ -117,21 +118,21 @@ const handleSubmit = () => {
           v-if="isOpen"
           class="w-full max-w-md bg-white rounded-[1.75rem] shadow-2xl border border-slate-200/50 flex flex-col overflow-hidden relative"
         >
-          <!-- 상단 장식 바 (모바일 느낌) -->
+          <!-- Top decorative bar (mobile feel) -->
           <div
             class="h-1 w-10 bg-slate-200 rounded-full mx-auto mt-2.5 mb-0.5 sm:hidden"
           ></div>
 
-          <!-- 헤더 -->
+          <!-- Header -->
           <div class="px-6 pt-4 pb-1 flex items-center justify-between">
             <div>
               <h2
                 class="text-xl font-black text-slate-900 tracking-tight mt-0.5"
               >
-                경조사 기록
+                Event Record
               </h2>
               <p class="text-[12px] font-medium text-slate-400 mt-0.5">
-                잊지 않도록 소중한 마음을 기록하세요
+                Keep track of your precious moments
               </p>
             </div>
             <button
@@ -142,12 +143,12 @@ const handleSubmit = () => {
             </button>
           </div>
 
-          <!-- 폼 영역 -->
+          <!-- Form Area -->
           <div class="px-6 py-4 space-y-4 flex-1 overflow-y-auto max-h-[70vh]">
-            <!-- [추가] 1. 주고받음 구분 선택 (received 데이터 바인딩) -->
+            <!-- 1. Type Selection (Received/Sent) -->
             <div class="space-y-1.5">
               <label class="block text-[12px] font-bold text-slate-500 ml-1"
-                >구분 선택</label
+                >Transaction Type</label
               >
               <div
                 class="grid grid-cols-2 gap-2.5 p-1 bg-slate-100/80 rounded-xl"
@@ -167,7 +168,7 @@ const handleSubmit = () => {
                     class="w-3 h-3 text-indigo-500"
                     v-if="isReceived"
                   />
-                  <span>받았어요 (수령)</span>
+                  <span>Received</span>
                 </button>
                 <button
                   type="button"
@@ -184,18 +185,18 @@ const handleSubmit = () => {
                     class="w-3 h-3 text-green-500"
                     v-if="!isReceived"
                   />
-                  <span>보냈어요 (지출)</span>
+                  <span>Sent</span>
                 </button>
               </div>
             </div>
 
-            <!-- 2. 이름 입력 (구분에 따라 라벨/플레이스홀더 변경) -->
+            <!-- 2. Name Input -->
             <div class="space-y-1.5">
               <label
                 for="event-name"
                 class="block text-[12px] font-bold text-slate-500 ml-1"
               >
-                {{ isReceived ? '보낸 사람 이름' : '받는 사람 이름' }}
+                {{ isReceived ? 'Sender Name' : 'Recipient Name' }}
               </label>
               <input
                 id="event-name"
@@ -203,27 +204,27 @@ const handleSubmit = () => {
                 v-model="personName"
                 :placeholder="
                   isReceived
-                    ? '선물이나 부조를 준 사람의 이름'
-                    : '받는 사람의 이름'
+                    ? 'Who gave this to you?'
+                    : 'Who are you giving this to?'
                 "
                 class="w-full px-4 py-3.5 bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-xl text-[14px] font-bold text-slate-700 placeholder-slate-300 outline-none transition-all"
               />
             </div>
 
-            <!-- 3. 경조사 대분류 구분 -->
+            <!-- 3. Event Category Selection -->
             <div class="space-y-1.5">
               <label class="block text-[12px] font-bold text-slate-500 ml-1"
-                >유형 선택</label
+                >Occasion Type</label
               >
               <div
                 class="grid grid-cols-2 gap-2.5 p-1 bg-slate-100/80 rounded-xl"
               >
                 <button
                   type="button"
-                  @click="eventType = '축하'"
+                  @click="eventType = 'Celebration'"
                   :class="[
                     'py-2.5 text-[13px] font-bold rounded-lg transition-all duration-300 flex items-center justify-center space-x-1.5',
-                    eventType === '축하'
+                    eventType === 'Celebration'
                       ? 'bg-white text-indigo-600 shadow-[0_2px_8px_rgba(99,102,241,0.08)] border border-white'
                       : 'text-slate-400 hover:text-slate-500',
                   ]"
@@ -232,17 +233,17 @@ const handleSubmit = () => {
                     icon="fa-solid fa-gift"
                     :class="[
                       'w-3.5 h-3.5',
-                      eventType === '축하' ? 'text-indigo-500' : '',
+                      eventType === 'Celebration' ? 'text-indigo-500' : '',
                     ]"
                   />
-                  <span>축하하기</span>
+                  <span>Celebration</span>
                 </button>
                 <button
                   type="button"
-                  @click="eventType = '위로'"
+                  @click="eventType = 'Condolence'"
                   :class="[
                     'py-2.5 text-[13px] font-bold rounded-lg transition-all duration-300 flex items-center justify-center space-x-1.5',
-                    eventType === '위로'
+                    eventType === 'Condolence'
                       ? 'bg-white text-indigo-600 shadow-[0_2px_8px_rgba(72,187,120,0.08)] border border-white'
                       : 'text-slate-400 hover:text-slate-500',
                   ]"
@@ -251,20 +252,20 @@ const handleSubmit = () => {
                     icon="fa-solid fa-bandage"
                     :class="[
                       'w-3.5 h-3.5',
-                      eventType === '위로' ? 'text-indigo-500' : '',
+                      eventType === 'Condolence' ? 'text-indigo-500' : '',
                     ]"
                   />
-                  <span>위로하기</span>
+                  <span>Condolence</span>
                 </button>
               </div>
             </div>
 
-            <!-- 4. 상세 카테고리 -->
+            <!-- 4. Detail Category -->
             <div class="space-y-1.5">
               <label
                 for="event-category"
                 class="block text-[12px] font-bold text-slate-500 ml-1"
-                >상세 항목</label
+                >Event Detail</label
               >
               <div class="relative group">
                 <select
@@ -291,12 +292,12 @@ const handleSubmit = () => {
               </div>
             </div>
 
-            <!-- 5. 날짜 선택 -->
+            <!-- 5. Date Selection -->
             <div class="space-y-1.5">
               <label
                 for="event-date"
                 class="block text-[12px] font-bold text-slate-500 ml-1"
-                >날짜</label
+                >Date</label
               >
               <input
                 id="event-date"
@@ -306,12 +307,12 @@ const handleSubmit = () => {
               />
             </div>
 
-            <!-- 6. 금액 입력 -->
+            <!-- 6. Amount Input -->
             <div class="space-y-1.5">
               <label
                 for="event-amount"
                 class="block text-[12px] font-bold text-slate-500 ml-1"
-                >금액</label
+                >Amount</label
               >
               <div class="relative flex items-center group">
                 <input
@@ -322,7 +323,6 @@ const handleSubmit = () => {
                   placeholder="0"
                   class="w-full pl-4 pr-12 py-3.5 bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-xl text-[14px] font-black text-slate-800 placeholder-slate-300 outline-none transition-all text-right group-hover:bg-slate-100/50"
                 />
-                <!-- 우측 기호 변경 (KRW: ₩, USD: $, JPY: ¥) -->
                 <span
                   class="absolute right-4 text-[13px] font-bold text-slate-400"
                   >{{ currencySymbol }}</span
@@ -330,10 +330,10 @@ const handleSubmit = () => {
               </div>
             </div>
 
-            <!-- 7. 통화 선택 (금액 밑에 배치, 3열 레이아웃) -->
+            <!-- 7. Currency Choice -->
             <div class="space-y-1.5">
               <label class="block text-[12px] font-bold text-slate-500 ml-1"
-                >통화 선택</label
+                >Currency</label
               >
               <div
                 class="grid grid-cols-3 gap-2 p-1 bg-slate-100/80 rounded-xl"
@@ -348,7 +348,7 @@ const handleSubmit = () => {
                       : 'text-slate-400 hover:text-slate-500',
                   ]"
                 >
-                  <span>₩ 원화</span>
+                  <span>₩ KRW</span>
                 </button>
                 <button
                   type="button"
@@ -360,7 +360,7 @@ const handleSubmit = () => {
                       : 'text-slate-400 hover:text-slate-500',
                   ]"
                 >
-                  <span>$ 달러</span>
+                  <span>$ USD</span>
                 </button>
                 <button
                   type="button"
@@ -372,20 +372,20 @@ const handleSubmit = () => {
                       : 'text-slate-400 hover:text-slate-500',
                   ]"
                 >
-                  <span>¥ 엔화</span>
+                  <span>¥ JPY</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- 하단 버튼 -->
+          <!-- Bottom Button -->
           <div class="px-6 pb-5 pt-1">
             <button
               type="button"
               @click="handleSubmit"
               class="w-full py-4 text-[15px] font-black text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-lg shadow-slate-200 transition-all duration-300 active:scale-[0.97] flex items-center justify-center space-x-1.5"
             >
-              <span>저장하기</span>
+              <span>Save Record</span>
               <font-awesome-icon icon="fa-solid fa-check" class="w-3.5 h-3.5" />
             </button>
           </div>
@@ -396,7 +396,6 @@ const handleSubmit = () => {
 </template>
 
 <style scoped>
-/* 기존 스타일 그대로 유지 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);

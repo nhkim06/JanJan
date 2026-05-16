@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import UserProfile
 from .services import GoogleAuthError, exchange_google_authorization_code
@@ -20,6 +21,14 @@ PENDING_GOOGLE_AUTH_SESSION_KEY = "pending_google_auth"
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
+
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+    }
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -73,9 +82,16 @@ class CallbackView(APIView):
                     detail="User is inactive.",
                 )
 
+            # JWT 토큰 생성
+            tokens = get_tokens_for_user(profile.user)
             login(request, profile.user)
             request.session.pop(PENDING_GOOGLE_AUTH_SESSION_KEY, None)
-            return self._redirect_to_frontend(success=True, hasData=True)
+            return self._redirect_to_frontend(
+                success=True, 
+                hasData=True, 
+                token=tokens["access"],
+                refresh=tokens["refresh"]
+            )
 
         request.session[PENDING_GOOGLE_AUTH_SESSION_KEY] = google_user
         return self._redirect_to_frontend(success=True, hasData=False)
@@ -145,9 +161,14 @@ class RegisterView(APIView):
             name=name,
         )
 
+        tokens = get_tokens_for_user(user)
         login(request, user)
         request.session.pop(PENDING_GOOGLE_AUTH_SESSION_KEY, None)
-        return Response({"success": True})
+        return Response({
+            "success": True,
+            "token": tokens["access"],
+            "refresh": tokens["refresh"]
+        })
 
 
 @method_decorator(csrf_exempt, name="dispatch")

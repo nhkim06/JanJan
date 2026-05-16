@@ -1,11 +1,11 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 
 /* import the fontawesome core */
-import { library } from '@fortawesome/fontawesome-svg-core'
+import { library } from '@fortawesome/fontawesome-svg-core';
 
 /* import font awesome icon component */
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 /* import specific icons */
 import {
@@ -38,7 +38,8 @@ import {
   faPlus,
   faChevronRight,
   faCommentDots,
-} from '@fortawesome/free-solid-svg-icons'
+  faBandage,
+} from '@fortawesome/free-solid-svg-icons';
 
 /* add icons to the library */
 library.add(
@@ -71,16 +72,17 @@ library.add(
   faPlus,
   faChevronRight,
   faCommentDots,
-)
+  faBandage,
+);
 
-import App from './App.vue'
-import router from './router'
+import App from './App.vue';
+import router from './router';
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.component('font-awesome-icon', FontAwesomeIcon)
+app.component('font-awesome-icon', FontAwesomeIcon);
 
-app.use(createPinia())
-app.use(router)
+app.use(createPinia());
+app.use(router);
 
-app.mount('#app')
+app.mount('#app');

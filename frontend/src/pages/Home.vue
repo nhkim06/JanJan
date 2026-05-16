@@ -22,7 +22,10 @@
             <div
               class="w-9 h-9 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-full flex items-center justify-center text-white shadow-md shadow-indigo-200"
             >
-              <font-awesome-icon icon="fa-solid fa-wand-magic-sparkles" class="w-4 h-4" />
+              <font-awesome-icon
+                icon="fa-solid fa-wand-magic-sparkles"
+                class="w-4 h-4"
+              />
             </div>
             <input
               type="text"
@@ -32,12 +35,16 @@
             <button
               class="text-indigo-500 hover:text-indigo-600 active:scale-90 transition-transform p-1"
             >
-              <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-5 h-5 rotate-45" />
+              <font-awesome-icon
+                icon="fa-solid fa-paper-plane"
+                class="w-5 h-5 rotate-45"
+              />
             </button>
           </div>
         </section>
 
         <section class="space-y-4">
+          <!-- 축하 버튼 -->
           <button
             @click="router.push('/events/축하')"
             class="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-[0_10px_30px_rgb(0,0,0,0.02)] border border-slate-50 hover:border-indigo-100 hover:shadow-[0_12px_35px_rgb(99,102,241,0.05)] active:scale-[0.99] transition-all text-left group"
@@ -55,17 +62,18 @@
             <div
               class="w-14 h-14 bg-indigo-50/70 rounded-2xl flex items-center justify-center text-indigo-500 transition-colors group-hover:bg-indigo-100"
             >
-              <font-awesome-icon icon="fa-solid fa-heart" class="w-6 h-6" />
+              <font-awesome-icon icon="fa-solid fa-gift" class="w-6 h-6" />
             </div>
           </button>
 
+          <!-- 위로 버튼 -->
           <button
             @click="router.push('/events/위로')"
-            class="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-[0_10px_30px_rgb(0,0,0,0.02)] border border-slate-50 hover:border-slate-300 hover:shadow-[0_12px_35px_rgb(148,163,184,0.05)] active:scale-[0.99] transition-all text-left group"
+            class="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-[0_10px_30px_rgb(0,0,0,0.02)] border border-slate-50 hover:border-indigo-100 hover:shadow-[0_12px_35px_rgb(99,102,241,0.05)] active:scale-[0.99] transition-all text-left group"
           >
             <div>
               <h2
-                class="text-xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors mb-1"
+                class="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1"
               >
                 위로
               </h2>
@@ -74,9 +82,9 @@
               </p>
             </div>
             <div
-              class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 transition-colors group-hover:bg-slate-100 group-hover:text-slate-600"
+              class="w-14 h-14 bg-indigo-50/70 rounded-2xl flex items-center justify-center text-indigo-500 transition-colors group-hover:bg-indigo-100"
             >
-              <font-awesome-icon icon="fa-solid fa-plus" class="w-6 h-6" />
+              <font-awesome-icon icon="fa-solid fa-bandage" class="w-6 h-6" />
             </div>
           </button>
         </section>
@@ -112,7 +120,10 @@
               <div
                 class="text-slate-300 group-hover:text-indigo-500 transition-colors"
               >
-                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-4 h-4" />
+                <font-awesome-icon
+                  icon="fa-solid fa-chevron-right"
+                  class="w-4 h-4"
+                />
               </div>
             </button>
           </div>
@@ -131,7 +142,7 @@ const router = useRouter();
 const goToChatList = (personId) => {
   router.push({
     name: 'chat-list',
-    params: { personId }
+    params: { personId },
   });
 };
 </script>

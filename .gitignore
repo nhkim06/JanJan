@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Django
+backend/db.sqlite3
+
+# Virtual environments
+.venv/
+backend/.venv/
+
+# Local environment
+.env
+backend/.env
+
+# IDE
+.idea/
+
+# Vercel
+vercel.json
+build_files.sh
+.vercel
+.vercelignore

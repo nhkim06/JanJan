@@ -24,20 +24,20 @@ if __name__ == "__main__":
     # 시스템이 허용하는 카테고리만 사용해야 합니다 (birth, wedding, employment 등)
     scenarios = [
         {
-            "name": "친한 친구의 결혼 (편한 사이)",
+            "name": "홍길동",
             "category": "wedding",
             # 'birthday'를 'wedding'이나 다른 허용된 카테고리로 변경
-            "history": [{"targetName": "절친", "received": True, "value": 100000, "currency": "ko", "category": "wedding", "date": "2025-01-01"}],
+            "history": [{"targetName": "홍길동", "received": True, "value": 100000, "currency": "ko", "category": "wedding", "date": "2025-01-01"}],
             "survey": [
                 {"question": "상대와의 관계", "answer": "매우 가까운 친구"},
                 {"question": "참석 여부", "answer": "참석함"}
             ]
         },
         {
-            "name": "직장 상사의 자녀 돌잔치 (격식 필요)",
+            "name": "고민지",
             "category": "first_birthday",
             # 'none' 대신 유효한 카테고리 입력
-            "history": [{"targetName": "팀장님", "received": False, "value": 0, "currency": "ko", "category": "first_birthday", "date": "2024-05-01"}],
+            "history": [{"targetName": "고민지", "received": False, "value": 0, "currency": "ko", "category": "first_birthday", "date": "2024-05-01"}],
             "survey": [
                 {"question": "상대와의 관계", "answer": "상사/선배"},
                 {"question": "참석 여부", "answer": "불참함 (메시지만 전달)"}
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         survey_json = json.dumps(sc['survey'], ensure_ascii=False)
         
         # etiquette_api.py 내부의 func 또는 analyze_etiquette를 호출하세요.
-        result = message_guide("ko", sc['history'], survey_json, "", sc['category'])
+        result = message_guide("en", sc['history'], survey_json, "", sc['category'])
         
         if result["success"]:
             print(f"추천 메시지: {result['answer']}")

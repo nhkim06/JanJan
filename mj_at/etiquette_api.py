@@ -30,7 +30,7 @@ except ImportError:  # pragma: no cover - supports direct script execution
         validate_histories,
     )
 
-MODEL = "gemini-3-flash-preview"
+MODEL = "gemini-2.5-flash"
 
 ETIQUETTE_QUESTIONS: dict[OccasionCategory, list[str]] = {
     "birth": [
@@ -131,14 +131,14 @@ SYSTEM_INSTRUCTION = """You are an expert on Korean and Japanese ceremonial etiq
 Help the user avoid being an "etiquette villain" at life events.
 
 Rules:
-- Write ALL output in English only (fullReport, summary, and every follow-up reply).
+- Write ALL output in the target language specified in the user prompt.
 - Do not calculate gift amounts; use the counterparty's past payments only for relationship depth and reciprocity.
-- Mark uncertain points as "needs confirmation".
+- Mark uncertain points clearly in the target language.
 - Be specific about visits, wording, dress code, SNS, timing, companions, and privacy.
-- Apply norms for the given cultural base (Korea vs Japan) even though you write in English."""
+- Apply norms for the given cultural base (Korea vs Japan)."""
 
 FOLLOWUP_INSTRUCTION = """You are a ceremonial etiquette expert for Korea and Japan.
-Answer the user's follow-up concisely in English only, using the prior report and context."""
+Answer the user's follow-up concisely in the target language specified in the user prompt, using the prior report and context."""
 
 
 def _history_date(h: History) -> str:
@@ -256,6 +256,15 @@ def _culture_label(currency: CultureBase | None, language: str) -> str:
     return code
 
 
+def _language_label(language: str) -> str:
+    code = (language or "ko").strip().lower()
+    if code == "ja":
+        return "Japanese"
+    if code == "en":
+        return "English"
+    return "Korean"
+
+
 def _build_report_prompt(
     language: str,
     survey: list[dict[str, str]],
@@ -284,11 +293,12 @@ def _build_report_prompt(
     )
 
     culture_label = _culture_label(currency, language)
+    output_language = _language_label(language)
 
     return f"""Using the pre-survey answers and ceremonial history below, write an **etiquette villain prevention analysis report**.
 
 ## Context
-- Output language: English only (both fullReport and summary must be in English)
+- Output language: {output_language} only (both fullReport and summary must be in {output_language})
 - Cultural base for etiquette rules: {culture_label}
 - Event category key: {category}
 - Event category label: {category_label}
@@ -309,26 +319,32 @@ Payment history schema note:
 
 ## Output format (JSON only, no other text)
 {{
-  "fullReport": "Detailed markdown report in English. Sections: Situation summary / What to do / What to avoid (villain points) / Visits, contact, SNS, wording / Culture-specific notes ({culture_label})",
-  "summary": "English summary: 3–5 sentences or 3–5 bullet points"
+  "fullReport": "Detailed markdown report written in {output_language}. Sections: Situation summary / What to do / What to avoid (villain points) / Visits, contact, SNS, wording / Culture-specific notes ({culture_label})",
+  "summary": "3-5 sentences or 3-5 bullet points written in {output_language}"
 }}
 """
 
 
 def _build_followup_prompt(
+    language: str,
     question: str,
     memory: str,
     prior_total: int,
     target_name: str | None,
 ) -> str:
-    return f"""## Prior analysis report and context
+    output_language = _language_label(language)
+
+    return f"""## Target output language
+{output_language} only
+
+## Prior analysis report and context
 {memory or "(none)"}
 
 ## Counterparty ceremonial payment summary
 - Name: {target_name or "(not specified)"}
 - Total paid to the user (KRW): {prior_total:,}
 
-## User follow-up question (reply in English only)
+## User follow-up question
 {question}
 """
 
@@ -412,8 +428,8 @@ def analyze_etiquette(
     """
     Etiquette villain-prevention API entry point.
 
-    First call: question is pre-survey JSON; answer is JSON with fullReport + summary (English).
-    Follow-up: question is plain text; answer is plain text (English).
+    First call: question is pre-survey JSON; answer is JSON with fullReport + summary.
+    Follow-up: question is plain text; answer is plain text.
     """
     lang = (language or "ko").strip().lower()
     if lang not in ("ko", "ja", "en"):
@@ -444,7 +460,7 @@ def analyze_etiquette(
 
         target_name = _target_name_from_histories(histories)
         prior_total, _ = _prior_payments(histories, target_name)
-        prompt = _build_followup_prompt(question, memory, prior_total, target_name)
+        prompt = _build_followup_prompt(lang, question, memory, prior_total, target_name)
         reply = _call_gemini(prompt, followup=True)
         return {"success": True, "answer": reply}
 
@@ -481,5 +497,5 @@ if __name__ == "__main__":
         ensure_ascii=False,
     )
 
-    result = analyze_etiquette("ko", sample_histories, sample_survey, "", "wedding")
+    result = analyze_etiquette("en", sample_histories, sample_survey, "", "wedding")
     print(result)

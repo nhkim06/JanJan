@@ -143,6 +143,12 @@
         </button>
       </div>
     </div>
+
+    <!-- 제출 중 로딩 오버레이 -->
+    <div v-if="isSubmitting" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
+       <div class="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+       <p class="text-slate-600 font-bold text-lg">결과를 분석하고 있습니다...</p>
+    </div>
   </div>
 </template>
 
@@ -182,9 +188,12 @@ const preSurveyData = ref({
   cultureBase: '',
 });
 const answers = ref([]);
+const isSubmitting = ref(false);
+const isLoading = ref(false); // Forms.vue는 초기 로딩이 필요 없으면 false로 시작
 
 // 다음 버튼 Validation 조건 관리
 const isNextDisabled = computed(() => {
+  if (isSubmitting.value) return true;
   if (currentStep.value === 0) return !preSurveyData.value.targetName.trim();
   if (currentStep.value === 1) return !preSurveyData.value.cultureBase;
   if (currentStep.value >= 2) {

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 try:
     from .gemini_client import call_gemini, pretty_json, pretty_question
-    from .type_def import AIResponse, History
+    from .type_def import AIResponse, History, validate_histories
 except ImportError:  # pragma: no cover - supports direct script execution
     from gemini_client import call_gemini, pretty_json, pretty_question
-    from type_def import AIResponse, History
+    from type_def import AIResponse, History, validate_histories
 
 
 SYSTEM_INSTRUCTION = """
@@ -23,6 +23,10 @@ def func(
     question: str,
     memory: str,
 ) -> AIResponse:
+    invalid_reason = validate_histories(histories)
+    if invalid_reason:
+        return {"success": False, "answer": invalid_reason}
+
     prompt = _build_prompt(language, histories, question, memory)
     return call_gemini(
         prompt,

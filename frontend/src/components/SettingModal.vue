@@ -6,6 +6,7 @@
     <div
       class="bg-white rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl transform transition-all duration-300 scale-100 opacity-100"
     >
+      <!-- Header -->
       <div class="px-6 pt-6 pb-4 flex items-center justify-between border-b border-slate-50">
         <h2 class="text-xl font-bold text-slate-900 ml-2">
           {{ i18n.settingTitle }}
@@ -18,7 +19,9 @@
         </button>
       </div>
 
+      <!-- Body -->
       <div class="px-8 py-6 flex flex-col space-y-6">
+        <!-- ID Change Section -->
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-400 ml-1">
             {{ i18n.usernameLabel }}
@@ -31,6 +34,7 @@
           />
         </div>
 
+        <!-- Language Change Section -->
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-400 ml-1">
             {{ i18n.langLabel }}
@@ -53,6 +57,7 @@
         </div>
       </div>
 
+      <!-- Footer Buttons -->
       <div class="px-8 pb-8 pt-2 space-y-3">
         <button
           @click="handleSave"

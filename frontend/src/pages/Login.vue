@@ -1,11 +1,11 @@
 <template>
   <div class="flex justify-center bg-gray-50 min-h-screen relative">
-    <!-- 상단 우측 언어 선택 토글 버튼 -->
+    <!-- Top Right Language Toggle -->
     <div
       class="absolute top-6 right-6 z-10 flex gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-100"
     >
       <button
-        v-for="lang in ['ko', 'en', 'ja']"
+        v-for="lang in ['en', 'ko', 'ja']"
         :key="lang"
         @click="currentLang = lang"
         :class="[
@@ -26,7 +26,7 @@
         class="flex flex-col items-center w-full max-w-sm h-full justify-between min-h-[calc(100vh-9rem)]"
       >
         <div class="flex flex-col items-center w-full">
-          <!-- 로고 및 서비스 이름 -->
+          <!-- Logo & Service Name -->
           <div
             class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-3xl flex items-center justify-center shadow-xl shadow-indigo-200 mb-8 animate-bounce-subtle overflow-hidden p-4 md:p-5"
           >
@@ -50,7 +50,7 @@
             </p>
           </header>
 
-          <!-- 로그인 섹션 -->
+          <!-- Login Section -->
           <div class="w-full space-y-4">
             <button
               @click="handleGoogleLogin"
@@ -85,7 +85,7 @@
           </div>
         </div>
 
-        <!-- 하단 문구 -->
+        <!-- Footer -->
         <footer class="mt-auto pt-12 text-center w-full">
           <p
             class="text-xs text-slate-400 font-medium leading-relaxed interpretation-links"
@@ -116,11 +116,20 @@ const router = useRouter();
 const apiBaseUrl =
   import.meta.env.VITE_API_BASE_URL || 'https://janjan-backend.hurdoo.kr';
 
-// 현재 선택된 언어 상태 ('ko' | 'en' | 'ja')
-const currentLang = ref('ko');
+// Default language is now 'en'
+const currentLang = ref('en');
 
-// 다국어 텍스트 데이터 팩
 const languages = {
+  en: {
+    title: 'JanJan',
+    subtitle: 'Lighten your daily etiquette,\nA smart etiquette guide with AI',
+    loginBtn: 'Continue with Google',
+    footerPre: 'By signing in, you agree to our ',
+    terms: 'Terms of Service',
+    footerMid: ' and ',
+    privacy: 'Privacy Policy',
+    footerPost: '.',
+  },
   ko: {
     title: '잔잔 (JanJan)',
     subtitle:
@@ -132,16 +141,6 @@ const languages = {
     privacy: '개인정보처리방침',
     footerPost: '에 동의하는 것으로 간주됩니다.',
   },
-  en: {
-    title: 'JanJan',
-    subtitle: 'Lighten your daily etiquette,\nA smart etiquette guide with AI',
-    loginBtn: 'Continue with Google',
-    footerPre: 'By signing in, you agree to our ',
-    terms: 'Terms of Service',
-    footerMid: ' and ',
-    privacy: 'Privacy Policy',
-    footerPost: '.',
-  },
   ja: {
     title: '残残 (JanJan)',
     subtitle:
@@ -151,16 +150,14 @@ const languages = {
     terms: '利用規約',
     footerMid: 'および',
     privacy: 'プライバシーポリシー',
-    footerPost: 'に同意したものとみなされます。',
+    footerPost: '에 同意したものとみなされます。',
   },
 };
 
-// 현재 언어에 맞는 텍스트 변환 계산 프로퍼티
-const t = computed(() => languages[currentLang.value]);
+const t = computed(() => languages[currentLang.value] || languages.en);
 
 const handleGoogleLogin = () => {
-  console.log(`[${currentLang.value.toUpperCase()}] Google 로그인 시도...`);
-  // 백엔드 구글 로그인 엔드포인트로 리다이렉트
+  console.log(`[${currentLang.value.toUpperCase()}] Google Login Attempt...`);
   window.location.href = `${apiBaseUrl}/auth/login`;
 };
 </script>
@@ -180,7 +177,6 @@ const handleGoogleLogin = () => {
   animation: bounce-subtle 3s infinite ease-in-out;
 }
 
-/* 줄바꿈(\n) 처리를 위한 스타일 */
 .whitespace-pre-line {
   white-space: pre-line;
 }

@@ -23,6 +23,19 @@
         </p>
 
         <div class="w-full space-y-6">
+          <!-- 아이디 입력 -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-slate-400 ml-1">
+              {{ i18n.idLabel }}
+            </label>
+            <input
+              v-model="formData.id"
+              type="text"
+              :placeholder="i18n.idPlaceholder"
+              class="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-5 text-base font-bold text-slate-800 placeholder-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all"
+            />
+          </div>
+
           <!-- 이름 입력 -->
           <div class="space-y-2">
             <label class="text-xs font-bold text-slate-400 ml-1">
@@ -90,6 +103,7 @@ const props = defineProps({
 const emit = defineEmits(['submit']);
 
 const formData = ref({
+  id: '',
   name: '',
   language: 'ko',
 });
@@ -106,6 +120,8 @@ const contentText = {
   ko: {
     title: '환영합니다!',
     description: '서비스 이용을 위해 기본 정보를 입력해주세요.',
+    idLabel: '아이디',
+    idPlaceholder: '아이디를 입력해주세요',
     nameLabel: '이름',
     placeholder: '이름을 입력해주세요',
     langLabel: '선호 언어',
@@ -114,6 +130,8 @@ const contentText = {
   en: {
     title: 'Welcome!',
     description: 'Please enter your basic profile details to get started.',
+    idLabel: 'ID',
+    idPlaceholder: 'Enter your ID',
     nameLabel: 'Name',
     placeholder: 'Enter your name',
     langLabel: 'Preferred Language',
@@ -121,7 +139,9 @@ const contentText = {
   },
   ja: {
     title: 'ようこそ！',
-    description: 'サービスをご利用いただくために、基本情報を入力してください。',
+    description: 'サービスをご利用いただくために、基本情報を 입력해주세요.',
+    idLabel: 'ID',
+    idPlaceholder: 'IDを入力してください',
     nameLabel: '名前',
     placeholder: '名前を入力してください',
     langLabel: '希望言語',
@@ -135,7 +155,11 @@ const i18n = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return formData.value.name.trim().length > 0 && formData.value.language;
+  return (
+    formData.value.id.trim().length > 0 &&
+    formData.value.name.trim().length > 0 &&
+    formData.value.language
+  );
 });
 
 const handleSubmit = () => {

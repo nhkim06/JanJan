@@ -60,7 +60,7 @@
       </div>
 
       <!-- 하단 버튼 영역 -->
-      <div class="px-8 pb-8 pt-2">
+      <div class="px-8 pb-8 pt-2 space-y-3">
         <button
           @click="handleSave"
           :disabled="!isFormValid"
@@ -73,25 +73,31 @@
         >
           {{ i18n.saveBtn }}
         </button>
+        <button
+          @click="handleLogout"
+          class="w-full py-4 rounded-2xl font-bold text-lg text-rose-600 bg-rose-50 hover:bg-rose-100 transition-all active:scale-[0.98]"
+        >
+          로그아웃
+        </button>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import apiClient from '../utils/api';
+import { useAuthStore } from '../stores/auth';
 
-const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false,
-  },
-  // 부모 컴포넌트로부터 현재 유저 정보를 받아와 초기값으로 설정할 수 있습니다.
+const authStore = useAuthStore();
+
+const props = defineProps<{
+  isOpen: boolean;
   currentSettings: {
-    type: Object,
-    default: () => ({ name: '홍길동', language: 'ko' }),
-  },
-});
+    name: string;
+    language: string;
+  };
+}>();
 
 const emit = defineEmits(['close', 'save']);
 
@@ -119,7 +125,7 @@ const languages = [
 ];
 
 // 설정 창 내부에서 즉각 반영될 다국어 사전
-const contentText = {
+const contentText: Record<string, any> = {
   ko: {
     settingTitle: '환경 설정',
     nameLabel: '이름 변경',
@@ -150,17 +156,43 @@ const i18n = computed(() => {
 
 // 빈 이름 저장 방지 검증
 const isFormValid = computed(() => {
-  return localData.value.name.trim().length > 0 && localData.value.language;
+  return localData.value.name.trim().length > 0 && !!localData.value.language;
 });
 
 const handleClose = () => {
   emit('close');
 };
 
-const handleSave = () => {
+const handleSave = async () => {
   if (isFormValid.value) {
-    emit('save', { ...localData.value });
-    emit('close');
+    try {
+      const response = await apiClient.post('/auth/profile', {
+        name: localData.value.name,
+        language: localData.value.language,
+      });
+      if (response.data.success) {
+        emit('save', { ...localData.value });
+        emit('close');
+      } else {
+        alert(response.data.detail || '설정 저장에 실패했습니다.');
+      }
+    } catch (error: any) {
+      console.error('설정 저장 에러:', error);
+      alert(error.response?.data?.detail || '오류가 발생했습니다.');
+    }
+  }
+};
+
+const handleLogout = async () => {
+  try {
+    await apiClient.post('/auth/logout');
+    authStore.logout();
+    window.location.href = '/login';
+  } catch (error) {
+    console.error('로그아웃 에러:', error);
+    // 에러가 나도 로컬에서는 로그아웃 처리
+    authStore.logout();
+    window.location.href = '/login';
   }
 };
 </script>

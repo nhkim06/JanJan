@@ -157,10 +157,8 @@ const t = computed(() => languages[currentLang.value]);
 
 const handleGoogleLogin = () => {
   console.log(`[${currentLang.value.toUpperCase()}] Google 로그인 시도...`);
-  router.push({
-    path: '/',
-    query: { isNewUser: 'true', lang: currentLang.value },
-  });
+  // 백엔드 구글 로그인 엔드포인트로 리다이렉트
+  window.location.href = 'https://janjan-backend.vercel.app/auth/login';
 };
 </script>
 

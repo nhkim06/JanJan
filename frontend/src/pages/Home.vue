@@ -1,13 +1,16 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { peopleData } from '../data/mockData';
 import SignUpModal from '../components/SignUpModal.vue';
 import InputReceivedModal from '../components/InputReceivedModal.vue';
 import SettingModal from '../components/SettingModal.vue';
+import apiClient from '../utils/api';
+import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
 const route = useRoute();
+const authStore = useAuthStore();
 
 const isSignUpModalOpen = ref(false);
 // 2. 경조사 입력 모달 상태 관리를 위한 ref 추가
@@ -19,11 +22,43 @@ onMounted(() => {
     isSignUpModalOpen.value = true;
     router.replace({ query: {} });
   }
+  
+  if (authStore.isAuthenticated) {
+    fetchUserProfile();
+  }
 });
 
-const handleSignUpSubmit = (data) => {
-  console.log('회원가입 데이터 제출:', data);
-  isSignUpModalOpen.value = false;
+const fetchUserProfile = async () => {
+  try {
+    const response = await apiClient.get('/auth/profile');
+    if (response.data.success) {
+      authStore.setUser(response.data.user);
+    }
+  } catch (error) {
+    console.error('프로필 조회 에러:', error);
+  }
+};
+
+const handleSignUpSubmit = async (data: any) => {
+  try {
+    // data 에는 { id, name, language } 가 포함되어 있습니다.
+    const response = await apiClient.post('/auth/register', data);
+    
+    if (response.data.success) {
+      if (response.data.token) {
+        authStore.setToken(response.data.token);
+      }
+      authStore.setIsRegistering(false);
+      isSignUpModalOpen.value = false;
+      fetchUserProfile();
+    } else {
+      alert(response.data.detail || '회원가입에 실패했습니다.');
+    }
+  } catch (error: any) {
+    console.error('회원가입 에러:', error);
+    const detail = error.response?.data?.detail || '회원가입 중 오류가 발생했습니다.';
+    alert(detail);
+  }
 };
 
 // 3. 경조사 입력 완료 시 처리할 핸들러 함수
@@ -61,6 +96,10 @@ const goToChatList = (personId) => {
     <!-- 설정 모달 컴포넌트 배치 -->
     <SettingModal
       :isOpen="isSettingModalOpen"
+      :currentSettings="{ 
+        name: authStore.user?.name || '', 
+        language: authStore.user?.language || 'ko' 
+      }"
       @close="isSettingModalOpen = false"
       @save="handleSettingSave"
     />

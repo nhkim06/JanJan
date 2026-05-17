@@ -147,48 +147,6 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- 3. Etiquette Summary Box -->
-        <div
-          class="bg-rose-50/50 rounded-[32px] p-7 border border-rose-100 flex flex-col h-[300px]"
-        >
-          <div
-            class="flex items-center text-rose-600 font-black text-sm mb-4 tracking-tight uppercase flex-shrink-0"
-          >
-            <font-awesome-icon icon="fa-solid fa-shield-halved" class="mr-2" />
-            Etiquette Summary
-          </div>
-
-          <div v-if="loadingSteps.etiquette" class="space-y-3 animate-pulse">
-            <div v-for="i in 4" :key="i" class="flex items-center">
-              <div class="w-2 h-2 bg-rose-200 rounded-full mr-2"></div>
-              <div class="h-4 bg-rose-100 rounded w-full"></div>
-            </div>
-          </div>
-          <div
-            v-else
-            class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2"
-          >
-            <div
-              v-for="(tip, idx) in parsedVillainTips"
-              :key="idx"
-              class="flex items-start"
-            >
-              <span class="text-rose-400 mt-1 mr-2 flex-shrink-0">•</span>
-              <p
-                class="text-sm md:text-base font-bold text-rose-900 leading-snug"
-              >
-                {{ tip }}
-              </p>
-            </div>
-            <p
-              v-if="!parsedVillainTips.length && !loadingSteps.etiquette"
-              class="text-xs text-rose-300 italic"
-            >
-              No specific summary available.
-            </p>
-          </div>
-        </div>
-
         <!-- 4. Message Guide Box -->
         <div
           class="bg-emerald-50/50 rounded-[32px] p-7 border border-emerald-100 flex flex-col h-[300px]"

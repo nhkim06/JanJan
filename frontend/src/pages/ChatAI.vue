@@ -15,7 +15,9 @@
       >
         <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-5 h-5" />
       </button>
-      <h1 class="text-xl font-black text-slate-900 tracking-tight">AI Advisor</h1>
+      <h1 class="text-xl font-black text-slate-900 tracking-tight">
+        AI Advisor
+      </h1>
     </header>
 
     <div
@@ -25,11 +27,18 @@
         isComponent ? '' : '',
       ]"
     >
-      <div v-if="isHistoryLoading" class="w-full flex items-center justify-center py-10 flex-1">
-         <div class="animate-pulse flex flex-col items-center">
-           <div class="w-8 h-8 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3"></div>
-           <p class="text-sm font-medium text-slate-400">Loading conversation...</p>
-         </div>
+      <div
+        v-if="isHistoryLoading"
+        class="w-full flex items-center justify-center py-10 flex-1"
+      >
+        <div class="animate-pulse flex flex-col items-center">
+          <div
+            class="w-8 h-8 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3"
+          ></div>
+          <p class="text-sm font-medium text-slate-400">
+            Loading conversation...
+          </p>
+        </div>
       </div>
 
       <template v-else>
@@ -54,14 +63,34 @@
                 <div
                   class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]"
                 ></div>
-                <div class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></div>
+                <div
+                  class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"
+                ></div>
               </div>
-              <p
-                v-else
-                class="text-sm md:text-base text-slate-700 font-medium leading-relaxed whitespace-pre-wrap"
-              >
-                {{ msg.text }}
-              </p>
+              <div v-else class="space-y-4">
+                <!-- Money Recommendation Card -->
+                <div
+                  v-if="msg.money"
+                  class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4"
+                >
+                  <div
+                    class="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-2"
+                  >
+                    Recommended Amount
+                  </div>
+
+                  <div class="text-xl font-black text-indigo-900">
+                    {{ msg.money }}
+                  </div>
+                </div>
+
+                <!-- AI Text -->
+                <p
+                  class="text-sm md:text-base text-slate-700 font-medium leading-relaxed whitespace-pre-wrap"
+                >
+                  {{ msg.text }}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -106,7 +135,6 @@
 import { ref, onMounted, nextTick, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import apiClient from '../utils/api';
-
 const props = defineProps({
   isComponent: {
     type: Boolean,
@@ -123,7 +151,6 @@ const router = useRouter();
 const messageContainer = ref<HTMLElement | null>(null);
 
 const inputMessage = ref('');
-const messages = ref<any[]>([]);
 const isHistoryLoading = ref(false);
 
 const scrollToBottom = async () => {
@@ -133,42 +160,137 @@ const scrollToBottom = async () => {
   }
 };
 
+interface ChatMessage {
+  sender: 'user' | 'ai';
+  text?: string;
+  isLoading?: boolean;
+
+  // AI structured response
+  money?: string;
+  body?: string;
+}
+
+const messages = ref<ChatMessage[]>([]);
+
 onMounted(async () => {
-  const roomId = props.roomId || (route.query.roomId ? parseInt(route.query.roomId as string) : null);
+  await initializeChat();
+});
+
+watch(
+  () => [props.roomId, route.query.roomId],
+  async (newVal, oldVal) => {
+    if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+      await initializeChat();
+    }
+  },
+);
+
+const initializeChat = async () => {
+  const roomId =
+    props.roomId ||
+    (route.query.roomId ? parseInt(route.query.roomId as string) : null);
 
   if (roomId) {
     isHistoryLoading.value = true;
     await fetchChatHistory(roomId);
     isHistoryLoading.value = false;
-  } else {
-    const category = props.category || route.query.category || 'General';
-    const targetName = props.targetName || route.query.targetName || 'Person';
-    const cultureBase = props.cultureBase || route.query.cultureBase || 'Global';
 
-    const initialUserMessage = `Tell me more about etiquette for ${targetName} in a ${category} situation (Base: ${cultureBase}).`;
-    
-    messages.value.push({ sender: 'user', text: initialUserMessage });
-    messages.value.push({ sender: 'ai', isLoading: true, text: '' });
-    
-    setTimeout(() => {
-      const aiMessageIndex = messages.value.findIndex(m => m.sender === 'ai' && m.isLoading);
-      if (aiMessageIndex !== -1) {
-        messages.value[aiMessageIndex].isLoading = false;
-        messages.value[aiMessageIndex].text = `Of course! I can help you with ${targetName}'s ${category} event based on ${cultureBase} customs.\n\nWhat would you like to know specifically?`;
-        scrollToBottom();
-      }
-    }, 1000);
+    // If still no messages after fetching, show initial welcome
+    if (messages.value.length === 0) {
+      showInitialMessage();
+    }
+  } else {
+    showInitialMessage();
   }
-});
+};
+
+const showInitialMessage = () => {
+  messages.value = [];
+  const category = props.category || route.query.category || 'General';
+  const targetName = props.targetName || route.query.targetName || 'Person';
+  const cultureBase = props.cultureBase || route.query.cultureBase || 'Global';
+
+  const initialUserMessage = `Tell me more about etiquette for ${targetName} in a ${category} situation (Base: ${cultureBase}).`;
+
+  messages.value.push({ sender: 'user', text: initialUserMessage });
+  messages.value.push({ sender: 'ai', isLoading: true, text: '' });
+
+  setTimeout(() => {
+    const aiMessageIndex = messages.value.findIndex(
+      (m) => m.sender === 'ai' && m.isLoading,
+    );
+    if (aiMessageIndex !== -1) {
+      messages.value[aiMessageIndex].isLoading = false;
+      messages.value[aiMessageIndex].text = `Of course! I can help you with ${targetName}'s ${category} event based on ${cultureBase} customs.\n\nWhat would you like to know specifically?`;
+      scrollToBottom();
+    }
+  }, 1000);
+};
+
+const parseAIAnswer = (raw: string) => {
+  if (!raw) return { body: '' };
+
+  try {
+    const parsed = JSON.parse(raw);
+
+    return {
+      money: parsed.money || '',
+      body:
+        parsed.text ||
+        parsed.message ||
+        parsed.fullReport ||
+        parsed.summary ||
+        parsed.analysis ||
+        parsed.intro ||
+        raw,
+    };
+  } catch {
+    // Handle 2-line plain text format (intro \n amount)
+    const lines = raw.split('\n').filter((l) => l.trim());
+    if (lines.length >= 2) {
+      const amountLine = lines[lines.length - 1];
+      const amountMatch = amountLine.match(/(\d+)\s*(\w+)/);
+
+      if (amountMatch) {
+        return {
+          money: amountLine.trim(),
+          body: lines.slice(0, -1).join('\n').trim(),
+        };
+      }
+    }
+    return {
+      body: raw,
+    };
+  }
+};
 
 const fetchChatHistory = async (roomId: any) => {
   try {
     const response = await apiClient.get(`/chat/list?formId=${roomId}`);
     if (response.data.success) {
-      messages.value = response.data.chatItems.flatMap((item: any) => [
-        { sender: 'user', text: item.question },
-        { sender: 'ai', text: item.answer }
-      ]);
+      const chatItems = response.data.chatItems || [];
+
+      messages.value = chatItems
+        .filter((item: any) => {
+          // Filter out automated analysis items (they start with { or are __CHAT_ITEM__)
+          const q = item.question.trim();
+          return q !== '__CHAT_ITEM__' && !q.startsWith('{');
+        })
+        .flatMap((item: any) => {
+          const parsed = parseAIAnswer(item.answer);
+
+          return [
+            {
+              sender: 'user',
+              text: item.question,
+            },
+            {
+              sender: 'ai',
+              text: parsed.body,
+              money: parsed.money,
+            },
+          ];
+        });
       scrollToBottom();
     }
   } catch (error) {
@@ -180,7 +302,9 @@ const sendMessage = async () => {
   if (!inputMessage.value.trim()) return;
 
   const userText = inputMessage.value;
-  const roomId = props.roomId || (route.query.roomId ? parseInt(route.query.roomId as string) : null);
+  const roomId =
+    props.roomId ||
+    (route.query.roomId ? parseInt(route.query.roomId as string) : null);
 
   messages.value.push({
     sender: 'user',
@@ -202,31 +326,42 @@ const sendMessage = async () => {
     if (roomId) {
       const response = await apiClient.post('/chat/new', {
         formId: roomId,
-        question: userText
+        question: userText,
       });
 
-      const aiMessageIndex = messages.value.findIndex(m => m.sender === 'ai' && m.isLoading);
+      const aiMessageIndex = messages.value.findIndex(
+        (m) => m.sender === 'ai' && m.isLoading,
+      );
       if (aiMessageIndex !== -1) {
+        const parsed = parseAIAnswer(response.data.answer);
+
         messages.value[aiMessageIndex].isLoading = false;
-        messages.value[aiMessageIndex].text = response.data.answer;
+        messages.value[aiMessageIndex].text = parsed.body;
+        messages.value[aiMessageIndex].money = parsed.money;
         scrollToBottom();
       }
     } else {
       setTimeout(() => {
-        const aiMessageIndex = messages.value.findIndex(m => m.sender === 'ai' && m.isLoading);
+        const aiMessageIndex = messages.value.findIndex(
+          (m) => m.sender === 'ai' && m.isLoading,
+        );
         if (aiMessageIndex !== -1) {
           messages.value[aiMessageIndex].isLoading = false;
-          messages.value[aiMessageIndex].text = "Please complete the survey first to save your questions.";
+          messages.value[aiMessageIndex].text =
+            'Please complete the survey first to save your questions.';
           scrollToBottom();
         }
       }, 1000);
     }
   } catch (error) {
     console.error('Error sending message:', error);
-    const aiMessageIndex = messages.value.findIndex(m => m.sender === 'ai' && m.isLoading);
+    const aiMessageIndex = messages.value.findIndex(
+      (m) => m.sender === 'ai' && m.isLoading,
+    );
     if (aiMessageIndex !== -1) {
       messages.value[aiMessageIndex].isLoading = false;
-      messages.value[aiMessageIndex].text = "An error occurred. Please try again.";
+      messages.value[aiMessageIndex].text =
+        'An error occurred. Please try again.';
       scrollToBottom();
     }
   }

@@ -25,9 +25,9 @@
       </div>
 
       <!-- 1. Welcome Greeting Card -->
-      <div class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 overflow-hidden relative group">
+      <div class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 overflow-hidden relative group h-[160px] flex flex-col justify-center">
         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></div>
-        <div class="flex items-center space-x-3 mb-4">
+        <div class="flex items-center space-x-3 mb-2">
            <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black tracking-wider uppercase">
              {{ categoryName }}
            </span>
@@ -35,9 +35,8 @@
         </div>
         <div v-if="loadingSteps.amount" class="space-y-2 animate-pulse">
            <div class="h-8 bg-slate-100 rounded-lg w-3/4"></div>
-           <div class="h-4 bg-slate-50 rounded w-1/2"></div>
         </div>
-        <div v-else>
+        <div v-else class="overflow-y-auto custom-scrollbar pr-2">
           <h1 class="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
             {{ aiReport.intro || `Hello! Here is your custom guide for ${formDetail.targetName}.` }}
           </h1>
@@ -45,13 +44,12 @@
       </div>
 
       <!-- 2. Recommended Amount Box -->
-      <div class="bg-indigo-600 rounded-[32px] p-10 shadow-xl shadow-indigo-100 flex flex-col items-center justify-center text-center text-white relative overflow-hidden">
+      <div class="bg-indigo-600 rounded-[32px] p-10 shadow-xl shadow-indigo-100 flex flex-col items-center justify-center text-center text-white relative overflow-hidden h-[200px]">
         <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,_rgba(255,255,255,0.1),_transparent)]"></div>
         <h2 class="text-sm font-bold opacity-80 mb-2 uppercase tracking-widest">Recommended Amount</h2>
         
         <div v-if="loadingSteps.amount" class="flex flex-col items-center animate-pulse">
            <div class="h-16 bg-white/20 rounded-2xl w-48 mb-4"></div>
-           <div class="h-4 bg-white/10 rounded w-24"></div>
         </div>
         <div v-else class="flex items-baseline space-x-2">
           <span class="text-6xl md:text-7xl font-black tracking-tighter">
@@ -63,19 +61,19 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- 3. Etiquette Summary Box -->
-        <div class="bg-rose-50/50 rounded-[32px] p-7 border border-rose-100 flex flex-col min-h-[200px]">
-          <div class="flex items-center text-rose-600 font-black text-sm mb-4 tracking-tight uppercase">
+        <div class="bg-rose-50/50 rounded-[32px] p-7 border border-rose-100 flex flex-col h-[300px]">
+          <div class="flex items-center text-rose-600 font-black text-sm mb-4 tracking-tight uppercase flex-shrink-0">
             <font-awesome-icon icon="fa-solid fa-shield-halved" class="mr-2" />
             Etiquette Summary
           </div>
           
           <div v-if="loadingSteps.etiquette" class="space-y-3 animate-pulse">
-             <div v-for="i in 3" :key="i" class="flex items-center">
+             <div v-for="i in 4" :key="i" class="flex items-center">
                 <div class="w-2 h-2 bg-rose-200 rounded-full mr-2"></div>
                 <div class="h-4 bg-rose-100 rounded w-full"></div>
              </div>
           </div>
-          <div v-else class="space-y-3 flex-1">
+          <div v-else class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2">
              <div v-for="(tip, idx) in parsedVillainTips" :key="idx" class="flex items-start">
                <span class="text-rose-400 mt-1 mr-2 flex-shrink-0">•</span>
                <p class="text-sm md:text-base font-bold text-rose-900 leading-snug">{{ tip }}</p>
@@ -85,8 +83,8 @@
         </div>
 
         <!-- 4. Message Guide Box -->
-        <div class="bg-emerald-50/50 rounded-[32px] p-7 border border-emerald-100 flex flex-col min-h-[200px]">
-          <div class="flex items-center text-emerald-700 font-black text-sm mb-4 tracking-tight uppercase">
+        <div class="bg-emerald-50/50 rounded-[32px] p-7 border border-emerald-100 flex flex-col h-[300px]">
+          <div class="flex items-center text-emerald-700 font-black text-sm mb-4 tracking-tight uppercase flex-shrink-0">
             <font-awesome-icon icon="fa-solid fa-pen-nib" class="mr-2" />
             Message Guide
           </div>
@@ -94,7 +92,7 @@
           <div v-if="loadingSteps.message" class="space-y-4 animate-pulse">
              <div v-for="i in 2" :key="i" class="p-4 bg-white/50 rounded-2xl h-16"></div>
           </div>
-          <div v-else class="space-y-4 flex-1">
+          <div v-else class="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-2">
              <div v-for="(msg, idx) in parsedMessages" :key="idx" class="bg-white/80 rounded-2xl p-4 border border-emerald-100/50 shadow-sm relative group cursor-pointer hover:border-emerald-300 transition-all active:scale-95" @click="copyToClipboard(msg)">
                <p class="text-xs md:text-sm font-bold text-emerald-900 italic leading-relaxed">"{{ msg }}"</p>
                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -107,15 +105,12 @@
       </div>
 
       <!-- 5. Full Analysis Report -->
-      <div class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-50 pb-5">
+      <div class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 space-y-6 flex flex-col h-[500px]">
+        <div class="flex items-center justify-between border-b border-slate-50 pb-5 flex-shrink-0">
            <div class="flex items-center text-slate-900 font-black text-sm tracking-tight uppercase">
              <font-awesome-icon icon="fa-solid fa-file-invoice" class="mr-2 text-indigo-500" />
              AI Full Analysis Report
            </div>
-           <button @click="isReportExpanded = !isReportExpanded" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors">
-              {{ isReportExpanded ? 'Close' : 'View Full Details' }}
-           </button>
         </div>
 
         <div v-if="loadingSteps.amount || loadingSteps.etiquette" class="space-y-3 animate-pulse">
@@ -125,34 +120,29 @@
         </div>
         <div 
           v-else
-          :class="[
-            'space-y-8 transition-all duration-500 overflow-hidden',
-            isReportExpanded ? 'max-h-[3000px]' : 'max-h-60 relative'
-          ]"
+          class="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-8"
         >
           <!-- Report Section: Amount Analysis -->
           <div class="space-y-3">
-            <h3 class="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center">
+            <h3 class="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center sticky top-0 bg-white py-2 z-10">
               <span class="w-6 h-px bg-indigo-100 mr-2"></span>
               Money & Gift Analysis
             </h3>
-            <div class="text-sm md:text-base leading-relaxed text-slate-600 font-medium whitespace-pre-wrap p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+            <div class="text-sm md:text-base leading-relaxed text-slate-600 font-medium whitespace-pre-wrap p-5 bg-slate-50/50 rounded-2xl border border-slate-100/50">
               {{ aiReport.amountProse || 'Waiting for amount analysis...' }}
             </div>
           </div>
 
           <!-- Report Section: Etiquette Analysis -->
           <div class="space-y-3">
-            <h3 class="text-xs font-black text-rose-500 uppercase tracking-widest flex items-center">
+            <h3 class="text-xs font-black text-rose-500 uppercase tracking-widest flex items-center sticky top-0 bg-white py-2 z-10">
               <span class="w-6 h-px bg-rose-100 mr-2"></span>
               Etiquette & Manners Analysis
             </h3>
-            <div class="text-sm md:text-base leading-relaxed text-slate-600 font-medium whitespace-pre-wrap p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+            <div class="text-sm md:text-base leading-relaxed text-slate-600 font-medium whitespace-pre-wrap p-5 bg-slate-50/50 rounded-2xl border border-slate-100/50">
               {{ aiReport.etiquetteProse || 'Waiting for etiquette analysis...' }}
             </div>
           </div>
-
-          <div v-if="!isReportExpanded" class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent"></div>
         </div>
       </div>
 
@@ -268,13 +258,11 @@ const parseStepResult = (step: number, answer: string) => {
     aiReport.value.etiquetteProse = answer;
     try {
       const etiquetteData = JSON.parse(answer);
-      // If it's the structured JSON we expect
       aiReport.value.villainPreventionSummary = etiquetteData.summary || '';
       if (etiquetteData.fullReport) {
          aiReport.value.etiquetteProse = etiquetteData.fullReport;
       }
     } catch (e) {
-      // Fallback: If not JSON, use the whole thing as summary and prose
       aiReport.value.villainPreventionSummary = answer;
     }
   } else if (step === 2) { // Message
@@ -388,7 +376,17 @@ const copyToClipboard = (text: string) => {
 </script>
 
 <style scoped>
-.max-h-60 {
-  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
 }
 </style>

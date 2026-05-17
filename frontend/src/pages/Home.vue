@@ -22,7 +22,7 @@ const fetchFormsAndHistories = async () => {
   try {
     const [formsRes, historiesRes] = await Promise.all([
       apiClient.get('/form/list'),
-      apiClient.get('/history/list')
+      apiClient.get('/history/list'),
     ]);
 
     const grouped: Record<string, any> = {};
@@ -32,7 +32,12 @@ const fetchFormsAndHistories = async () => {
       formsRes.data.forms.forEach((form: any) => {
         const name = form.targetName;
         if (!grouped[name]) {
-          grouped[name] = { id: name, name: name, itemsCount: 0, chatRooms: [] };
+          grouped[name] = {
+            id: name,
+            name: name,
+            itemsCount: 0,
+            chatRooms: [],
+          };
         }
         grouped[name].itemsCount++;
       });
@@ -43,7 +48,12 @@ const fetchFormsAndHistories = async () => {
       historiesRes.data.histories.forEach((h: any) => {
         const name = h.targetName; // Serializer returns targetName
         if (!grouped[name]) {
-          grouped[name] = { id: name, name: name, itemsCount: 0, chatRooms: [] };
+          grouped[name] = {
+            id: name,
+            name: name,
+            itemsCount: 0,
+            chatRooms: [],
+          };
         }
         grouped[name].itemsCount++;
       });
@@ -60,14 +70,16 @@ onMounted(async () => {
     isSignUpModalOpen.value = true;
     router.replace({ query: {} });
   }
-  
+
   try {
     await Promise.all([
-      fetchFormsAndHistories(),
-      authStore.isAuthenticated ? fetchUserProfile() : Promise.resolve()
+      authStore.isAuthenticated ? fetchFormsAndHistories() : Promise.resolve(),
+      authStore.isAuthenticated ? fetchUserProfile() : Promise.resolve(),
     ]);
   } finally {
-    setTimeout(() => { isLoading.value = false; }, 300);
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 300);
   }
 });
 
@@ -144,17 +156,22 @@ const goToChatList = (personId: string) => {
 
     <SettingModal
       :isOpen="isSettingModalOpen"
-      :currentSettings="{ 
-        username: authStore.user?.username || '', 
-        language: authStore.user?.language || 'ko' 
+      :currentSettings="{
+        username: authStore.user?.username || '',
+        language: authStore.user?.language || 'ko',
       }"
       @close="isSettingModalOpen = false"
       @save="handleSettingSave"
     />
 
-    <div v-if="isLoading" class="w-full max-w-md md:max-w-2xl lg:max-w-3xl flex flex-col items-center justify-center min-h-screen">
-       <div class="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
-       <p class="text-slate-500 font-medium">Loading data...</p>
+    <div
+      v-if="isLoading"
+      class="w-full max-w-md md:max-w-2xl lg:max-w-3xl flex flex-col items-center justify-center min-h-screen"
+    >
+      <div
+        class="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4"
+      ></div>
+      <p class="text-slate-500 font-medium">Loading data...</p>
     </div>
 
     <div
@@ -190,13 +207,22 @@ const goToChatList = (personId: string) => {
             class="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-[0_10px_30px_rgb(0,0,0,0.02)] border border-slate-50 hover:border-indigo-100 hover:shadow-[0_12px_35px_rgb(99,102,241,0.05)] active:scale-[0.99] transition-all text-left group"
           >
             <div>
-              <h2 class="text-xl md:text-2xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1">
+              <h2
+                class="text-xl md:text-2xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1"
+              >
                 Celebration
               </h2>
-              <p class="text-xs md:text-sm font-medium text-slate-400">Wedding, Promotion, Birth, etc.</p>
+              <p class="text-xs md:text-sm font-medium text-slate-400">
+                Wedding, Promotion, Birth, etc.
+              </p>
             </div>
-            <div class="w-14 h-14 md:w-16 md:h-16 bg-indigo-50/70 rounded-2xl flex items-center justify-center text-indigo-500 transition-colors group-hover:bg-indigo-100">
-              <font-awesome-icon icon="fa-solid fa-gift" class="w-6 h-6 md:w-8 md:h-8" />
+            <div
+              class="w-14 h-14 md:w-16 md:h-16 bg-indigo-50/70 rounded-2xl flex items-center justify-center text-indigo-500 transition-colors group-hover:bg-indigo-100"
+            >
+              <font-awesome-icon
+                icon="fa-solid fa-gift"
+                class="w-6 h-6 md:w-8 md:h-8"
+              />
             </div>
           </button>
 
@@ -205,13 +231,22 @@ const goToChatList = (personId: string) => {
             class="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-[0_10px_30px_rgb(0,0,0,0.02)] border border-slate-50 hover:border-indigo-100 hover:shadow-[0_12px_35px_rgb(99,102,241,0.05)] active:scale-[0.99] transition-all text-left group"
           >
             <div>
-              <h2 class="text-xl md:text-2xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1">
+              <h2
+                class="text-xl md:text-2xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors mb-1"
+              >
                 Condolence
               </h2>
-              <p class="text-xs md:text-sm font-medium text-slate-400">Hospital visit, Funeral, etc.</p>
+              <p class="text-xs md:text-sm font-medium text-slate-400">
+                Hospital visit, Funeral, etc.
+              </p>
             </div>
-            <div class="w-14 h-14 md:w-16 md:h-16 bg-indigo-50/70 rounded-2xl flex items-center justify-center text-indigo-500 transition-colors group-hover:bg-indigo-100">
-              <font-awesome-icon icon="fa-solid fa-bandage" class="w-6 h-6 md:w-8 md:h-8" />
+            <div
+              class="w-14 h-14 md:w-16 md:h-16 bg-indigo-50/70 rounded-2xl flex items-center justify-center text-indigo-500 transition-colors group-hover:bg-indigo-100"
+            >
+              <font-awesome-icon
+                icon="fa-solid fa-bandage"
+                class="w-6 h-6 md:w-8 md:h-8"
+              />
             </div>
           </button>
         </section>
@@ -220,7 +255,10 @@ const goToChatList = (personId: string) => {
           <div class="text-xs md:text-sm font-bold text-slate-400 mb-3 px-1">
             Recent Interactions
           </div>
-          <div v-if="peopleData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div
+            v-if="peopleData.length > 0"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+          >
             <button
               v-for="person in peopleData"
               :key="person.id"
@@ -228,11 +266,15 @@ const goToChatList = (personId: string) => {
               class="w-full flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.01)] hover:border-indigo-100 active:scale-[0.99] transition-all text-left group"
             >
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 md:w-11 md:h-11 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-400 flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-sm">
+                <div
+                  class="w-10 h-10 md:w-11 md:h-11 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-400 flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-sm"
+                >
                   {{ person.name ? person.name[0] : '?' }}
                 </div>
                 <div>
-                  <h3 class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors text-sm md:text-base">
+                  <h3
+                    class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors text-sm md:text-base"
+                  >
                     {{ person.name }}
                   </h3>
                   <p class="text-[11px] md:text-xs text-slate-400 mt-0.5">
@@ -240,12 +282,20 @@ const goToChatList = (personId: string) => {
                   </p>
                 </div>
               </div>
-              <div class="text-slate-300 group-hover:text-indigo-500 transition-colors">
-                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-4 h-4" />
+              <div
+                class="text-slate-300 group-hover:text-indigo-500 transition-colors"
+              >
+                <font-awesome-icon
+                  icon="fa-solid fa-chevron-right"
+                  class="w-4 h-4"
+                />
               </div>
             </button>
           </div>
-          <div v-else class="text-center py-10 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+          <div
+            v-else
+            class="text-center py-10 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200"
+          >
             <p class="text-sm text-slate-400 font-medium">No history yet.</p>
           </div>
         </section>
@@ -256,7 +306,10 @@ const goToChatList = (personId: string) => {
         class="absolute bottom-6 right-6 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-indigo-200 active:scale-95 transition-all z-40 group"
         aria-label="Add record"
       >
-        <font-awesome-icon icon="fa-solid fa-plus" class="w-6 h-6 transition-transform group-hover:rotate-90" />
+        <font-awesome-icon
+          icon="fa-solid fa-plus"
+          class="w-6 h-6 transition-transform group-hover:rotate-90"
+        />
       </button>
     </div>
   </div>

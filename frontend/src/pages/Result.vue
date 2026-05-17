@@ -206,6 +206,54 @@
                 aiReport.etiquetteProse || 'Waiting for etiquette analysis...'
               }}
             </div>
+
+            <!-- Villain Prevention Tips -->
+            <div v-if="parsedVillainTips.length > 0" class="mt-4 space-y-2">
+              <div
+                v-for="(tip, i) in parsedVillainTips"
+                :key="i"
+                class="flex items-start space-x-2 p-3 bg-rose-50/50 rounded-xl border border-rose-100/50 text-xs font-bold text-rose-700"
+              >
+                <font-awesome-icon
+                  icon="fa-solid fa-circle-exclamation"
+                  class="mt-0.5"
+                />
+                <span>{{ tip }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Report Section: Recommended Message -->
+          <div class="space-y-3">
+            <h3
+              class="text-xs font-black text-amber-500 uppercase tracking-widest flex items-center sticky top-0 bg-white py-2 z-10"
+            >
+              <span class="w-6 h-px bg-amber-100 mr-2"></span>
+              Recommended Message
+            </h3>
+            <div
+              v-if="aiReport.messageGuide"
+              class="p-5 bg-slate-50/50 rounded-2xl border border-slate-100/50 space-y-4"
+            >
+              <div
+                class="text-sm md:text-base leading-relaxed text-slate-600 font-medium italic"
+              >
+                "{{ aiReport.messageGuide }}"
+              </div>
+              <button
+                @click="copyToClipboard(aiReport.messageGuide)"
+                class="flex items-center text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:text-indigo-600 transition-colors"
+              >
+                <font-awesome-icon icon="fa-solid fa-copy" class="mr-1.5" />
+                Copy to clipboard
+              </button>
+            </div>
+            <div
+              v-else
+              class="text-sm md:text-base leading-relaxed text-slate-400 font-medium"
+            >
+              Waiting for message recommendation...
+            </div>
           </div>
         </div>
       </div>
@@ -350,12 +398,11 @@ const parseStepResult = (step: number, answer: string) => {
       aiReport.value.amountProse = parsed.text || parsed.analysis || '';
     } catch (e) {
       // 기존 fallback
-      aiReport.value.amountProse = answer;
-
       const lines = answer.split('\n').filter((l: string) => l.trim());
 
       if (lines.length >= 2) {
         aiReport.value.intro = lines[0];
+        aiReport.value.amountProse = lines[0]; // prose만 저장
 
         const amountMatch = lines[1].match(/(\d+)\s*(\w+)/);
 
@@ -365,6 +412,7 @@ const parseStepResult = (step: number, answer: string) => {
         }
       } else {
         aiReport.value.intro = answer;
+        aiReport.value.amountProse = answer;
       }
     }
   } else if (step === 1) {
@@ -439,42 +487,44 @@ onMounted(async () => {
           if (idx < 3) parseStepResult(idx, item.answer);
         });
 
-        const currentCount = chatItems.length;
+        let currentStep = chatItems.length;
 
-        if (currentCount < 1) loadingSteps.amount = true;
-        if (currentCount < 2) loadingSteps.etiquette = true;
-        if (currentCount < 3) loadingSteps.message = true;
-
-        if (currentCount < 1) {
+        if (currentStep < 1) {
+          loadingSteps.amount = true;
           const res = await apiClient.post('/chat/new', {
             formId: roomId,
             question: '__CHAT_ITEM__',
           });
-          if (res.data.success) parseStepResult(0, res.data.answer);
-          loadingSteps.amount = false;
-        } else {
+          if (res.data.success) {
+            parseStepResult(0, res.data.answer);
+            currentStep = 1;
+          }
           loadingSteps.amount = false;
         }
 
-        if (currentCount < 2) {
+        if (currentStep < 2) {
+          loadingSteps.etiquette = true;
           const res = await apiClient.post('/chat/new', {
             formId: roomId,
             question: '__CHAT_ITEM__',
           });
-          if (res.data.success) parseStepResult(1, res.data.answer);
-          loadingSteps.etiquette = false;
-        } else {
+          if (res.data.success) {
+            parseStepResult(1, res.data.answer);
+            currentStep = 2;
+          }
           loadingSteps.etiquette = false;
         }
 
-        if (currentCount < 3) {
+        if (currentStep < 3) {
+          loadingSteps.message = true;
           const res = await apiClient.post('/chat/new', {
             formId: roomId,
             question: '__CHAT_ITEM__',
           });
-          if (res.data.success) parseStepResult(2, res.data.answer);
-          loadingSteps.message = false;
-        } else {
+          if (res.data.success) {
+            parseStepResult(2, res.data.answer);
+            currentStep = 3;
+          }
           loadingSteps.message = false;
         }
       }

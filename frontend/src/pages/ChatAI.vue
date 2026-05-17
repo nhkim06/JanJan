@@ -272,9 +272,9 @@ const fetchChatHistory = async (roomId: any) => {
 
       messages.value = chatItems
         .filter((item: any) => {
-          // Filter out automated analysis items (they start with { or are __CHAT_ITEM__)
+          // Filter out automated analysis items (they start with { or [ or are __CHAT_ITEM__)
           const q = item.question.trim();
-          return q !== '__CHAT_ITEM__' && !q.startsWith('{');
+          return q !== '__CHAT_ITEM__' && !q.startsWith('{') && !q.startsWith('[');
         })
         .flatMap((item: any) => {
           const parsed = parseAIAnswer(item.answer);

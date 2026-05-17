@@ -137,11 +137,11 @@ class RegisterView(APIView):
                 status=status.HTTP_409_CONFLICT,
             )
 
-        if UserProfile.objects.filter(name=name).exists():
-            return Response(
-                {"success": False, "detail": "name is already taken."},
-                status=status.HTTP_409_CONFLICT,
-            )
+        # if UserProfile.objects.filter(name=name).exists():
+        #     return Response(
+        #         {"success": False, "detail": "name is already taken."},
+        #         status=status.HTTP_409_CONFLICT,
+        #     )
 
         if UserProfile.objects.filter(
             google_sub=pending_google_user["sub"]

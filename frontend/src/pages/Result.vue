@@ -59,6 +59,27 @@
         </div>
       </div>
 
+      <!-- [ADD] Outfit Recommendation Ad Card -->
+      <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[32px] p-8 shadow-xl text-white relative overflow-hidden group cursor-pointer hover:scale-[1.01] transition-transform duration-300">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full -mr-10 -mt-10 group-hover:bg-indigo-500/30 transition-colors"></div>
+        <div class="relative flex items-center justify-between">
+           <div class="space-y-2 max-w-[70%]">
+              <span class="px-2 py-0.5 bg-amber-400 text-slate-900 rounded text-[9px] font-black uppercase tracking-wider">Sponsored</span>
+              <h3 class="text-xl md:text-2xl font-black leading-tight">Struggling with what to wear?</h3>
+              <p class="text-xs md:text-sm font-medium text-slate-300">Get 1:1 premium styling advice for your upcoming {{ categoryName }} event.</p>
+           </div>
+           <div class="flex-shrink-0 ml-4">
+              <div class="w-16 h-16 md:w-20 md:h-20 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 group-hover:rotate-6 transition-transform">
+                 <font-awesome-icon icon="fa-solid fa-shirt" class="text-3xl text-indigo-400" />
+              </div>
+           </div>
+        </div>
+        <button class="mt-6 w-full py-3 bg-white text-slate-900 rounded-2xl font-black text-sm hover:bg-slate-100 transition-colors flex items-center justify-center">
+           View Outfit Recommendations
+           <font-awesome-icon icon="fa-solid fa-arrow-right" class="ml-2 text-xs" />
+        </button>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- 3. Etiquette Summary Box -->
         <div class="bg-rose-50/50 rounded-[32px] p-7 border border-rose-100 flex flex-col h-[300px]">
@@ -258,11 +279,13 @@ const parseStepResult = (step: number, answer: string) => {
     aiReport.value.etiquetteProse = answer;
     try {
       const etiquetteData = JSON.parse(answer);
+      // If it's the structured JSON we expect
       aiReport.value.villainPreventionSummary = etiquetteData.summary || '';
       if (etiquetteData.fullReport) {
          aiReport.value.etiquetteProse = etiquetteData.fullReport;
       }
     } catch (e) {
+      // Fallback: If not JSON, use the whole thing as summary and prose
       aiReport.value.villainPreventionSummary = answer;
     }
   } else if (step === 2) { // Message

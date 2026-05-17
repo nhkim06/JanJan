@@ -146,59 +146,6 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- 4. Message Guide Box -->
-        <div
-          class="bg-emerald-50/50 rounded-[32px] p-7 border border-emerald-100 flex flex-col h-[300px]"
-        >
-          <div
-            class="flex items-center text-emerald-700 font-black text-sm mb-4 tracking-tight uppercase flex-shrink-0"
-          >
-            <font-awesome-icon icon="fa-solid fa-pen-nib" class="mr-2" />
-            Message Guide
-          </div>
-
-          <div v-if="loadingSteps.message" class="space-y-4 animate-pulse">
-            <div
-              v-for="i in 2"
-              :key="i"
-              class="p-4 bg-white/50 rounded-2xl h-16"
-            ></div>
-          </div>
-          <div
-            v-else
-            class="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-2"
-          >
-            <div
-              v-for="(msg, idx) in parsedMessages"
-              :key="idx"
-              class="bg-white/80 rounded-2xl p-4 border border-emerald-100/50 shadow-sm relative group cursor-pointer hover:border-emerald-300 transition-all active:scale-95"
-              @click="copyToClipboard(msg)"
-            >
-              <p
-                class="text-xs md:text-sm font-bold text-emerald-900 italic leading-relaxed"
-              >
-                "{{ msg }}"
-              </p>
-              <div
-                class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <font-awesome-icon
-                  icon="fa-solid fa-copy"
-                  class="text-emerald-400 text-[10px]"
-                />
-              </div>
-            </div>
-            <p
-              v-if="!parsedMessages.length && !loadingSteps.message"
-              class="text-xs text-emerald-300 italic"
-            >
-              No templates available.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <!-- 5. Full Analysis Report -->
       <div
         class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 space-y-6 flex flex-col h-[500px]"

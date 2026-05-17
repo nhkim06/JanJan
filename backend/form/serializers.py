@@ -47,7 +47,7 @@ class FormCreateSerializer(serializers.Serializer):
 
 class FormReadSerializer(serializers.ModelSerializer):
     formId = serializers.IntegerField(source="id")
-    category = serializers.CharField(source="category")
+    category = serializers.CharField()
     targetName = serializers.CharField(source="target_name")
     cultureBase = serializers.CharField(source="culture_base")
     createdAt = serializers.DateTimeField(source="created_at")

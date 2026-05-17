@@ -24,7 +24,7 @@
         <div class="w-10"></div>
       </div>
 
-      <!-- 1. Intro Card -->
+      <!-- 1. Welcome Greeting Card -->
       <div class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 overflow-hidden relative group">
         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></div>
         <div class="flex items-center space-x-3 mb-4">
@@ -35,13 +35,16 @@
         </div>
         <div v-if="loadingSteps.amount" class="space-y-2 animate-pulse">
            <div class="h-8 bg-slate-100 rounded-lg w-3/4"></div>
+           <div class="h-4 bg-slate-50 rounded w-1/2"></div>
         </div>
-        <h1 v-else class="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
-          {{ aiReport.intro || `Custom guide for ${formDetail.targetName}.` }}
-        </h1>
+        <div v-else>
+          <h1 class="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
+            {{ aiReport.intro || `Hello! Here is your custom guide for ${formDetail.targetName}.` }}
+          </h1>
+        </div>
       </div>
 
-      <!-- 2. Recommended Amount Card -->
+      <!-- 2. Recommended Amount Box -->
       <div class="bg-indigo-600 rounded-[32px] p-10 shadow-xl shadow-indigo-100 flex flex-col items-center justify-center text-center text-white relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,_rgba(255,255,255,0.1),_transparent)]"></div>
         <h2 class="text-sm font-bold opacity-80 mb-2 uppercase tracking-widest">Recommended Amount</h2>
@@ -58,13 +61,12 @@
         </div>
       </div>
 
-      <!-- 3. Etiquette & 4. Message Guide -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- 3. Etiquette Villain Prevention -->
-        <div class="bg-rose-50/50 rounded-[32px] p-7 border border-rose-100 flex flex-col">
+        <!-- 3. Etiquette Summary Box -->
+        <div class="bg-rose-50/50 rounded-[32px] p-7 border border-rose-100 flex flex-col min-h-[200px]">
           <div class="flex items-center text-rose-600 font-black text-sm mb-4 tracking-tight uppercase">
             <font-awesome-icon icon="fa-solid fa-shield-halved" class="mr-2" />
-            Etiquette Pitfalls
+            Etiquette Summary
           </div>
           
           <div v-if="loadingSteps.etiquette" class="space-y-3 animate-pulse">
@@ -73,38 +75,38 @@
                 <div class="h-4 bg-rose-100 rounded w-full"></div>
              </div>
           </div>
-          <div v-else class="space-y-3">
+          <div v-else class="space-y-3 flex-1">
              <div v-for="(tip, idx) in parsedVillainTips" :key="idx" class="flex items-start">
                <span class="text-rose-400 mt-1 mr-2 flex-shrink-0">•</span>
                <p class="text-sm md:text-base font-bold text-rose-900 leading-snug">{{ tip }}</p>
              </div>
-             <p v-if="!parsedVillainTips.length && !loadingSteps.etiquette" class="text-xs text-rose-300 italic">No specific tips available yet.</p>
+             <p v-if="!parsedVillainTips.length && !loadingSteps.etiquette" class="text-xs text-rose-300 italic">No specific summary available.</p>
           </div>
         </div>
 
-        <!-- 4. Message Guide -->
-        <div class="bg-emerald-50/50 rounded-[32px] p-7 border border-emerald-100 flex flex-col">
+        <!-- 4. Message Guide Box -->
+        <div class="bg-emerald-50/50 rounded-[32px] p-7 border border-emerald-100 flex flex-col min-h-[200px]">
           <div class="flex items-center text-emerald-700 font-black text-sm mb-4 tracking-tight uppercase">
             <font-awesome-icon icon="fa-solid fa-pen-nib" class="mr-2" />
-            Message Template
+            Message Guide
           </div>
           
           <div v-if="loadingSteps.message" class="space-y-4 animate-pulse">
              <div v-for="i in 2" :key="i" class="p-4 bg-white/50 rounded-2xl h-16"></div>
           </div>
-          <div v-else class="space-y-4">
+          <div v-else class="space-y-4 flex-1">
              <div v-for="(msg, idx) in parsedMessages" :key="idx" class="bg-white/80 rounded-2xl p-4 border border-emerald-100/50 shadow-sm relative group cursor-pointer hover:border-emerald-300 transition-all active:scale-95" @click="copyToClipboard(msg)">
                <p class="text-xs md:text-sm font-bold text-emerald-900 italic leading-relaxed">"{{ msg }}"</p>
                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                  <font-awesome-icon icon="fa-solid fa-copy" class="text-emerald-400 text-[10px]" />
                </div>
              </div>
-             <p v-if="!parsedMessages.length && !loadingSteps.message" class="text-xs text-emerald-300 italic">No templates available yet.</p>
+             <p v-if="!parsedMessages.length && !loadingSteps.message" class="text-xs text-emerald-300 italic">No templates available.</p>
           </div>
         </div>
       </div>
 
-      <!-- 5. Full Report -->
+      <!-- 5. Full Analysis Report -->
       <div class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 space-y-6">
         <div class="flex items-center justify-between border-b border-slate-50 pb-5">
            <div class="flex items-center text-slate-900 font-black text-sm tracking-tight uppercase">
@@ -112,11 +114,11 @@
              AI Full Analysis Report
            </div>
            <button @click="isReportExpanded = !isReportExpanded" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors">
-              {{ isReportExpanded ? 'Close' : 'View More' }}
+              {{ isReportExpanded ? 'Close' : 'View Full Details' }}
            </button>
         </div>
 
-        <div v-if="loadingSteps.etiquette" class="space-y-3 animate-pulse">
+        <div v-if="loadingSteps.amount || loadingSteps.etiquette" class="space-y-3 animate-pulse">
            <div class="h-4 bg-slate-100 rounded w-full"></div>
            <div class="h-4 bg-slate-100 rounded w-5/6"></div>
            <div class="h-4 bg-slate-100 rounded w-4/6"></div>
@@ -124,16 +126,37 @@
         <div 
           v-else
           :class="[
-            'text-sm md:text-base leading-relaxed text-slate-600 font-medium whitespace-pre-wrap transition-all duration-500 overflow-hidden',
-            isReportExpanded ? 'max-h-[2000px]' : 'max-h-40 relative'
+            'space-y-8 transition-all duration-500 overflow-hidden',
+            isReportExpanded ? 'max-h-[3000px]' : 'max-h-60 relative'
           ]"
         >
-          {{ aiReport.fullReport || 'Detailed report is being generated...' }}
-          <div v-if="!isReportExpanded && aiReport.fullReport" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent"></div>
+          <!-- Report Section: Amount Analysis -->
+          <div class="space-y-3">
+            <h3 class="text-xs font-black text-indigo-500 uppercase tracking-widest flex items-center">
+              <span class="w-6 h-px bg-indigo-100 mr-2"></span>
+              Money & Gift Analysis
+            </h3>
+            <div class="text-sm md:text-base leading-relaxed text-slate-600 font-medium whitespace-pre-wrap p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+              {{ aiReport.amountProse || 'Waiting for amount analysis...' }}
+            </div>
+          </div>
+
+          <!-- Report Section: Etiquette Analysis -->
+          <div class="space-y-3">
+            <h3 class="text-xs font-black text-rose-500 uppercase tracking-widest flex items-center">
+              <span class="w-6 h-px bg-rose-100 mr-2"></span>
+              Etiquette & Manners Analysis
+            </h3>
+            <div class="text-sm md:text-base leading-relaxed text-slate-600 font-medium whitespace-pre-wrap p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+              {{ aiReport.etiquetteProse || 'Waiting for etiquette analysis...' }}
+            </div>
+          </div>
+
+          <div v-if="!isReportExpanded" class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent"></div>
         </div>
       </div>
 
-      <!-- AI Chat -->
+      <!-- 6. AI Q&A Section -->
       <div
         ref="chatSection"
         class="bg-white rounded-[32px] shadow-sm border border-slate-100 flex flex-col overflow-hidden h-[600px] scroll-mt-6"
@@ -157,7 +180,7 @@
       </div>
     </div>
 
-    <!-- Floating Button -->
+    <!-- Floating Chat Button -->
     <div class="fixed bottom-6 right-6 flex flex-col items-end space-y-3 z-50 group">
       <button
         @click="scrollToChat"
@@ -194,13 +217,14 @@ const aiReport = ref({
   intro: '',
   amount: 0,
   currency: 'KRW',
+  amountProse: '', // Original text for amount
   villainPreventionSummary: '',
+  etiquetteProse: '', // Original text for etiquette
   messageGuide: '',
-  fullReport: ''
 });
 
 const categoryName = computed(() => {
-  const cat = route.params.category as string || formDetail.value?.category;
+  const cat = (route.params.category as string) || formDetail.value?.category;
   if (!cat) return 'Unknown';
   
   for (const groupKey in surveyData) {
@@ -228,6 +252,7 @@ const parsedMessages = computed(() => {
 
 const parseStepResult = (step: number, answer: string) => {
   if (step === 0) { // Amount
+    aiReport.value.amountProse = answer;
     const lines = answer.split('\n').filter((l: string) => l.trim());
     if (lines.length >= 2) {
       aiReport.value.intro = lines[0];
@@ -240,12 +265,17 @@ const parseStepResult = (step: number, answer: string) => {
       aiReport.value.intro = answer;
     }
   } else if (step === 1) { // Etiquette
+    aiReport.value.etiquetteProse = answer;
     try {
       const etiquetteData = JSON.parse(answer);
-      aiReport.value.fullReport = etiquetteData.fullReport || etiquetteData.answer || '';
+      // If it's the structured JSON we expect
       aiReport.value.villainPreventionSummary = etiquetteData.summary || '';
+      if (etiquetteData.fullReport) {
+         aiReport.value.etiquetteProse = etiquetteData.fullReport;
+      }
     } catch (e) {
-      aiReport.value.fullReport = answer;
+      // Fallback: If not JSON, use the whole thing as summary and prose
+      aiReport.value.villainPreventionSummary = answer;
     }
   } else if (step === 2) { // Message
     aiReport.value.messageGuide = answer;
@@ -267,7 +297,6 @@ onMounted(async () => {
       const createResponse = await apiClient.post('/form/new', pendingData);
       if (createResponse.data.success) {
         roomId = createResponse.data.formId;
-        // Update URL query without refresh
         router.replace({ 
           query: { ...route.query, roomId },
           params: route.params 
@@ -286,7 +315,6 @@ onMounted(async () => {
         formDetail.value = formResponse.data.form;
       }
       
-      // Stop global loading if it was still on
       isLoading.value = false;
 
       // 3. Fetch or Trigger Analysis
@@ -294,15 +322,12 @@ onMounted(async () => {
       if (chatResponse.data.success) {
         let chatItems = chatResponse.data.chatItems;
         
-        // Parse existing items
         chatItems.forEach((item: any, idx: number) => {
           if (idx < 3) parseStepResult(idx, item.answer);
         });
 
-        // Trigger missing steps sequentially
         const currentCount = chatItems.length;
         
-        // Set loading states for what's missing
         if (currentCount < 1) loadingSteps.amount = true;
         if (currentCount < 2) loadingSteps.etiquette = true;
         if (currentCount < 3) loadingSteps.message = true;
@@ -339,7 +364,6 @@ onMounted(async () => {
     const msg = error.response?.data?.detail || error.message || 'Analysis failed. Please try again.';
     alert(`Error: ${msg}`);
     isLoading.value = false;
-    // Reset all loading states on error
     loadingSteps.amount = false;
     loadingSteps.etiquette = false;
     loadingSteps.message = false;
@@ -364,7 +388,7 @@ const copyToClipboard = (text: string) => {
 </script>
 
 <style scoped>
-.max-h-40 {
-  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+.max-h-60 {
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
 }
 </style>
